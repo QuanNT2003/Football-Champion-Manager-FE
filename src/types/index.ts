@@ -281,3 +281,18 @@ export interface TimelineData {
     status: string;
   };
 }
+
+
+export interface StarterCountry {
+  id: string;
+  name: string;
+  code: string;
+  flag_url: string | null;
+  unclaimed_clubs: number;
+}
+
+export interface StarterTier {
+  tier: number;
+  competition_name: string;
+  unclaimed_count: number;
+}

@@ -1,12 +1,13 @@
 import React from 'react';
 import { Club, TimelineData, User } from '../types';
-import { Trophy, Calendar, Coins, DollarSign, UserCheck, Shield, Radio, Clock } from 'lucide-react';
+import { Trophy, Calendar, Coins, DollarSign, UserCheck, Shield, LogOut } from 'lucide-react';
 
 interface Props {
   club: Club | null;
   timeline: TimelineData | null;
   user: User | null;
   onOpenLogin: () => void;
+  onLogout?: () => void;
 }
 
 export const Navbar: React.FC<Props> = ({
@@ -14,9 +15,10 @@ export const Navbar: React.FC<Props> = ({
   timeline,
   user,
   onOpenLogin,
+  onLogout,
 }) => {
-  const cash = club?.financial_accounts?.[0]?.cash_balance ?? club?.finances?.cash ?? 5000000;
-  const gold = club?.financial_accounts?.[0]?.gold_balance ?? club?.finances?.gold ?? 250;
+  const cash = club?.financial_accounts?.[0]?.cash_balance ?? club?.finances?.cash ?? 1500000;
+  const gold = club?.financial_accounts?.[0]?.gold_balance ?? club?.finances?.gold ?? 200;
   const currentDay = timeline?.season?.current_day || 1;
   const totalDays = timeline?.season?.total_days || 40;
 
@@ -35,18 +37,18 @@ export const Navbar: React.FC<Props> = ({
 
       <div className="header-stats">
         {/* Real-time Server Live Indicator */}
-        <div className="stat-pill" style={{ border: '1px solid rgba(6, 214, 160, 0.3)', background: 'rgba(6, 214, 160, 0.08)' }}>
+        <div className="stat-pill" style={{ border: '1px solid rgba(2, 132, 199, 0.3)', background: 'rgba(2, 132, 199, 0.06)' }}>
           <span style={{
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: '#06d6a0',
-            boxShadow: '0 0 10px #06d6a0',
+            background: '#0284c7',
+            boxShadow: '0 0 10px #0284c7',
             display: 'inline-block'
           }} />
           <div>
-            <span style={{ color: '#94a3b8', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>MÁY CHỦ REAL-TIME</span>
-            <strong style={{ color: '#06d6a0', fontSize: '0.88rem' }}>
+            <span style={{ color: '#64748b', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>MÁY CHỦ REAL-TIME</span>
+            <strong style={{ color: '#0284c7', fontSize: '0.88rem' }}>
               Online (Đồng bộ)
             </strong>
           </div>
@@ -54,10 +56,10 @@ export const Navbar: React.FC<Props> = ({
 
         {/* Season & Matchday Progress */}
         <div className="stat-pill">
-          <Calendar size={16} color="#3b82f6" />
+          <Calendar size={16} color="#0284c7" />
           <div>
-            <span style={{ color: '#94a3b8', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>TIẾN ĐỘ MÙA GIẢI</span>
-            <strong style={{ color: '#f8fafc', fontSize: '0.88rem' }}>
+            <span style={{ color: '#64748b', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>TIẾN ĐỘ MÙA GIẢI</span>
+            <strong style={{ color: '#0f172a', fontSize: '0.88rem' }}>
               Vòng {currentDay} / {totalDays}
             </strong>
           </div>
@@ -67,28 +69,53 @@ export const Navbar: React.FC<Props> = ({
         {club && (
           <>
             <div className="stat-pill cash">
-              <DollarSign size={16} color="#10b981" />
+              <DollarSign size={16} color="#059669" />
               <div>
-                <span style={{ color: '#94a3b8', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase' }}>TIỀN MẶT CLB</span>
-                <strong style={{ color: '#10b981' }}>€{Number(cash).toLocaleString()}</strong>
+                <span style={{ color: '#64748b', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase' }}>TIỀN MẶT CLB</span>
+                <strong style={{ color: '#059669' }}>€{Number(cash).toLocaleString()}</strong>
               </div>
             </div>
 
             <div className="stat-pill gold">
-              <Coins size={16} color="#f59e0b" />
+              <Coins size={16} color="#d97706" />
               <div>
-                <span style={{ color: '#94a3b8', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase' }}>VÀNG BULLION</span>
-                <strong style={{ color: '#f59e0b' }}>{Number(gold).toLocaleString()} GOLD</strong>
+                <span style={{ color: '#64748b', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase' }}>VÀNG BULLION</span>
+                <strong style={{ color: '#d97706' }}>{Number(gold).toLocaleString()} GOLD</strong>
               </div>
             </div>
           </>
         )}
 
-        {/* User / Login Button */}
+        {/* User / Logout */}
         {user ? (
-          <div className="stat-pill" style={{ cursor: 'pointer' }} onClick={onOpenLogin}>
-            <UserCheck size={16} color="#06d6a0" />
-            <span style={{ fontWeight: 600 }}>{user.username}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="stat-pill" style={{ borderColor: '#bae6fd', background: '#f0f9ff' }}>
+              <UserCheck size={16} color="#0284c7" />
+              <span style={{ fontWeight: 600, color: '#0369a1' }}>{user.username}</span>
+            </div>
+            {onLogout && (
+              <button
+                className="btn btn-secondary"
+                style={{
+                  borderColor: '#fecaca',
+                  color: '#dc2626',
+                  background: '#fef2f2',
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '0.82rem'
+                }}
+                onClick={onLogout}
+                title="Đăng xuất khỏi tài khoản HLV"
+              >
+                <LogOut size={15} />
+                <span>Đăng Xuất</span>
+              </button>
+            )}
           </div>
         ) : (
           <button className="btn btn-secondary" onClick={onOpenLogin}>

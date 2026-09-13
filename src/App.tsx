@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Club, Player, TimelineData, User } from './types';
 import { clubsApi, playersApi, gameWorldApi, authApi } from './services/api';
 import { Navbar } from './components/Navbar';
@@ -11,57 +11,31 @@ import { TransfersView } from './components/TransfersView';
 import { FinancesView } from './components/FinancesView';
 import { TrainingView } from './components/TrainingView';
 import { PlayerDetailModal } from './components/PlayerDetailModal';
-import { LoginModal } from './components/LoginModal';
-import { LayoutDashboard, Users, Compass, Swords, ShoppingCart, Trophy, CreditCard, Dumbbell } from 'lucide-react';
+import { AuthScreen } from './components/AuthScreen';
+import { ClubOnboardingScreen } from './components/ClubOnboardingScreen';
+import {
+  LayoutDashboard,
+  Users,
+  Compass,
+  Swords,
+  ShoppingCart,
+  Trophy,
+  CreditCard,
+  Dumbbell,
+  Loader2,
+} from 'lucide-react';
+
+type AppState = 'LOADING' | 'AUTH' | 'ONBOARDING' | 'GAME';
 
 export function App() {
+  const [appState, setAppState] = useState<AppState>('LOADING');
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [user, setUser] = useState<User | null>(null);
   const [club, setClub] = useState<Club | null>(null);
   const [timeline, setTimeline] = useState<TimelineData | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [globalNotification, setGlobalNotification] = useState<string | null>(null);
-
-  // Initialize data on mount
-  useEffect(() => {
-    initApp();
-  }, []);
-
-  const initApp = async () => {
-    try {
-      // 1. Load game world timeline
-      const tl = await gameWorldApi.getTimeline('1').catch(() => null);
-      if (tl) setTimeline(tl);
-
-      // 2. Check current manager or load default club
-      const token = localStorage.getItem('fc_token');
-      if (token) {
-        try {
-          const profile = await authApi.getProfile().catch(() => null);
-          if (profile) setUser(profile);
-          const myClub = await clubsApi.getMyClub().catch(() => null);
-          if (myClub && myClub.id) {
-            setClub(myClub);
-            loadClubSquad(myClub.id);
-            return;
-          }
-        } catch (e) {
-          console.warn('No claimed club yet');
-        }
-      }
-
-      // Default to club 1 if no user login yet
-      const defaultClub = await clubsApi.getClubById('1').catch(() => null);
-      if (defaultClub) {
-        setClub(defaultClub);
-        loadClubSquad(defaultClub.id);
-      }
-    } catch (err) {
-      console.error('App init error:', err);
-    }
-  };
 
   const loadClubSquad = async (clubId: string) => {
     try {
@@ -70,6 +44,70 @@ export function App() {
     } catch (err) {
       console.error('Failed to load squad:', err);
     }
+  };
+
+  const checkAuthState = useCallback(async () => {
+    setAppState('LOADING');
+    const token = localStorage.getItem('fc_token');
+
+    if (!token) {
+      setUser(null);
+      setClub(null);
+      setAppState('AUTH');
+      return;
+    }
+
+    try {
+      // 1. Verify User Profile
+      const profile = await authApi.getProfile().catch(() => null);
+      if (!profile) {
+        authApi.logout();
+        setUser(null);
+        setClub(null);
+        setAppState('AUTH');
+        return;
+      }
+      setUser(profile);
+
+      // 2. Load Timeline
+      gameWorldApi.getTimeline('1').then((tl) => {
+        if (tl) setTimeline(tl);
+      }).catch(() => null);
+
+      // 3. Check if user owns a club
+      const myClub = await clubsApi.getMyClub().catch(() => null);
+      if (!myClub || !myClub.id) {
+        setClub(null);
+        setAppState('ONBOARDING');
+        return;
+      }
+
+      setClub(myClub);
+      loadClubSquad(myClub.id);
+      setAppState('GAME');
+    } catch (err) {
+      console.error('Error during auth verification:', err);
+      authApi.logout();
+      setAppState('AUTH');
+    }
+  }, []);
+
+  useEffect(() => {
+    checkAuthState();
+  }, [checkAuthState]);
+
+  const handleLogout = () => {
+    authApi.logout();
+    setUser(null);
+    setClub(null);
+    setPlayers([]);
+    setAppState('AUTH');
+  };
+
+  const handleClubClaimed = (newClub: Club) => {
+    setClub(newClub);
+    loadClubSquad(newClub.id);
+    setAppState('GAME');
   };
 
   const refreshClubData = async () => {
@@ -91,157 +129,251 @@ export function App() {
       refreshClubData();
       setTimeout(() => setGlobalNotification(null), 3000);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Nâng cấp thất bại. Không đủ số dư quỹ CLB.');
+      alert(err.response?.data?.message || 'Nâng cấp thất bại, kiểm tra số dư');
     }
   };
 
-  const tabs = [
-    { id: 'dashboard', label: 'Tổng Quan (Dashboard)', icon: LayoutDashboard },
-    { id: 'squad', label: 'Đội Hình & Cầu Thủ', icon: Users },
-    { id: 'tactics', label: 'Chiến Thuật 2D', icon: Compass },
-    { id: 'matches', label: 'Trung Tâm Trận Đấu', icon: Swords },
-    { id: 'transfers', label: 'Thị Trường Chuyển Nhượng', icon: ShoppingCart },
-    { id: 'standings', label: 'Bảng Xếp Hạng', icon: Trophy },
-    { id: 'finances', label: 'Ngân Quỹ CLB', icon: CreditCard },
-    { id: 'training', label: 'Sân Tập Đội Bóng', icon: Dumbbell },
-  ];
+  const handleUpdateTransferListing = async (
+    playerId: string,
+    isTransfer: boolean,
+    isLoan: boolean,
+    price?: number
+  ) => {
+    try {
+      await playersApi.updateTransferListing(playerId, isTransfer, isLoan, price);
+      setGlobalNotification('Cập nhật trạng thái thị trường chuyển nhượng thành công!');
+      if (club) loadClubSquad(club.id);
+      setTimeout(() => setGlobalNotification(null), 3000);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Không thể cập nhật danh sách chuyển nhượng');
+    }
+  };
 
-  const cash = club?.financial_accounts?.[0]?.cash_balance ?? club?.finances?.cash ?? 5000000;
+  // 1. STATE: LOADING SCREEN
+  if (appState === 'LOADING') {
+    return (
+      <div className="app-loading-screen">
+        <div className="loading-card">
+          <div className="loading-logo">⚽</div>
+          <h2>Football Champion Manager</h2>
+          <div className="loading-spinner-row">
+            <Loader2 className="spinner-icon" size={24} />
+            <span>Đang xác thực thông tin Huấn Luyện Viên...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  // 2. STATE: AUTH SCREEN (Strict access control)
+  if (appState === 'AUTH') {
+    return <AuthScreen onAuthSuccess={checkAuthState} />;
+  }
+
+  // 3. STATE: ONBOARDING SCREEN (Logged in, but no club yet)
+  if (appState === 'ONBOARDING') {
+    return (
+      <ClubOnboardingScreen
+        user={user}
+        onClubClaimed={handleClubClaimed}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  const cashBalance = club?.financial_accounts?.[0]?.cash_balance ?? club?.finances?.cash ?? 1500000;
+
+  // 4. STATE: MAIN GAME DASHBOARD
   return (
     <div className="app-container">
-      {/* Top Navbar */}
+      {globalNotification && (
+        <div className="notification-banner">
+          {globalNotification}
+        </div>
+      )}
+
+      {/* Main Navbar */}
       <Navbar
         club={club}
         timeline={timeline}
         user={user}
-        onOpenLogin={() => setIsLoginOpen(true)}
+        onOpenLogin={() => {}}
+        onLogout={handleLogout}
       />
 
-      {/* Global Notification Banner */}
-      {globalNotification && (
-        <div style={{
-          background: 'linear-gradient(90deg, rgba(16, 185, 129, 0.95), rgba(6, 214, 160, 0.95))',
-          color: '#070b12',
-          fontWeight: 700,
-          textAlign: 'center',
-          padding: '0.6rem 1rem',
-          fontSize: '0.9rem'
-        }}>
-          ✨ {globalNotification}
-        </div>
-      )}
+      {/* Navigation Sub-bar */}
+      <nav className="sub-nav">
+        <button
+          className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setActiveTab('dashboard')}
+        >
+          <LayoutDashboard size={18} />
+          <span>Tổng Quan</span>
+        </button>
 
-      {/* Main App Layout */}
-      <div className="main-layout">
-        {/* Navigation Sidebar */}
-        <aside className="sidebar">
-          <nav className="nav-menu">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  className={`nav-item ${isActive ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <Icon size={18} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </aside>
+        <button
+          className={`nav-tab ${activeTab === 'squad' ? 'active' : ''}`}
+          onClick={() => setActiveTab('squad')}
+        >
+          <Users size={18} />
+          <span>Đội Hình ({players.length})</span>
+        </button>
 
-        {/* Dynamic Content Views */}
-        <main className="content-area">
-          {activeTab === 'dashboard' && (
-            <DashboardView
-              club={club}
-              timeline={timeline}
-              onUpgradeFacility={handleUpgradeFacility}
-              onSwitchTab={(t: string) => setActiveTab(t)}
-            />
-          )}
+        <button
+          className={`nav-tab ${activeTab === 'tactics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('tactics')}
+        >
+          <Compass size={18} />
+          <span>Chiến Thuật</span>
+        </button>
 
-          {activeTab === 'squad' && (
-            <SquadView
-              players={players}
-              onSelectPlayer={(p) => setSelectedPlayer(p)}
-              onUpdateTransferListing={() => refreshClubData()}
-            />
-          )}
+        <button
+          className={`nav-tab ${activeTab === 'matches' ? 'active' : ''}`}
+          onClick={() => setActiveTab('matches')}
+        >
+          <Swords size={18} />
+          <span>Lịch Thi Đấu</span>
+        </button>
 
-          {activeTab === 'tactics' && club && (
-            <TacticsView
-              club={club}
-              players={players}
-            />
-          )}
+        <button
+          className={`nav-tab ${activeTab === 'transfers' ? 'active' : ''}`}
+          onClick={() => setActiveTab('transfers')}
+        >
+          <ShoppingCart size={18} />
+          <span>Chuyển Nhượng</span>
+        </button>
 
-          {activeTab === 'matches' && club && (
-            <MatchCenterView
-              club={club}
-              onMatchSimulated={() => refreshClubData()}
-            />
-          )}
+        <button
+          className={`nav-tab ${activeTab === 'facilities' ? 'active' : ''}`}
+          onClick={() => setActiveTab('facilities')}
+        >
+          <CreditCard size={18} />
+          <span>Cơ Sở Vật Chất</span>
+        </button>
 
-          {activeTab === 'transfers' && club && (
-            <TransfersView
-              currentClubId={club.id}
-              cashBalance={cash}
-              onRefreshFinance={refreshClubData}
-              onSelectPlayer={(p) => setSelectedPlayer(p)}
-            />
-          )}
+        <button
+          className={`nav-tab ${activeTab === 'finances' ? 'active' : ''}`}
+          onClick={() => setActiveTab('finances')}
+        >
+          <Trophy size={18} />
+          <span>Tài Chính & Shop</span>
+        </button>
 
-          {activeTab === 'standings' && club && (
-            <StandingsView
-              currentClubId={club.id}
-            />
-          )}
+        <button
+          className={`nav-tab ${activeTab === 'training' ? 'active' : ''}`}
+          onClick={() => setActiveTab('training')}
+        >
+          <Dumbbell size={18} />
+          <span>Huấn Luyện</span>
+        </button>
 
-          {activeTab === 'finances' && club && (
-            <FinancesView
-              currentClubId={club.id}
-              onRefreshBalance={refreshClubData}
-            />
-          )}
+        <button
+          className={`nav-tab ${activeTab === 'standings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('standings')}
+        >
+          <Trophy size={18} />
+          <span>Bảng Xếp Hạng</span>
+        </button>
+      </nav>
 
-          {activeTab === 'training' && club && (
-            <TrainingView
-              currentClubId={club.id}
-            />
-          )}
-        </main>
-      </div>
+      {/* Main Content Area */}
+      <main className="main-content">
+        {activeTab === 'dashboard' && (
+          <DashboardView
+            club={club}
+            timeline={timeline}
+            onUpgradeFacility={handleUpgradeFacility}
+            onSwitchTab={setActiveTab}
+          />
+        )}
 
-      {/* Player Detail Modal */}
+        {activeTab === 'squad' && (
+          <SquadView
+            players={players}
+            onSelectPlayer={setSelectedPlayer}
+            onUpdateTransferListing={handleUpdateTransferListing}
+          />
+        )}
+
+        {activeTab === 'tactics' && (
+          <TacticsView
+            club={club}
+            players={players}
+          />
+        )}
+
+        {activeTab === 'matches' && (
+          <MatchCenterView
+            club={club}
+            onMatchSimulated={refreshClubData}
+          />
+        )}
+
+        {activeTab === 'standings' && (
+          <StandingsView
+            currentClubId={club?.id || '1'}
+          />
+        )}
+
+        {activeTab === 'transfers' && (
+          <TransfersView
+            currentClubId={club?.id || '1'}
+            cashBalance={Number(cashBalance)}
+            onRefreshFinance={refreshClubData}
+            onSelectPlayer={setSelectedPlayer}
+          />
+        )}
+
+        {activeTab === 'facilities' && club && (
+          <div className="view-container">
+            <div className="card">
+              <h2 style={{ marginBottom: '1.5rem', color: '#0f172a' }}>Cơ Sở Vật Chất & Nâng Cấp SVĐ</h2>
+              <div className="facilities-grid">
+                {(club.facilities || []).map((f) => (
+                  <div key={f.id} className="facility-card">
+                    <div>
+                      <h4 style={{ color: '#0284c7' }}>{f.name}</h4>
+                      <p style={{ color: '#64748b', fontSize: '0.85rem' }}>Cấp độ hiện tại: {f.current_level}</p>
+                      <p style={{ color: '#059669', fontSize: '0.85rem' }}>Trạng thái: {f.status}</p>
+                    </div>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handleUpgradeFacility(f.id)}
+                    >
+                      Nâng cấp (+1 Cấp)
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'finances' && (
+          <FinancesView
+            currentClubId={club?.id || '1'}
+            onRefreshBalance={refreshClubData}
+          />
+        )}
+
+        {activeTab === 'training' && (
+          <TrainingView
+            currentClubId={club?.id || '1'}
+          />
+        )}
+      </main>
+
+      {/* Modals */}
       {selectedPlayer && (
         <PlayerDetailModal
           player={selectedPlayer}
           currentClubId={club?.id || '1'}
           onClose={() => setSelectedPlayer(null)}
           onPlayerUpdated={() => {
-            refreshClubData();
-            setSelectedPlayer(null);
+            if (club) loadClubSquad(club.id);
           }}
         />
       )}
-
-      {/* Login & Club Claiming Modal */}
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onSuccess={(token, u, c) => {
-          setUser(u);
-          if (c) {
-            setClub(c);
-            loadClubSquad(c.id);
-          }
-        }}
-      />
     </div>
   );
 }

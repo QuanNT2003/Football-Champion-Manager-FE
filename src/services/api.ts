@@ -14,6 +14,8 @@ import {
   ShopItem,
   TrainingType,
   TrainingSession,
+  StarterCountry,
+  StarterTier,
 } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
@@ -44,16 +46,31 @@ async function request<T = any>(endpoint: string, options?: RequestInit): Promis
 
 // 1. Auth API
 export const authApi = {
-  login: (usernameOrEmail: string, password: string) =>
-    request('/auth/login', {
+  login: async (usernameOrEmail: string, password: string) => {
+    const res = await request<any>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ usernameOrEmail, password }),
-    }),
-  register: (username: string, email: string, password: string) =>
-    request('/auth/register', {
+    });
+    const token = res?.accessToken || res?.access_token || res?.token;
+    if (token) {
+      localStorage.setItem('fc_token', token);
+    }
+    return res;
+  },
+  register: async (username: string, email: string, password: string) => {
+    const res = await request<any>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ username, email, password }),
-    }),
+    });
+    const token = res?.accessToken || res?.access_token || res?.token;
+    if (token) {
+      localStorage.setItem('fc_token', token);
+    }
+    return res;
+  },
+  logout: () => {
+    localStorage.removeItem('fc_token');
+  },
   getProfile: () => request<User>('/auth/me'),
 };
 
@@ -73,7 +90,18 @@ export const clubsApi = {
     return request(url);
   },
   getClubById: (id: string) => request<Club>(`/clubs/${id}`),
-  getMyClub: () => request<Club>('/clubs/my-club'),
+  getMyClub: () => request<Club | null>('/clubs/my-club'),
+  getStarterCountries: (search?: string) =>
+    request<StarterCountry[]>(
+      '/clubs/starter/countries' + (search ? `?search=${encodeURIComponent(search)}` : '')
+    ),
+  getStarterTiers: (countryId: string) =>
+    request<StarterTier[]>(`/clubs/starter/tiers?countryId=${encodeURIComponent(countryId)}`),
+  claimRandomStarterClub: (countryId: string, tier: number) =>
+    request<{ message: string; club: Club }>('/clubs/starter/claim-random', {
+      method: 'POST',
+      body: JSON.stringify({ countryId, tier }),
+    }),
   claim: (clubId: string) =>
     request(`/clubs/${clubId}/claim`, { method: 'POST' }),
   claimClub: (clubId: string) =>
