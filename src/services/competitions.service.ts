@@ -20,18 +20,29 @@ export interface CompetitionTeam {
 }
 
 export const competitionsApi = {
-  getAll: () => request<Competition[]>('/competitions'),
+  getAll: (countryId?: string) => {
+    let url = '/competitions';
+    if (countryId) url += `?countryId=${encodeURIComponent(countryId)}`;
+    return request<Competition[]>(url);
+  },
 
-  getStandings: (competitionId: string) =>
-    request<{ competitionId: string; stageName: string; standings: Standing[] } | Standing[]>(
-      `/competitions/${competitionId}/standings`
-    ),
+  getStandings: (competitionId: string, countryId?: string) => {
+    let url = `/competitions/${competitionId}/standings`;
+    if (countryId) url += `?countryId=${encodeURIComponent(countryId)}`;
+    return request<{ competitionId: string; stageName: string; standings: Standing[] } | Standing[]>(url);
+  },
 
-  getTopScorers: (competitionId: string) =>
-    request<PlayerStat[]>(`/competitions/${competitionId}/top-scorers`),
+  getTopScorers: (competitionId: string, countryId?: string) => {
+    let url = `/competitions/${competitionId}/top-scorers`;
+    if (countryId) url += `?countryId=${encodeURIComponent(countryId)}`;
+    return request<PlayerStat[]>(url);
+  },
 
-  getTopAssists: (competitionId: string) =>
-    request<PlayerStat[]>(`/competitions/${competitionId}/top-assists`),
+  getTopAssists: (competitionId: string, countryId?: string) => {
+    let url = `/competitions/${competitionId}/top-assists`;
+    if (countryId) url += `?countryId=${encodeURIComponent(countryId)}`;
+    return request<PlayerStat[]>(url);
+  },
 
   getTeams: (competitionId: string, countryId?: string) => {
     let url = `/competitions/${competitionId}/teams`;

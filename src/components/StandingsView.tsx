@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { competitionsApi, CompetitionTeam } from '../services/competitions.service';
-import { Competition, Standing, PlayerStat } from '../types';
+import { Competition, Standing, PlayerStat, Club } from '../types';
 import {
   Trophy,
   Award,
   TrendingUp,
   Target,
   Activity,
-  Users,
+  Shield,
   Building2,
   UserCheck,
-  Shield,
   Star,
+  Globe2,
+  Flag,
+  Sparkles,
 } from 'lucide-react';
 
 interface StandingsViewProps {
+  club: Club | null;
   currentClubId: string;
 }
 
-export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) => {
+export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubId }) => {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [selectedCompId, setSelectedCompId] = useState<string>('');
   const [standings, setStandings] = useState<any[]>([]);
@@ -28,24 +31,43 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'table' | 'teams' | 'stats'>('table');
 
+  // Club geographical context
+  const countryId = club?.country_id || club?.country_detail?.id || '114';
+  const countryName =
+    club?.country_detail?.name ||
+    (typeof club?.country === 'string' ? club?.country : (club?.country as any)?.name) ||
+    'Việt Nam';
+  const confedCode =
+    club?.confederation?.code ||
+    club?.country_detail?.confederation?.code ||
+    'AFC';
+  const clubCompId = club?.current_competition_id ? club.current_competition_id.toString() : '3';
+
   useEffect(() => {
     loadCompetitions();
-  }, []);
+  }, [countryId]);
 
   useEffect(() => {
     if (selectedCompId) {
       loadCompData(selectedCompId);
     }
-  }, [selectedCompId]);
+  }, [selectedCompId, countryId]);
 
   const loadCompetitions = async () => {
     try {
       setLoading(true);
-      const data = await competitionsApi.getAll();
-      const list = Array.isArray(data) ? data : (data as any)?.items || [];
+      const data = await competitionsApi.getAll(countryId);
+      const list: Competition[] = Array.isArray(data) ? data : (data as any)?.items || [];
       setCompetitions(list);
+
+      // Default to club's active competition if available in list
       if (list.length > 0) {
-        setSelectedCompId(list[0].id);
+        const foundClubComp = list.find((c) => c.id.toString() === clubCompId);
+        if (foundClubComp) {
+          setSelectedCompId(foundClubComp.id.toString());
+        } else {
+          setSelectedCompId(list[0].id.toString());
+        }
       }
     } catch (err) {
       console.error('Failed to load competitions:', err);
@@ -58,13 +80,12 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
     try {
       setLoading(true);
       const [tableData, teamsData, scorersData, assistsData] = await Promise.all([
-        competitionsApi.getStandings(compId).catch(() => null),
-        competitionsApi.getTeams(compId).catch(() => []),
-        competitionsApi.getTopScorers(compId).catch(() => []),
-        competitionsApi.getTopAssists(compId).catch(() => []),
+        competitionsApi.getStandings(compId, countryId).catch(() => null),
+        competitionsApi.getTeams(compId, countryId).catch(() => []),
+        competitionsApi.getTopScorers(compId, countryId).catch(() => []),
+        competitionsApi.getTopAssists(compId, countryId).catch(() => []),
       ]);
 
-      // Unpack standings safely from { competitionId, stageName, standings: [] } or raw array
       const rawStandings = Array.isArray(tableData)
         ? tableData
         : (tableData as any)?.standings || [];
@@ -82,45 +103,136 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
 
   const currentComp = competitions.find((c) => c.id.toString() === selectedCompId.toString());
 
+  // Group competitions by category for optgroup
+  const domesticComps = competitions.filter((c) => c.scope === 'DOMESTIC');
+  const continentalComps = competitions.filter((c) => c.scope === 'CONTINENTAL' || c.scope === 'REGIONAL');
+  const internationalComps = competitions.filter((c) => c.scope === 'INTERNATIONAL');
+
   return (
     <div className="view-container">
+      {/* Club Context Information Banner */}
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+          color: '#ffffff',
+          padding: '1rem 1.5rem',
+          borderRadius: '16px',
+          marginBottom: '1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          boxShadow: '0 4px 14px rgba(2, 132, 199, 0.25)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            style={{
+              width: '44px',
+              height: '44px',
+              borderRadius: '12px',
+              background: 'rgba(255, 255, 255, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.4rem',
+            }}
+          >
+            ⚽
+          </div>
+          <div>
+            <div style={{ fontSize: '0.78rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Câu Lạc Bộ Chủ Quản Của Bạn
+            </div>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800 }}>
+              {club?.name || 'Can Tho Gold Tigers'}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', background: 'rgba(255, 255, 255, 0.15)', padding: '6px 12px', borderRadius: '10px' }}>
+            <Flag size={16} />
+            <span>Quốc Gia: <strong>{countryName}</strong></span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', background: 'rgba(255, 255, 255, 0.15)', padding: '6px 12px', borderRadius: '10px' }}>
+            <Globe2 size={16} />
+            <span>Châu Lục: <strong>{confedCode}</strong></span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', background: '#fef08a', color: '#854d0e', padding: '6px 12px', borderRadius: '10px', fontWeight: 700 }}>
+            <Sparkles size={16} />
+            <span>Giải Đấu Hiện Tại: {currentComp?.displayName || currentComp?.name || 'Tier 3 - Giải Hạng Nhì'}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Header & Competition Dropdown Selector */}
       <div className="card" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
               <Trophy size={24} color="#0284c7" />
-              <span>Bảng Xếp Hạng & Hệ Thống Giải Đấu</span>
+              <span>Hệ Thống Giải Đấu & Bảng Xếp Hạng</span>
             </h2>
             <p style={{ color: '#64748b', fontSize: '0.88rem', margin: '4px 0 0' }}>
-              Theo dõi chi tiết thứ hạng, câu lạc bộ tham dự và chỉ số cầu thủ xuất sắc nhất
+              Giải quốc nội theo quốc gia ({countryName}) & Cúp châu lục theo liên đoàn ({confedCode})
             </p>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {/* Grouped Select */}
             <select
               value={selectedCompId}
               onChange={(e) => setSelectedCompId(e.target.value)}
               className="select"
               style={{
-                padding: '8px 14px',
+                padding: '9px 14px',
                 borderRadius: '10px',
                 border: '1.5px solid #bae6fd',
                 background: '#ffffff',
-                fontWeight: 600,
+                fontWeight: 700,
                 color: '#0369a1',
                 fontSize: '0.92rem',
-                minWidth: '260px',
+                minWidth: '320px',
                 outline: 'none',
+                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.08)',
               }}
             >
-              {competitions.map((comp) => (
-                <option key={comp.id} value={comp.id}>
-                  {comp.name} {comp.tier ? `(Tier ${comp.tier})` : ''}
-                </option>
-              ))}
+              {domesticComps.length > 0 && (
+                <optgroup label={`🇻🇳 Giải Đấu Quốc Nội (${countryName})`}>
+                  {domesticComps.map((comp) => (
+                    <option key={comp.id} value={comp.id}>
+                      {comp.displayName || comp.name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+
+              {continentalComps.length > 0 && (
+                <optgroup label={`🌏 Cúp Châu Lục (${confedCode})`}>
+                  {continentalComps.map((comp) => (
+                    <option key={comp.id} value={comp.id}>
+                      {comp.displayName || comp.name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+
+              {internationalComps.length > 0 && (
+                <optgroup label="🏆 Đấu Trường Quốc Tế">
+                  {internationalComps.map((comp) => (
+                    <option key={comp.id} value={comp.id}>
+                      {comp.displayName || comp.name}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
             </select>
 
+            {/* Navigation Tabs */}
             <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '10px', gap: '4px' }}>
               <button
                 type="button"
@@ -129,7 +241,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
                   borderRadius: '8px',
                   fontWeight: 600,
                   fontSize: '0.85rem',
-                  padding: '6px 14px',
+                  padding: '7px 14px',
                   backgroundColor: activeTab === 'table' ? '#0284c7' : 'transparent',
                   color: activeTab === 'table' ? '#ffffff' : '#64748b',
                   border: 'none',
@@ -147,7 +259,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
                   borderRadius: '8px',
                   fontWeight: 600,
                   fontSize: '0.85rem',
-                  padding: '6px 14px',
+                  padding: '7px 14px',
                   backgroundColor: activeTab === 'teams' ? '#0284c7' : 'transparent',
                   color: activeTab === 'teams' ? '#ffffff' : '#64748b',
                   border: 'none',
@@ -160,7 +272,16 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
               >
                 <span>Đội Tham Gia</span>
                 {teams.length > 0 && (
-                  <span style={{ background: activeTab === 'teams' ? '#ffffff' : '#e0f2fe', color: activeTab === 'teams' ? '#0284c7' : '#0369a1', fontSize: '0.72rem', padding: '1px 6px', borderRadius: '10px', fontWeight: 700 }}>
+                  <span
+                    style={{
+                      background: activeTab === 'teams' ? '#ffffff' : '#e0f2fe',
+                      color: activeTab === 'teams' ? '#0284c7' : '#0369a1',
+                      fontSize: '0.72rem',
+                      padding: '1px 6px',
+                      borderRadius: '10px',
+                      fontWeight: 700,
+                    }}
+                  >
                     {teams.length}
                   </span>
                 )}
@@ -173,7 +294,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
                   borderRadius: '8px',
                   fontWeight: 600,
                   fontSize: '0.85rem',
-                  padding: '6px 14px',
+                  padding: '7px 14px',
                   backgroundColor: activeTab === 'stats' ? '#0284c7' : 'transparent',
                   color: activeTab === 'stats' ? '#ffffff' : '#64748b',
                   border: 'none',
@@ -254,18 +375,20 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
                       }}
                     >
                       <td style={{ textAlign: 'center', padding: '12px 8px' }}>
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '26px',
-                          height: '26px',
-                          borderRadius: '8px',
-                          background: posBg,
-                          color: posColor,
-                          fontSize: '0.85rem',
-                          fontWeight: 700,
-                        }}>
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '26px',
+                            height: '26px',
+                            borderRadius: '8px',
+                            background: posBg,
+                            color: posColor,
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                          }}
+                        >
                           {pos}
                         </span>
                       </td>
@@ -278,15 +401,17 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
                               {row.club?.name || `CLB #${clubId || idx + 1}`}
                             </span>
                             {isCurrent && (
-                              <span style={{
-                                marginLeft: '8px',
-                                background: '#0284c7',
-                                color: '#ffffff',
-                                fontSize: '0.68rem',
-                                padding: '2px 6px',
-                                borderRadius: '6px',
-                                fontWeight: 700,
-                              }}>
+                              <span
+                                style={{
+                                  marginLeft: '8px',
+                                  background: '#0284c7',
+                                  color: '#ffffff',
+                                  fontSize: '0.68rem',
+                                  padding: '2px 7px',
+                                  borderRadius: '6px',
+                                  fontWeight: 700,
+                                }}
+                              >
                                 ĐỘI BẠN
                               </span>
                             )}
@@ -330,15 +455,17 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
         <div>
           <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ color: '#475569', fontSize: '0.92rem', fontWeight: 600 }}>
-              Có <strong>{teams.length}</strong> câu lạc bộ tham dự giải {currentComp?.name || ''}
+              Có <strong>{teams.length}</strong> câu lạc bộ tham dự giải <strong>{currentComp?.displayName || currentComp?.name || ''}</strong>
             </span>
           </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '16px',
-          }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '16px',
+            }}
+          >
             {teams.length === 0 ? (
               <div className="card text-center" style={{ gridColumn: '1 / -1', padding: '3.5rem' }}>
                 <Shield size={36} color="#cbd5e1" style={{ marginBottom: '8px', display: 'inline-block' }} />
@@ -363,33 +490,37 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
                     }}
                   >
                     {isCurrent && (
-                      <span style={{
-                        position: 'absolute',
-                        top: '12px',
-                        right: '12px',
-                        background: '#0284c7',
-                        color: '#ffffff',
-                        fontSize: '0.68rem',
-                        padding: '2px 8px',
-                        borderRadius: '10px',
-                        fontWeight: 700,
-                      }}>
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          background: '#0284c7',
+                          color: '#ffffff',
+                          fontSize: '0.68rem',
+                          padding: '2px 8px',
+                          borderRadius: '10px',
+                          fontWeight: 700,
+                        }}
+                      >
                         CLB CỦA BẠN
                       </span>
                     )}
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '50%',
-                        background: '#f0f9ff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '1.4rem',
-                        border: '1px solid #bae6fd',
-                      }}>
+                      <div
+                        style={{
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '50%',
+                          background: '#f0f9ff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.4rem',
+                          border: '1px solid #bae6fd',
+                        }}
+                      >
                         ⚽
                       </div>
                       <div>
@@ -405,7 +536,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
                     <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.82rem', color: '#475569' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Building2 size={14} color="#0284c7" />
-                        <span>Sân: <strong>{team.stadium?.name || 'Sân vận động Trung tâm'}</strong> ({team.stadium?.capacity?.toLocaleString() || '15,000'} chỗ)</span>
+                        <span>Sân: <strong>{team.stadium?.name || 'Sân vận động Quốc gia'}</strong> ({team.stadium?.capacity?.toLocaleString() || '15,000'} chỗ)</span>
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -457,7 +588,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
                       </span>
                       <div>
                         <strong style={{ display: 'block', fontSize: '0.92rem', color: '#0f172a' }}>
-                          {(item.player as any)?.name || item.player?.common_name || ((item.player?.first_name || '') + ' ' + (item.player?.last_name || '')).trim() || 'Cầu thủ'}
+                          {item.player?.name || item.player?.common_name || `${item.player?.first_name || ''} ${item.player?.last_name || ''}`.trim() || 'Cầu thủ'}
                         </strong>
                         <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
                           {item.club?.name || 'CLB'}
@@ -505,7 +636,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ currentClubId }) =
                       </span>
                       <div>
                         <strong style={{ display: 'block', fontSize: '0.92rem', color: '#0f172a' }}>
-                          {(item.player as any)?.name || item.player?.common_name || ((item.player?.first_name || '') + ' ' + (item.player?.last_name || '')).trim() || 'Cầu thủ'}
+                          {item.player?.name || item.player?.common_name || `${item.player?.first_name || ''} ${item.player?.last_name || ''}`.trim() || 'Cầu thủ'}
                         </strong>
                         <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
                           {item.club?.name || 'CLB'}

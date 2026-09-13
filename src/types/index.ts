@@ -25,6 +25,25 @@ export interface Facility {
 }
 
 export interface Club {
+  country_id?: string;
+  current_competition_id?: string;
+  country_detail?: {
+    id: string;
+    name: string;
+    code?: string;
+    flag_url?: string;
+    confederation_id?: string;
+    confederation?: {
+      id: string;
+      name: string;
+      code: string;
+    } | null;
+  } | null;
+  confederation?: {
+    id: string;
+    name: string;
+    code: string;
+  } | null;
   id: string;
   name: string;
   short_name?: string;
@@ -171,10 +190,19 @@ export interface Match {
 export interface Competition {
   id: string;
   name: string;
-  country?: string;
+  code?: string;
+  displayName?: string;
+  groupLabel?: string;
+  regionName?: string;
+  scope?: 'DOMESTIC' | 'CONTINENTAL' | 'INTERNATIONAL' | 'REGIONAL';
   type?: string;
   tier?: number;
+  total_teams?: number;
   logo_url?: string;
+  country_id?: string | null;
+  confederation_id?: string | null;
+  country?: { id: string; name: string; code?: string; flag_url?: string } | null;
+  confederation?: { id: string; name: string; code?: string } | null;
 }
 
 export interface Standing {
@@ -201,6 +229,7 @@ export interface StandingItem extends Standing {
 export interface PlayerStat {
   player: {
     id: string;
+    name?: string;
     common_name?: string;
     first_name?: string;
     last_name?: string;

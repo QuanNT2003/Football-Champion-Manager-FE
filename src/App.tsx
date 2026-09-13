@@ -314,6 +314,7 @@ export function App() {
 
         {activeTab === 'standings' && (
           <StandingsView
+            club={club}
             currentClubId={club?.id || '1'}
           />
         )}
