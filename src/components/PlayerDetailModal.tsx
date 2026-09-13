@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Player } from '../types';
-import { playersApi } from '../services/api';
+import { playersApi } from '../services/players.service';
 import { X, ShieldAlert, DollarSign, Activity, Award, HeartPulse, Sparkles, Check } from 'lucide-react';
 
 interface PlayerDetailModalProps {

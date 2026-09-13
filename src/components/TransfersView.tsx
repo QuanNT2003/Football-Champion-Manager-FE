@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { transfersApi, playersApi } from '../services/api';
+import { transfersApi } from '../services/transfers.service';
+import { playersApi } from '../services/players.service';
 import { Player, TransferOffer } from '../types';
 import { ShoppingCart, DollarSign, Search, Filter, ArrowRightLeft, CheckCircle, XCircle, Check, X } from 'lucide-react';
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { competitionsApi } from '../services/api';
+import { competitionsApi } from '../services/competitions.service';
 import { Competition, Standing, PlayerStat } from '../types';
 import { Trophy, Award, TrendingUp, Shield, Activity, Target } from 'lucide-react';
 

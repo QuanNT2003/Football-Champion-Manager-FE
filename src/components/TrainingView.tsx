@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { trainingApi } from '../services/api';
+import { trainingApi } from '../services/training.service';
 import { TrainingType, TrainingSession } from '../types';
 import { Dumbbell, Calendar, Zap, CheckCircle2, Award, Clock } from 'lucide-react';
 

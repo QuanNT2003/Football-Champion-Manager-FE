@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Club, Formation, FormationPosition, Player } from '../types';
-import { tacticsApi } from '../services/api';
+import { tacticsApi } from '../services/tactics.service';
 import { Sliders, Save, Shield, Compass, FastForward, Activity, CheckCircle2 } from 'lucide-react';
 
 interface Props {

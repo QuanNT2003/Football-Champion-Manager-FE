@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Club, Match, MatchEvent } from '../types';
-import { matchesApi } from '../services/api';
+import { matchesApi } from '../services/matches.service';
 import { Play, CheckCircle2, DollarSign, Users, Award, AlertTriangle, Swords } from 'lucide-react';
 
 interface Props {

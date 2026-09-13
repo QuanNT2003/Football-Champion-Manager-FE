@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Club, StarterCountry, StarterTier, User } from '../types';
-import { clubsApi, authApi } from '../services/api';
+import { clubsApi } from '../services/clubs.service';
+import { authApi } from '../services/auth.service';
 import {
   Globe,
   Trophy,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { financesApi } from '../services/api';
+import { financesApi } from '../services/finances.service';
 import { FinancialAccount, LedgerTransaction, ShopItem } from '../types';
 import { DollarSign, Coins, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, ShoppingBag, CreditCard, RefreshCw } from 'lucide-react';
 

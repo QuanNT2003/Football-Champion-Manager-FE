@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Club, Player, TimelineData, User } from './types';
-import { clubsApi, playersApi, gameWorldApi, authApi } from './services/api';
+import { clubsApi } from './services/clubs.service';
+import { playersApi } from './services/players.service';
+import { gameWorldApi } from './services/gameWorld.service';
+import { authApi } from './services/auth.service';
 import { Navbar } from './components/Navbar';
 import { DashboardView } from './components/DashboardView';
 import { SquadView } from './components/SquadView';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { authApi } from '../services/api';
+import { authApi } from '../services/auth.service';
 import { Shield, Lock, User, Mail, LogIn, UserPlus, AlertCircle, Sparkles } from 'lucide-react';
 
 interface Props {

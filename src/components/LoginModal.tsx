@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { authApi, clubsApi } from '../services/api';
+import { authApi } from '../services/auth.service';
+import { clubsApi } from '../services/clubs.service';
 import { Club } from '../types';
 import { Shield, User, Lock, Mail, Search, CheckCircle } from 'lucide-react';
 
