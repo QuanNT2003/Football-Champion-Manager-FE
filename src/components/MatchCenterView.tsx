@@ -1,45 +1,110 @@
-import React, { useState, useEffect } from 'react';
-import { Club, Match, MatchEvent } from '../types';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  Filter,
+  Loader2,
+  MapPin,
+  Play,
+  Search,
+  Swords,
+  Users,
+  X,
+} from 'lucide-react';
+import { Club, Match, MatchEvent, TimelineData } from '../types';
 import { matchesApi } from '../services/matches.service';
-import { Play, CheckCircle2, DollarSign, Users, Award, AlertTriangle, Swords } from 'lucide-react';
 
 interface Props {
   club?: Club | null;
+  timeline?: TimelineData | null;
   matches?: Match[];
   onSimulateMatch?: (matchId: string) => Promise<any>;
   onMatchSimulated?: () => void;
 }
 
+type StatusFilter = 'ALL' | 'SCHEDULED' | 'FINISHED';
+
+const formatDate = (value?: string) => {
+  if (!value) return 'Chưa có ngày';
+  return new Intl.DateTimeFormat('vi-VN', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(value));
+};
+
+const formatTime = (value?: string) => {
+  if (!value) return '--:--';
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) {
+    return new Intl.DateTimeFormat('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Ho_Chi_Minh',
+    }).format(date);
+  }
+
+  return value.slice(0, 5);
+};
+
+const statusLabel = (status: Match['status']) => (status === 'FINISHED' ? 'Đã đá' : 'Sắp đá');
+
 export const MatchCenterView: React.FC<Props> = ({
   club,
+  timeline,
   matches: initialMatches,
   onSimulateMatch,
   onMatchSimulated,
 }) => {
   const [matchList, setMatchList] = useState<Match[]>(initialMatches || []);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [simulating, setSimulating] = useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [dayFilter, setDayFilter] = useState<string>('ALL');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [simulating, setSimulating] = useState(false);
   const [simResult, setSimResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const seasonId = timeline?.season?.id;
 
   useEffect(() => {
-    if (initialMatches && initialMatches.length > 0) {
+    if (initialMatches) {
       setMatchList(initialMatches);
-      setSelectedMatch(initialMatches[0]);
-    } else {
-      loadMatches();
+      setSelectedMatch(null);
+      return;
     }
-  }, [initialMatches, club?.id]);
+
+    loadMatches();
+  }, [initialMatches, club?.id, seasonId]);
 
   const loadMatches = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const data = await matchesApi.getMatches(1, 20, club?.id);
+      const data = await matchesApi.getMatches(1, 500, club?.id, undefined, seasonId);
       const items = data.items || (Array.isArray(data) ? data : []);
       setMatchList(items);
-      if (items.length > 0) {
-        setSelectedMatch(items[0]);
-      }
     } catch (err) {
       console.error('Failed to load matches:', err);
+      setError('Không tải được lịch thi đấu.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMatchDetail = async (match: Match) => {
+    setSelectedMatch(match);
+    setSimResult(null);
+    try {
+      const detail = await matchesApi.getMatchById(match.id);
+      setSelectedMatch(detail);
+    } catch (err) {
+      console.error('Failed to load match detail:', err);
     }
   };
 
@@ -47,199 +112,250 @@ export const MatchCenterView: React.FC<Props> = ({
     if (!selectedMatch) return;
     setSimulating(true);
     try {
-      let res;
-      if (onSimulateMatch) {
-        res = await onSimulateMatch(selectedMatch.id);
-      } else {
-        res = await matchesApi.simulateMatch(selectedMatch.id);
-      }
+      const res = onSimulateMatch
+        ? await onSimulateMatch(selectedMatch.id)
+        : await matchesApi.simulateMatch(selectedMatch.id);
       setSimResult(res?.data || res);
-      loadMatches();
+      await loadMatches();
       if (onMatchSimulated) onMatchSimulated();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to simulate match');
+      alert(err.response?.data?.message || 'Không thể mô phỏng trận đấu');
     } finally {
       setSimulating(false);
     }
   };
 
-  const currentMatch = selectedMatch || matchList[0];
+  const days = useMemo(() => {
+    return Array.from(new Set(matchList.map((match) => match.season_day))).sort((a, b) => a - b);
+  }, [matchList]);
+
+  const filteredMatches = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+
+    return matchList.filter((match) => {
+      const statusMatched = statusFilter === 'ALL' || match.status === statusFilter;
+      const dayMatched = dayFilter === 'ALL' || match.season_day === Number(dayFilter);
+      const textMatched =
+        keyword.length === 0 ||
+        match.homeClub?.name?.toLowerCase().includes(keyword) ||
+        match.awayClub?.name?.toLowerCase().includes(keyword) ||
+        match.stadium?.toString().toLowerCase().includes(keyword);
+
+      return statusMatched && dayMatched && textMatched;
+    });
+  }, [dayFilter, matchList, searchTerm, statusFilter]);
+
+  const sortedMatches = useMemo(() => {
+    return [...filteredMatches].sort((a, b) => {
+      if (a.season_day !== b.season_day) return a.season_day - b.season_day;
+      return formatTime(a.kickoff_time).localeCompare(formatTime(b.kickoff_time));
+    });
+  }, [filteredMatches]);
+
+  const selectedEvents = (simResult?.events || selectedMatch?.events || []) as MatchEvent[];
+  const selectedHomeScore = simResult?.homeScore ?? selectedMatch?.homeScore ?? 0;
+  const selectedAwayScore = simResult?.awayScore ?? selectedMatch?.awayScore ?? 0;
+  const seasonLabel = timeline?.season
+    ? `${timeline.season.name} · Day ${timeline.season.current_day}/${timeline.season.total_days}`
+    : 'Mùa hiện tại';
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '24px' }}>
-      {/* Live Match Pitch & Events */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Scoreboard */}
-        <div className="glass-panel" style={{ padding: '32px', textAlign: 'center', background: 'linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)', border: '1px solid #bae6fd' }}>
-          <div style={{ display: 'inline-block', marginBottom: '12px' }}>
-            <span className={`badge ${currentMatch?.status === 'FINISHED' || simResult ? 'badge-green' : 'badge-gold'}`}>
-              {currentMatch?.status === 'FINISHED' || simResult ? 'ĐÃ KẾT THÚC' : 'SẮP DIỄN RA (LỊCH THI ĐẤU)'}
-            </span>
+    <div className="match-season-view">
+      <section className="match-season-list glass-panel">
+        <div className="match-season-header">
+          <div>
+            <h2>Lịch Thi Đấu</h2>
+            <p>{seasonLabel}</p>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', margin: '20px 0' }}>
-            {/* Home Team */}
-            <div style={{ width: '180px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '8px' }}>🛡️</div>
-              <strong style={{ fontSize: '1.2rem', display: 'block' }}>{currentMatch?.homeClub?.name || 'Đội Nhà'}</strong>
-              <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Chủ Nhà</span>
-            </div>
-
-            {/* Score */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ fontSize: '3.5rem', fontWeight: 900, fontFamily: 'Outfit', color: '#0284c7', letterSpacing: '4px' }}>
-                {simResult?.homeScore ?? currentMatch?.homeScore ?? 0} : {simResult?.awayScore ?? currentMatch?.awayScore ?? 0}
-              </div>
-              <span style={{ fontSize: '0.85rem', color: '#06d6a0', fontWeight: 600 }}>90 Phút Chính Thức</span>
-            </div>
-
-            {/* Away Team */}
-            <div style={{ width: '180px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '8px' }}>⚔️</div>
-              <strong style={{ fontSize: '1.2rem', display: 'block' }}>{currentMatch?.awayClub?.name || 'Đội Khách'}</strong>
-              <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Đội Khách</span>
-            </div>
-          </div>
-
-          {/* Action Button */}
-          {currentMatch && currentMatch.status !== 'FINISHED' && !simResult && (
-            <button
-              className="btn btn-primary"
-              style={{ padding: '12px 32px', fontSize: '1.05rem', margin: '0 auto' }}
-              onClick={handleSimulate}
-              disabled={simulating}
-            >
-              <Play size={20} fill="#070b12" />
-              {simulating ? 'Đang Mô Phỏng Trận Đấu 90 Phút...' : 'Mô Phỏng Trận Đấu (Simulate Match)'}
-            </button>
-          )}
-
-          {/* Matchday Stats Banner if finished */}
-          {(currentMatch?.status === 'FINISHED' || simResult) && (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '24px',
-              marginTop: '20px',
-              padding: '12px',
-              background: '#f1f5f9',
-              borderRadius: '12px',
-              border: '1px solid var(--border-subtle)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Users size={16} color="#38bdf8" />
-                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Khán giả:</span>
-                <strong style={{ fontSize: '0.9rem' }}>
-                  {(simResult?.attendance ?? currentMatch?.attendance ?? 48500).toLocaleString()} người
-                </strong>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <DollarSign size={16} color="#10b981" />
-                <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Doanh thu bán vé:</span>
-                <strong style={{ fontSize: '0.9rem', color: '#10b981' }}>
-                  +€{(simResult?.ticketRevenue ?? currentMatch?.ticketRevenue ?? 1940000).toLocaleString()}
-                </strong>
-              </div>
-            </div>
-          )}
+          <button className="btn btn-secondary btn-sm" onClick={loadMatches} disabled={loading}>
+            {loading ? <Loader2 className="spinner-icon" size={16} /> : <CalendarDays size={16} />}
+            Làm mới
+          </button>
         </div>
 
-        {/* Live Match Events Ticker */}
-        <div className="glass-panel" style={{ padding: '24px' }}>
-          <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.1rem', marginBottom: '16px' }}>
-            Diễn Biến Trận Đấu (Match Timeline Events)
-          </h3>
+        <div className="match-toolbar">
+          <div className="match-search">
+            <Search size={16} />
+            <input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Tìm đội bóng, sân vận động"
+            />
+          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {(simResult?.events || currentMatch?.events || []).length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '0.9rem' }}>
-                Chưa có diễn biến nào. Bấm 'Mô Phỏng Trận Đấu' để xem bàn thắng và thẻ phạt trực tiếp!
-              </div>
-            ) : (
-              (simResult?.events || currentMatch?.events || []).map((evt: MatchEvent, idx: number) => {
-                const isGoal = evt.eventType === 'GOAL';
-                const isCard = evt.eventType === 'CARD' || evt.eventType === 'YELLOW_CARD' || evt.eventType === 'RED_CARD';
-                const isSub = evt.eventType === 'SUBSTITUTION';
+          <select value={dayFilter} onChange={(event) => setDayFilter(event.target.value)} className="input-select">
+            <option value="ALL">Tất cả ngày</option>
+            {days.map((day) => (
+              <option key={day} value={day}>
+                Day {day}
+              </option>
+            ))}
+          </select>
 
-                return (
-                  <div
-                    key={evt.id || idx}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '10px 14px',
-                      background: isGoal ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.02)',
-                      borderRadius: '8px',
-                      borderLeft: `3px solid ${isGoal ? '#10b981' : isCard ? '#f59e0b' : '#38bdf8'}`
-                    }}
-                  >
-                    <span style={{ fontWeight: 800, color: '#f59e0b', width: '36px' }}>
-                      {evt.minute}'
-                    </span>
-                    <span style={{ fontSize: '1.2rem' }}>
-                      {isGoal ? '⚽' : isCard ? '🟨' : isSub ? '🔄' : '🧤'}
-                    </span>
-                    <div style={{ flex: 1 }}>
-                      <strong style={{ color: '#0f172a', fontSize: '0.9rem' }}>
-                        {evt.player?.name || 'Cầu thủ'}
-                      </strong>
-                      <span style={{ color: '#94a3b8', fontSize: '0.85rem', marginLeft: '6px' }}>
-                        {evt.metadata?.description || (isGoal ? 'sút tung lưới đối phương!' : 'phạm lỗi')}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+          <div className="match-status-tabs" aria-label="Lọc trạng thái trận">
+            {(['ALL', 'SCHEDULED', 'FINISHED'] as StatusFilter[]).map((status) => (
+              <button
+                key={status}
+                type="button"
+                className={statusFilter === status ? 'active' : ''}
+                onClick={() => setStatusFilter(status)}
+              >
+                <Filter size={14} />
+                {status === 'ALL' ? 'Tất cả' : status === 'SCHEDULED' ? 'Sắp đá' : 'Đã đá'}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Fixtures List */}
-      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.1rem' }}>
-          Lịch Thi Đấu Mùa Giải
-        </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '520px', overflowY: 'auto' }}>
-          {matchList.length === 0 ? (
-            <div style={{ color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', padding: '20px' }}>
-              Không có trận đấu nào trong lịch trình.
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        <div className="season-fixture-list">
+          {loading && matchList.length === 0 ? (
+            <div className="match-empty-state">
+              <Loader2 className="spinner-icon" size={24} />
+              <span>Đang tải lịch mùa giải...</span>
+            </div>
+          ) : filteredMatches.length === 0 ? (
+            <div className="match-empty-state">
+              <CalendarDays size={24} />
+              <span>Không có trận nào khớp bộ lọc.</span>
             </div>
           ) : (
-            matchList.map((m) => (
-              <div
-                key={m.id}
-                onClick={() => {
-                  setSelectedMatch(m);
-                  setSimResult(null);
-                }}
-                style={{
-                  padding: '12px',
-                  borderRadius: '10px',
-                  background: selectedMatch?.id === m.id ? 'rgba(59, 130, 246, 0.15)' : 'rgba(255,255,255,0.02)',
-                  border: `1px solid ${selectedMatch?.id === m.id ? '#3b82f6' : 'rgba(255,255,255,0.05)'}`,
-                  cursor: 'pointer'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#94a3b8', marginBottom: '6px' }}>
-                  <span>Vòng {m.season_day || 1}</span>
-                  <span className={`badge ${m.status === 'FINISHED' ? 'badge-green' : 'badge-gold'}`} style={{ fontSize: '0.65rem' }}>
-                    {m.status === 'FINISHED' ? 'KẾT THÚC' : 'SẮP ĐÁ'}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 600, fontSize: '0.88rem' }}>
-                  <span style={{ color: m.homeClub?.id === club?.id ? '#06d6a0' : 'inherit' }}>{m.homeClub?.name}</span>
-                  <span style={{ color: '#f59e0b', margin: '0 8px' }}>
-                    {m.status === 'FINISHED' ? `${m.homeScore} - ${m.awayScore}` : 'vs'}
-                  </span>
-                  <span style={{ color: m.awayClub?.id === club?.id ? '#06d6a0' : 'inherit' }}>{m.awayClub?.name}</span>
-                </div>
-              </div>
-            ))
+            <div className="season-fixture-table" role="list">
+              {sortedMatches.map((match, index) => {
+                const previousMatch = sortedMatches[index - 1];
+                const showDayHeader = !previousMatch || previousMatch.season_day !== match.season_day;
+                const isSelected = selectedMatch?.id === match.id;
+                const isMyClub = match.homeClub?.id === club?.id || match.awayClub?.id === club?.id;
+                const competitionName = match.competitionSeason?.name || match.stage?.name || 'Giải đấu';
+
+                return (
+                  <React.Fragment key={match.id}>
+                    {showDayHeader && (
+                      <div className="fixture-section-label">
+                        <span>Day {match.season_day}</span>
+                        <strong>{formatDate(match.match_date)}</strong>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      className={`season-fixture-row ${isSelected ? 'selected' : ''}`}
+                      onClick={() => loadMatchDetail(match)}
+                    >
+                      <span className={`fixture-status ${match.status === 'FINISHED' ? 'finished' : 'scheduled'}`}>
+                        {statusLabel(match.status)}
+                      </span>
+                      <span className="fixture-time">
+                        <Clock size={14} />
+                        {formatTime(match.kickoff_time)}
+                      </span>
+                      <span className="fixture-competition">{competitionName}</span>
+                      <span className={`fixture-club ${match.homeClub?.id === club?.id ? 'my-club' : ''}`}>
+                        {match.homeClub?.name || 'Đội nhà'}
+                      </span>
+                      <span className="fixture-score">
+                        {match.status === 'FINISHED' ? `${match.homeScore ?? 0} - ${match.awayScore ?? 0}` : 'vs'}
+                      </span>
+                      <span className={`fixture-club ${match.awayClub?.id === club?.id ? 'my-club' : ''}`}>
+                        {match.awayClub?.name || 'Đội khách'}
+                      </span>
+                      {isMyClub && <span className="fixture-my-club">CLB</span>}
+                    </button>
+                  </React.Fragment>
+                );
+              })}
+            </div>
           )}
         </div>
-      </div>
+      </section>
+
+      <aside className="match-detail-panel glass-panel">
+        {!selectedMatch ? (
+          <div className="match-detail-empty">
+            <Swords size={36} />
+            <h3>Chọn một trận trong lịch</h3>
+            <p>Chi tiết trận, tỷ số, sân đấu và diễn biến sẽ mở ở đây.</p>
+          </div>
+        ) : (
+          <>
+            <div className="match-detail-header">
+              <div>
+                <span className={`badge ${selectedMatch.status === 'FINISHED' || simResult ? 'badge-green' : 'badge-gold'}`}>
+                  {selectedMatch.status === 'FINISHED' || simResult ? 'Đã kết thúc' : 'Sắp diễn ra'}
+                </span>
+                <h3>Day {selectedMatch.season_day}</h3>
+                <p>{formatDate(selectedMatch.match_date)} · {formatTime(selectedMatch.kickoff_time)} giờ VN</p>
+              </div>
+              <button className="btn btn-outline btn-xs" type="button" onClick={() => setSelectedMatch(null)}>
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="match-scoreboard">
+              <div className="match-team">
+                <div className="club-avatar-sm">{selectedMatch.homeClub?.name?.slice(0, 2).toUpperCase() || 'HN'}</div>
+                <strong>{selectedMatch.homeClub?.name || 'Đội nhà'}</strong>
+                <span>Chủ nhà</span>
+              </div>
+
+              <div className="score-block">
+                <strong>{selectedHomeScore} - {selectedAwayScore}</strong>
+                <span>{selectedMatch.status === 'FINISHED' || simResult ? 'Kết quả' : 'Lịch đấu'}</span>
+              </div>
+
+              <div className="match-team">
+                <div className="club-avatar-sm">{selectedMatch.awayClub?.name?.slice(0, 2).toUpperCase() || 'AK'}</div>
+                <strong>{selectedMatch.awayClub?.name || 'Đội khách'}</strong>
+                <span>Đội khách</span>
+              </div>
+            </div>
+
+            <div className="match-meta-grid">
+              <div>
+                <MapPin size={16} />
+                <span>{typeof selectedMatch.stadium === 'string' ? selectedMatch.stadium : selectedMatch.stadium?.name || 'Chưa có sân'}</span>
+              </div>
+              <div>
+                <Users size={16} />
+                <span>{(simResult?.attendance ?? selectedMatch.attendance ?? 0).toLocaleString()} khán giả</span>
+              </div>
+              <div>
+                <DollarSign size={16} />
+                <span>€{Number(simResult?.ticketRevenue ?? selectedMatch.ticketRevenue ?? 0).toLocaleString()}</span>
+              </div>
+              <div>
+                <CheckCircle2 size={16} />
+                <span>{selectedMatch.round?.name || `Vòng ${selectedMatch.season_day}`}</span>
+              </div>
+            </div>
+
+            {selectedMatch.status !== 'FINISHED' && !simResult && (
+              <button className="btn btn-primary match-simulate-btn" onClick={handleSimulate} disabled={simulating}>
+                {simulating ? <Loader2 className="spinner-icon" size={18} /> : <Play size={18} />}
+                {simulating ? 'Đang mô phỏng...' : 'Mô phỏng trận đấu'}
+              </button>
+            )}
+
+            <div className="match-events-panel">
+              <h4>Diễn Biến Trận Đấu</h4>
+              {selectedEvents.length === 0 ? (
+                <p>Chưa có diễn biến cho trận này.</p>
+              ) : (
+                <div className="match-event-list">
+                  {selectedEvents.map((event, idx) => (
+                    <div key={event.id || idx} className="match-event-row">
+                      <strong>{event.minute}'</strong>
+                      <span>{event.eventType}</span>
+                      <p>{event.player?.name || 'Cầu thủ'} {event.metadata?.description || ''}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </aside>
     </div>
   );
 };

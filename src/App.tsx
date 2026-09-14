@@ -308,6 +308,7 @@ export function App() {
         {activeTab === 'matches' && (
           <MatchCenterView
             club={club}
+            timeline={timeline}
             onMatchSimulated={refreshClubData}
           />
         )}

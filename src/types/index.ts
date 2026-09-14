@@ -177,6 +177,9 @@ export interface Match {
   match_date: string;
   kickoff_time: string;
   status: 'SCHEDULED' | 'FINISHED';
+  competitionSeason?: { id: string; name: string } | null;
+  stage?: { id: string; name: string } | null;
+  round?: { id: string; name: string; round_no: number } | null;
   homeScore?: number;
   awayScore?: number;
   attendance?: number;
