@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Club, Formation, FormationPosition, Player } from '../types';
 import { tacticsApi } from '../services/tactics.service';
-import { Sliders, Save, Shield, Compass, FastForward, Activity, CheckCircle2 } from 'lucide-react';
+import { Sliders, Save, Compass, CheckCircle2, Zap } from 'lucide-react';
 
 interface Props {
   club: Club | null;
@@ -62,29 +62,31 @@ export const TacticsView: React.FC<Props> = ({
       } else if (club?.id) {
         await tacticsApi.updateClubTactics(club.id, tacticPayload);
       }
-      setSavedSuccess('Tactics and squad formation saved successfully!');
+      setSavedSuccess('Đã lưu sơ đồ và chiến thuật thành công!');
       setTimeout(() => setSavedSuccess(''), 3000);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to save tactics');
+      alert(err.response?.data?.message || 'Không thể lưu chiến thuật');
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px' }}>
-      {/* 2D Football Pitch */}
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 360px', gap: '24px' }}>
+      {/* 2D Football Pitch (Lush Turf & Magnetic Pucks) */}
       <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
-            <h3 style={{ fontFamily: 'Outfit', fontWeight: 800, fontSize: '1.25rem' }}>
-              Sân Đấu Chiến Thuật & Đội Hình Ra Sân (Starting XI)
+            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.35rem', color: '#0f172a' }}>
+              SA BÀN CHIẾN THUẬT & ĐỘI HÌNH RA SÂN (STARTING XI)
             </h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
-              Sơ đồ: <strong style={{ color: 'var(--neon-green)' }}>{currentFormation?.name || '4-3-3 Attack'}</strong> ({currentFormation?.code || '4-3-3'})
+            <p style={{ color: '#64748b', fontSize: '0.88rem', marginTop: '2px' }}>
+              Sơ đồ hiện tại: <strong style={{ color: '#059669', fontFamily: 'var(--font-game)' }}>{currentFormation?.name || '4-3-3 Tấn Công'}</strong> ({currentFormation?.code || '4-3-3'})
             </p>
           </div>
-          <span className="badge badge-green">LIVE LINEUP</span>
+          <span className="badge badge-green" style={{ gap: '6px' }}>
+            <Zap size={14} /> LIVE LINEUP
+          </span>
         </div>
 
         {savedSuccess && (
@@ -94,7 +96,7 @@ export const TacticsView: React.FC<Props> = ({
           </div>
         )}
 
-        {/* Pitch Graphic */}
+        {/* Pitch Graphic with Striped Lawn & Magnetic Pucks */}
         <div className="pitch-container">
           <div className="pitch-line-half" />
           <div className="pitch-circle" />
@@ -113,12 +115,13 @@ export const TacticsView: React.FC<Props> = ({
                 key={pos.id || idx}
                 className="player-token"
                 style={{ left: `${xPercent}%`, top: `${yPercent}%` }}
+                title={assignedPlayer ? `${assignedPlayer.name} (${pos.slot_code})` : pos.slot_code}
               >
                 <div className={`token-circle ${isGK ? 'gk' : ''}`}>
                   {assignedPlayer?.squad_number || idx + 1}
                 </div>
                 <div className="token-label">
-                  {assignedPlayer ? (assignedPlayer.common_name || `${assignedPlayer.first_name?.[0] || ''}. ${assignedPlayer.last_name}`) : pos.slot_code}
+                  {assignedPlayer ? (assignedPlayer.common_name || `${assignedPlayer.first_name?.[0] || ''}. ${assignedPlayer.last_name || assignedPlayer.name}`) : pos.slot_code}
                 </div>
               </div>
             );
@@ -129,8 +132,9 @@ export const TacticsView: React.FC<Props> = ({
       {/* Tactical Sliders and Controls */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div className="glass-panel" style={{ padding: '24px' }}>
-          <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.1rem', marginBottom: '16px' }}>
-            Chọn Sơ Đồ Đội Hình
+          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem', marginBottom: '16px', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Compass size={18} color="#0284c7" />
+            CHỌN SƠ ĐỒ ĐỘI HÌNH
           </h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {formations.map((f) => (
@@ -147,21 +151,22 @@ export const TacticsView: React.FC<Props> = ({
 
         {/* Mentality & Sliders */}
         <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <h3 style={{ fontFamily: 'Outfit', fontWeight: 700, fontSize: '1.1rem' }}>
-            Chỉ Đạo Lối Chơi
+          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Sliders size={18} color="#059669" />
+            CHỈ ĐẠO LỐI CHƠI
           </h3>
 
           <div>
-            <label style={{ fontSize: '0.85rem', color: '#94a3b8', display: 'block', marginBottom: '8px' }}>
-              Tư Duy Chiến Thuật (Mentality)
+            <label style={{ fontSize: '0.85rem', color: '#64748b', display: 'block', marginBottom: '8px', fontWeight: 700, fontFamily: 'var(--font-game)' }}>
+              TƯ DUY CHIẾN THUẬT (MENTALITY)
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
               {['DEFENSIVE', 'BALANCED', 'ATTACKING'].map((m) => (
                 <button
                   key={m}
                   className={`btn btn-sm ${mentality === m ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setMentality(m)}
-                  style={{ fontSize: '0.78rem', padding: '6px 4px' }}
+                  style={{ fontSize: '0.8rem', padding: '8px 6px' }}
                 >
                   {m === 'DEFENSIVE' ? 'Phòng Ngự' : m === 'BALANCED' ? 'Cân Bằng' : 'Tấn Công'}
                 </button>
@@ -170,9 +175,9 @@ export const TacticsView: React.FC<Props> = ({
           </div>
 
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.85rem' }}>
-              <span style={{ color: '#94a3b8' }}>Nhịp Độ Trận Đấu (Tempo)</span>
-              <strong style={{ color: '#38bdf8' }}>{tempo} / 100</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
+              <span style={{ color: '#64748b', fontWeight: 700, fontFamily: 'var(--font-game)' }}>NHỊP ĐỘ (TEMPO)</span>
+              <strong style={{ color: '#0284c7', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>{tempo} / 100</strong>
             </div>
             <input
               type="range"
@@ -180,14 +185,14 @@ export const TacticsView: React.FC<Props> = ({
               max="100"
               value={tempo}
               onChange={(e) => setTempo(Number(e.target.value))}
-              style={{ width: '100%' }}
+              style={{ width: '100%', accentColor: '#0284c7', cursor: 'pointer' }}
             />
           </div>
 
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.85rem' }}>
-              <span style={{ color: '#94a3b8' }}>Cường Độ Áp Sát (Pressing)</span>
-              <strong style={{ color: '#f59e0b' }}>{pressing} / 100</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
+              <span style={{ color: '#64748b', fontWeight: 700, fontFamily: 'var(--font-game)' }}>ÁP SÁT (PRESSING)</span>
+              <strong style={{ color: '#d97706', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>{pressing} / 100</strong>
             </div>
             <input
               type="range"
@@ -195,14 +200,14 @@ export const TacticsView: React.FC<Props> = ({
               max="100"
               value={pressing}
               onChange={(e) => setPressing(Number(e.target.value))}
-              style={{ width: '100%' }}
+              style={{ width: '100%', accentColor: '#d97706', cursor: 'pointer' }}
             />
           </div>
 
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.85rem' }}>
-              <span style={{ color: '#94a3b8' }}>Hàng Phòng Ngự (Defensive Line)</span>
-              <strong style={{ color: '#10b981' }}>{defensiveLine} / 100</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem' }}>
+              <span style={{ color: '#64748b', fontWeight: 700, fontFamily: 'var(--font-game)' }}>HÀNG THỦ (DEFENSIVE LINE)</span>
+              <strong style={{ color: '#059669', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>{defensiveLine} / 100</strong>
             </div>
             <input
               type="range"
@@ -210,18 +215,18 @@ export const TacticsView: React.FC<Props> = ({
               max="100"
               value={defensiveLine}
               onChange={(e) => setDefensiveLine(Number(e.target.value))}
-              style={{ width: '100%' }}
+              style={{ width: '100%', accentColor: '#059669', cursor: 'pointer' }}
             />
           </div>
 
           <button
             className="btn btn-primary"
-            style={{ marginTop: '10px', width: '100%' }}
+            style={{ marginTop: '12px', width: '100%', padding: '14px' }}
             onClick={handleSave}
             disabled={saving}
           >
-            <Save size={16} />
-            {saving ? 'Đang Lưu...' : 'Lưu Chiến Thuật'}
+            <Save size={18} />
+            <span>{saving ? 'ĐANG LƯU...' : 'LƯU CHIẾN THUẬT'}</span>
           </button>
         </div>
       </div>

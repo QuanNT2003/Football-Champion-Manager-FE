@@ -37,19 +37,19 @@ export const Navbar: React.FC<Props> = ({
 
       <div className="header-stats">
         {/* Real-time Server Live Indicator */}
-        <div className="stat-pill" style={{ border: '1px solid rgba(2, 132, 199, 0.3)', background: 'rgba(2, 132, 199, 0.06)' }}>
+        <div className="stat-pill server">
           <span style={{
-            width: 8,
-            height: 8,
+            width: 9,
+            height: 9,
             borderRadius: '50%',
-            background: '#0284c7',
-            boxShadow: '0 0 10px #0284c7',
+            background: '#10b981',
+            boxShadow: '0 0 10px rgba(16, 185, 129, 0.5)',
             display: 'inline-block'
           }} />
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>MÁY CHỦ REAL-TIME</span>
-            <strong style={{ color: '#0284c7', fontSize: '0.88rem' }}>
-              Online (Đồng bộ)
+            <span style={{ color: '#64748b', fontSize: '0.65rem', display: 'block', textTransform: 'uppercase', fontWeight: 800, fontFamily: 'var(--font-game)' }}>MÁY CHỦ REAL-TIME</span>
+            <strong style={{ color: '#0284c7', fontSize: '0.88rem', fontFamily: 'var(--font-game)' }}>
+              LIVE (ĐỒNG BỘ)
             </strong>
           </div>
         </div>
@@ -58,9 +58,9 @@ export const Navbar: React.FC<Props> = ({
         <div className="stat-pill">
           <Calendar size={16} color="#0284c7" />
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase', fontWeight: 600 }}>TIẾN ĐỘ MÙA GIẢI</span>
-            <strong style={{ color: '#0f172a', fontSize: '0.88rem' }}>
-              Vòng {currentDay} / {totalDays}
+            <span style={{ color: '#64748b', fontSize: '0.65rem', display: 'block', textTransform: 'uppercase', fontWeight: 800, fontFamily: 'var(--font-game)' }}>VÒNG ĐẤU MÙA GIẢI</span>
+            <strong style={{ color: '#0f172a', fontSize: '0.88rem', fontFamily: 'var(--font-game)' }}>
+              VÒNG {currentDay} / {totalDays}
             </strong>
           </div>
         </div>
@@ -71,16 +71,16 @@ export const Navbar: React.FC<Props> = ({
             <div className="stat-pill cash">
               <DollarSign size={16} color="#059669" />
               <div>
-                <span style={{ color: '#64748b', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase' }}>TIỀN MẶT CLB</span>
-                <strong style={{ color: '#059669' }}>€{Number(cash).toLocaleString()}</strong>
+                <span style={{ color: '#64748b', fontSize: '0.65rem', display: 'block', textTransform: 'uppercase', fontWeight: 800, fontFamily: 'var(--font-game)' }}>TIỀN MẶT CLB</span>
+                <strong>€{Number(cash).toLocaleString()}</strong>
               </div>
             </div>
 
             <div className="stat-pill gold">
               <Coins size={16} color="#d97706" />
               <div>
-                <span style={{ color: '#64748b', fontSize: '0.68rem', display: 'block', textTransform: 'uppercase' }}>VÀNG BULLION</span>
-                <strong style={{ color: '#d97706' }}>{Number(gold).toLocaleString()} GOLD</strong>
+                <span style={{ color: '#64748b', fontSize: '0.65rem', display: 'block', textTransform: 'uppercase', fontWeight: 800, fontFamily: 'var(--font-game)' }}>VÀNG BULLION</span>
+                <strong>{Number(gold).toLocaleString()} GOLD</strong>
               </div>
             </div>
           </>
@@ -91,34 +91,26 @@ export const Navbar: React.FC<Props> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div className="stat-pill" style={{ borderColor: '#bae6fd', background: '#f0f9ff' }}>
               <UserCheck size={16} color="#0284c7" />
-              <span style={{ fontWeight: 600, color: '#0369a1' }}>{user.username}</span>
+              <span style={{ fontWeight: 700, color: '#0369a1', fontFamily: 'var(--font-game)' }}>{user.username}</span>
             </div>
             {onLogout && (
               <button
-                className="btn btn-secondary"
+                className="btn btn-secondary btn-sm"
                 style={{
-                  borderColor: '#fecaca',
                   color: '#dc2626',
-                  background: '#fef2f2',
-                  padding: '6px 12px',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600,
-                  fontSize: '0.82rem'
+                  borderColor: '#fecaca',
+                  background: '#fef2f2'
                 }}
                 onClick={onLogout}
                 title="Đăng xuất khỏi tài khoản HLV"
               >
-                <LogOut size={15} />
-                <span>Đăng Xuất</span>
+                <LogOut size={14} />
+                <span>Thoát</span>
               </button>
             )}
           </div>
         ) : (
-          <button className="btn btn-secondary" onClick={onOpenLogin}>
+          <button className="btn btn-primary btn-sm" onClick={onOpenLogin}>
             <Shield size={16} />
             <span>Đăng Nhập HLV</span>
           </button>

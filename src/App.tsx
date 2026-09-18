@@ -331,18 +331,18 @@ export function App() {
 
         {activeTab === 'facilities' && club && (
           <div className="view-container">
-            <div className="card">
-              <h2 style={{ marginBottom: '1.5rem', color: '#0f172a' }}>Cơ Sở Vật Chất & Nâng Cấp SVĐ</h2>
+            <div className="glass-panel" style={{ padding: '24px' }}>
+              <h2 style={{ marginBottom: '1.5rem', color: '#ffffff', fontFamily: 'var(--font-display)', fontWeight: 900 }}>CƠ SỞ VẬT CHẤT & NÂNG CẤP SVĐ</h2>
               <div className="facilities-grid">
                 {(club.facilities || []).map((f) => (
                   <div key={f.id} className="facility-card">
                     <div>
-                      <h4 style={{ color: '#0284c7' }}>{f.name}</h4>
-                      <p style={{ color: '#64748b', fontSize: '0.85rem' }}>Cấp độ hiện tại: {f.current_level}</p>
-                      <p style={{ color: '#059669', fontSize: '0.85rem' }}>Trạng thái: {f.status}</p>
+                      <h4 style={{ color: '#00e5ff', fontFamily: 'var(--font-display)', fontSize: '1.05rem', marginBottom: '4px' }}>{f.name}</h4>
+                      <p style={{ color: '#ffd700', fontSize: '0.85rem', fontFamily: 'var(--font-game)', fontWeight: 700 }}>CẤP ĐỘ HIỆN TẠI: {f.current_level}</p>
+                      <p style={{ color: '#00ff87', fontSize: '0.85rem', fontWeight: 600 }}>● Trạng thái: {f.status}</p>
                     </div>
                     <button
-                      className="btn btn-primary"
+                      className="btn btn-primary btn-sm"
                       onClick={() => handleUpgradeFacility(f.id)}
                     >
                       Nâng cấp (+1 Cấp)

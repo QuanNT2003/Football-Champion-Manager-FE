@@ -1,5 +1,12 @@
 import { request } from './client';
-import { Competition, Standing, PlayerStat } from '../types';
+import {
+  Competition,
+  Standing,
+  StandingItem,
+  PlayerStat,
+  GroupStandings,
+  KnockoutBracketResponse,
+} from '../types';
 
 export interface CompetitionTeam {
   id: string;
@@ -29,7 +36,23 @@ export const competitionsApi = {
   getStandings: (competitionId: string, countryId?: string) => {
     let url = `/competitions/${competitionId}/standings`;
     if (countryId) url += `?countryId=${encodeURIComponent(countryId)}`;
-    return request<{ competitionId: string; stageName: string; standings: Standing[] } | Standing[]>(url);
+    return request<{
+      competitionId: string;
+      stageName: string;
+      formatType?: 'LEAGUE' | 'KNOCKOUT' | 'GROUP_KNOCKOUT';
+      formatLabel?: string;
+      groups?: GroupStandings[];
+      standings: StandingItem[];
+    } | StandingItem[]>(url);
+  },
+
+  getKnockoutBracket: (competitionId: string, countryId?: string, seasonId?: string) => {
+    let url = `/competitions/${competitionId}/knockout-bracket`;
+    const params: string[] = [];
+    if (countryId) params.push(`countryId=${encodeURIComponent(countryId)}`);
+    if (seasonId) params.push(`seasonId=${encodeURIComponent(seasonId)}`);
+    if (params.length > 0) url += `?${params.join('&')}`;
+    return request<KnockoutBracketResponse>(url);
   },
 
   getTopScorers: (competitionId: string, countryId?: string) => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Player } from '../types';
 import { playersApi } from '../services/players.service';
-import { X, ShieldAlert, DollarSign, Activity, Award, HeartPulse, Sparkles, Check } from 'lucide-react';
+import { X, DollarSign, Check } from 'lucide-react';
 
 interface PlayerDetailModalProps {
   player: Player | null;
@@ -22,7 +22,7 @@ export const PlayerDetailModal: React.FC<PlayerDetailModalProps> = ({
   const isInjured = player.status?.is_injured || player.player_status?.is_injured;
   const isListed = player.status?.is_transfer_listed || player.player_status?.is_transfer_listed;
   const condition = player.status?.condition ?? player.player_status?.condition ?? 95;
-  const ovr = player.overall_rating ?? 75;
+  const ovr = player.overall_rating ?? (player.reputation ? Math.min(99, Math.round(player.reputation / 100)) : 75);
   const pot = player.potential_rating ?? player.potential ?? 82;
   const value = Number(player.market_value || player.player_financial_data?.market_value || 2500000);
   const wage = Number(player.contract?.salary || player.contract?.wage || player.player_financial_data?.wage || 35000);
@@ -40,10 +40,10 @@ export const PlayerDetailModal: React.FC<PlayerDetailModalProps> = ({
         is_listed: !isListed,
         asking_price: askingPrice
       });
-      setMessage(!isListed ? 'Player placed on the Transfer List!' : 'Player removed from Transfer List.');
+      setMessage(!isListed ? 'Đã niêm yết cầu thủ lên thị trường chuyển nhượng!' : 'Đã rút cầu thủ khỏi thị trường chuyển nhượng.');
       onPlayerUpdated();
     } catch (err: any) {
-      setMessage(err.response?.data?.message || 'Failed to update transfer listing.');
+      setMessage(err.response?.data?.message || 'Không thể cập nhật trạng thái chuyển nhượng.');
     } finally {
       setToggling(false);
     }
@@ -57,16 +57,23 @@ export const PlayerDetailModal: React.FC<PlayerDetailModalProps> = ({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 640 }}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 660 }}>
+        {/* Modal Top Bar */}
         <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-          <div className="flex-center" style={{ gap: '0.75rem' }}>
-            <div className="pos-badge" style={{ fontSize: '1rem', padding: '0.35rem 0.75rem' }}>{pos}</div>
+          <div className="flex-center" style={{ gap: '1rem' }}>
+            <div className="ovr-badge-fut" style={{ width: '48px', height: '52px' }}>
+              <span className="ovr-score" style={{ fontSize: '1.25rem' }}>{ovr}</span>
+              <span className="ovr-label">OVR</span>
+            </div>
             <div>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-bright)' }}>
-                {player.common_name || `${player.first_name} ${player.last_name}`}
-              </h2>
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                {typeof player.nationality === 'object' ? (player.nationality as any)?.name || 'International' : (player.nationality || 'International')} · {player.age} Years Old · {player.club?.name || 'Free Agent'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', fontFamily: 'var(--font-display)' }}>
+                  {player.common_name || `${player.first_name || ''} ${player.last_name || player.name}`}
+                </h2>
+                <span className="pos-badge">{pos}</span>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '2px' }}>
+                {typeof player.nationality === 'object' ? (player.nationality as any)?.name || 'Quốc tế' : (player.nationality || 'Quốc tế')} · {player.age} tuổi · {player.club?.name || 'Cầu thủ tự do'}
               </div>
             </div>
           </div>
@@ -81,57 +88,57 @@ export const PlayerDetailModal: React.FC<PlayerDetailModalProps> = ({
 
         {/* Top Ratings Grid */}
         <div className="grid-3 mb-4">
-          <div className="stat-card text-center">
-            <div className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>Overall Rating</div>
-            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--neon-green)', fontFamily: 'Outfit' }}>
+          <div className="stat-card text-center" style={{ background: '#f8fafc' }}>
+            <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 800, fontFamily: 'var(--font-game)' }}>CHỈ SỐ TỔNG (OVR)</div>
+            <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#059669', fontFamily: 'var(--font-game)', lineHeight: 1.1, margin: '4px 0' }}>
               {ovr}
             </div>
-            <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>Current Ability</span>
+            <span className="badge badge-success" style={{ fontSize: '0.68rem' }}>HIỆN TẠI</span>
           </div>
 
-          <div className="stat-card text-center">
-            <div className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>Potential</div>
-            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--accent-gold)', fontFamily: 'Outfit' }}>
+          <div className="stat-card text-center" style={{ background: '#f8fafc' }}>
+            <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 800, fontFamily: 'var(--font-game)' }}>TIỀM NĂNG (POTENTIAL)</div>
+            <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#d97706', fontFamily: 'var(--font-game)', lineHeight: 1.1, margin: '4px 0' }}>
               {pot}
             </div>
-            <span className="badge badge-warning" style={{ fontSize: '0.7rem' }}>Ceiling</span>
+            <span className="badge badge-warning" style={{ fontSize: '0.68rem' }}>TRẦN PHÁT TRIỂN</span>
           </div>
 
-          <div className="stat-card text-center">
-            <div className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase' }}>Condition / Fitness</div>
-            <div style={{ fontSize: '2rem', fontWeight: 900, color: condition > 80 ? 'var(--neon-green)' : 'var(--danger)', fontFamily: 'Outfit' }}>
+          <div className="stat-card text-center" style={{ background: '#f8fafc' }}>
+            <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 800, fontFamily: 'var(--font-game)' }}>THỂ LỰC (FITNESS)</div>
+            <div style={{ fontSize: '2.4rem', fontWeight: 900, color: condition > 80 ? '#0284c7' : '#dc2626', fontFamily: 'var(--font-game)', lineHeight: 1.1, margin: '4px 0' }}>
               {condition}%
             </div>
             {isInjured ? (
-              <span className="badge badge-danger" style={{ fontSize: '0.7rem' }}>Injured</span>
+              <span className="badge badge-danger" style={{ fontSize: '0.68rem' }}>CHẤN THƯƠNG 🚑</span>
             ) : (
-              <span className="badge badge-outline" style={{ fontSize: '0.7rem' }}>Match Fit</span>
+              <span className="badge badge-primary" style={{ fontSize: '0.68rem' }}>SẴN SÀNG ĐÁ CHÍNH</span>
             )}
           </div>
         </div>
 
         {/* Contract & Financials */}
-        <div className="card mb-4" style={{ padding: '1rem 1.25rem' }}>
-          <h4 className="flex-center" style={{ justifyContent: 'flex-start', gap: '0.5rem', marginBottom: '0.75rem', fontSize: '0.95rem' }}>
-            <DollarSign className="text-success" size={18} /> Financial Details & Contract
+        <div className="card mb-4" style={{ padding: '1.25rem', background: '#f8fafc' }}>
+          <h4 className="flex-center" style={{ justifyContent: 'flex-start', gap: '0.5rem', marginBottom: '0.9rem', fontSize: '1rem', color: '#0f172a', fontFamily: 'var(--font-display)' }}>
+            <DollarSign color="#059669" size={18} /> HỢP ĐỒNG & TÀI CHÍNH CẦU THỦ
           </h4>
-          <div className="grid-2" style={{ gap: '1rem', fontSize: '0.875rem' }}>
-            <div className="flex-center" style={{ justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
-              <span className="text-muted">Estimated Market Value:</span>
-              <strong className="text-success">{formatMoney(value)}</strong>
+          <div className="grid-2" style={{ gap: '1rem', fontSize: '0.88rem' }}>
+            <div className="flex-center" style={{ justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #e2e8f0' }}>
+              <span style={{ color: '#64748b' }}>Định Giá Thị Trường:</span>
+              <strong style={{ color: '#059669', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>{formatMoney(value)}</strong>
             </div>
-            <div className="flex-center" style={{ justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
-              <span className="text-muted">Weekly Wage:</span>
-              <strong>{formatMoney(wage)} / wk</strong>
-            </div>
-            <div className="flex-center" style={{ justifyContent: 'space-between', padding: '0.5rem 0' }}>
-              <span className="text-muted">Squad Status:</span>
-              <span className="badge badge-primary">{player.squad_type || 'First Team'}</span>
+            <div className="flex-center" style={{ justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #e2e8f0' }}>
+              <span style={{ color: '#64748b' }}>Lương Tuần:</span>
+              <strong style={{ color: '#0f172a', fontFamily: 'var(--font-game)' }}>{formatMoney(wage)} / tuần</strong>
             </div>
             <div className="flex-center" style={{ justifyContent: 'space-between', padding: '0.5rem 0' }}>
-              <span className="text-muted">Transfer Listed:</span>
+              <span style={{ color: '#64748b' }}>Vai Trò Đội Hình:</span>
+              <span className="badge badge-primary">{player.squad_type || 'Đội 1 (First Team)'}</span>
+            </div>
+            <div className="flex-center" style={{ justifyContent: 'space-between', padding: '0.5rem 0' }}>
+              <span style={{ color: '#64748b' }}>Trạng Thái Rao Bán:</span>
               <span className={`badge ${isListed ? 'badge-danger' : 'badge-outline'}`}>
-                {isListed ? 'YES' : 'NO'}
+                {isListed ? 'ĐANG RAO BÁN 🏷️' : 'KHÔNG RAO BÁN'}
               </span>
             </div>
           </div>
@@ -139,22 +146,22 @@ export const PlayerDetailModal: React.FC<PlayerDetailModalProps> = ({
 
         {/* Transfer Listing Action for Manager */}
         {isOwnPlayer && (
-          <div className="card" style={{ padding: '1.25rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-            <h4 style={{ marginBottom: '0.5rem', fontSize: '0.95rem', color: 'var(--text-bright)' }}>
-              Manager Transfer Actions
+          <div className="card" style={{ padding: '1.25rem', background: '#f0f9ff', border: '1.5px solid #bae6fd' }}>
+            <h4 style={{ marginBottom: '0.4rem', fontSize: '1rem', color: '#0369a1', fontFamily: 'var(--font-display)' }}>
+              THAO TÁC THỊ TRƯỜNG CHUYỂN NHƯỢNG (HLV)
             </h4>
-            <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: '1rem' }}>
-              List this player to invite bids from competing AI and human clubs worldwide.
+            <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: '1rem' }}>
+              Niêm yết cầu thủ lên thị trường chuyển nhượng để nhận các lời đề nghị từ các HLV khác và câu lạc bộ trên toàn máy chủ.
             </p>
 
-            <div className="flex-center" style={{ gap: '1rem' }}>
+            <div className="flex-center" style={{ gap: '1rem', flexWrap: 'wrap' }}>
               {!isListed && (
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>Asking Price (€)</label>
+                <div style={{ flex: '1 1 200px' }}>
+                  <label style={{ fontSize: '0.75rem', color: '#64748b', display: 'block', marginBottom: '0.35rem', fontWeight: 700, fontFamily: 'var(--font-game)' }}>GIÁ YÊU CẦU (€)</label>
                   <input
                     type="number"
                     className="input-text"
-                    style={{ width: '100%', padding: '0.4rem 0.75rem' }}
+                    style={{ width: '100%' }}
                     value={askingPrice}
                     onChange={(e) => setAskingPrice(Number(e.target.value))}
                     step={100000}
@@ -163,11 +170,11 @@ export const PlayerDetailModal: React.FC<PlayerDetailModalProps> = ({
               )}
               <button
                 className={`btn ${isListed ? 'btn-danger' : 'btn-primary'}`}
-                style={{ alignSelf: 'flex-end' }}
+                style={{ alignSelf: 'flex-end', padding: '12px 22px' }}
                 disabled={toggling}
                 onClick={handleToggleTransfer}
               >
-                {toggling ? 'Updating...' : isListed ? 'Remove from Transfer Market' : 'List on Transfer Market'}
+                {toggling ? 'Đang Xử Lý...' : isListed ? 'Rút Khỏi Thị Trường Chuyển Nhượng' : 'Rao Bán Cầu Thủ Này'}
               </button>
             </div>
           </div>

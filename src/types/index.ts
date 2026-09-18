@@ -199,6 +199,8 @@ export interface Competition {
   regionName?: string;
   scope?: 'DOMESTIC' | 'CONTINENTAL' | 'INTERNATIONAL' | 'REGIONAL';
   type?: string;
+  formatType?: 'LEAGUE' | 'KNOCKOUT' | 'GROUP_KNOCKOUT';
+  formatLabel?: string;
   tier?: number;
   total_teams?: number;
   logo_url?: string;
@@ -206,6 +208,52 @@ export interface Competition {
   confederation_id?: string | null;
   country?: { id: string; name: string; code?: string; flag_url?: string } | null;
   confederation?: { id: string; name: string; code?: string } | null;
+}
+
+export interface GroupStandings {
+  id: string;
+  name: string;
+  orderNo?: number;
+  standings: StandingItem[];
+}
+
+export interface KnockoutClub {
+  id: string;
+  name: string;
+  short_name?: string;
+  logo_url?: string;
+}
+
+export interface KnockoutMatch {
+  id: string;
+  seasonDay: number;
+  matchDate?: string | null;
+  kickoffTime?: string;
+  status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | string;
+  groupName?: string | null;
+  homeClub: KnockoutClub | null;
+  awayClub: KnockoutClub | null;
+  homeScore?: number | null;
+  awayScore?: number | null;
+  homePenaltyScore?: number | null;
+  awayPenaltyScore?: number | null;
+  resultType?: string;
+  winnerClubId?: string | null;
+}
+
+export interface KnockoutRound {
+  roundName: string;
+  roundOrder: number;
+  seasonDay: number;
+  matches: KnockoutMatch[];
+}
+
+export interface KnockoutBracketResponse {
+  competitionId: string;
+  competitionName: string;
+  seasonName: string;
+  totalMatches: number;
+  rounds: KnockoutRound[];
 }
 
 export interface Standing {
