@@ -158,8 +158,10 @@ export const GameLayout: React.FC<Props> = ({
       {selectedPlayer && (
         <PlayerDetailModal
           player={selectedPlayer}
+          playersList={players}
           currentClubId={club?.id || '1'}
           onClose={() => setSelectedPlayer(null)}
+          onSelectPlayer={(p) => setSelectedPlayer(p)}
           onPlayerUpdated={() => {
             if (club) loadClubSquad(club.id);
           }}

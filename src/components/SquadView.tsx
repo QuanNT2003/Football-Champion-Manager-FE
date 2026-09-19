@@ -140,7 +140,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                 const playerName = player.name || `${player.first_name || ''} ${player.last_name || ''}`.trim() || player.common_name || 'Cầu Thủ';
 
                 return (
-                  <tr key={player.id}>
+                  <tr key={player.id} onClick={() => onSelectPlayer(player)} style={{ cursor: "pointer" }} title="Bấm để xem chi tiết cầu thủ">
                     <td>
                       <strong style={{ color: '#0284c7', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>
                         #{player.squad_number || '-'}

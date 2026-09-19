@@ -376,3 +376,161 @@ export interface StarterTier {
   competition_name: string;
   unclaimed_count: number;
 }
+
+export interface PlayerSkillItem {
+  id?: string;
+  code: string;
+  name: string;
+  value: number;
+  potential_value?: number;
+  growth?: string | null;
+  category?: string;
+  description?: string;
+  is_key?: boolean;
+  multiplier?: number;
+  order_no?: number;
+}
+
+export interface PlayerQualityProgressItem {
+  age: number;
+  season: string;
+  quality: number;
+}
+
+export interface PlayerSkillsData {
+  left_column: PlayerSkillItem[];
+  right_column: PlayerSkillItem[];
+  key_attributes?: PlayerSkillItem[];
+  all_attributes?: PlayerSkillItem[];
+  categories?: {
+    physical: PlayerSkillItem[];
+    technical: PlayerSkillItem[];
+    mental: PlayerSkillItem[];
+    goalkeeping: PlayerSkillItem[];
+  };
+  total_skills: number;
+  total_all_skills?: number;
+  average_quality: number;
+  quality_progress: PlayerQualityProgressItem[];
+}
+
+export interface PlayerMatchItem {
+  day: number;
+  opponent: string;
+  opponent_logo?: string | null;
+  result: string;
+  outcome: 'WIN' | 'DRAW' | 'LOSS';
+  minutes: number;
+  saves_or_tackles: number;
+  key_ass: string;
+  shot_goal: string;
+  rating: number;
+}
+
+export interface PlayerMatchesData {
+  total: number;
+  missed: number;
+  missed_pct: string;
+  list: PlayerMatchItem[];
+}
+
+export interface PlayerCareerSeasonItem {
+  season: string;
+  team: string;
+  avg_quality: number;
+  matches: number;
+  tackles: number;
+  key_ass: string;
+  shot_goal: string;
+  rating: number;
+}
+
+export interface PlayerStatisticsData {
+  career_totals: {
+    matches: number;
+    caps: number;
+    tackles: number;
+    key_ass: string;
+    shot_goal: string;
+    rating: number;
+  };
+  seasons: PlayerCareerSeasonItem[];
+}
+
+export interface PlayerTransferItem {
+  from_team: string;
+  to_team: string;
+  season: string;
+  avg_quality: number;
+  bid_value: string;
+  type: string;
+}
+
+export interface PlayerTransfersData {
+  history: PlayerTransferItem[];
+  potential_upgrades?: any[];
+}
+
+export interface PlayerInjuryItem {
+  id: string;
+  injury_name: string;
+  category: string;
+  severity: string;
+  days_missed: number;
+  days_remaining?: number;
+  season: string;
+  start_date: string;
+  status: 'ACTIVE' | 'RECOVERED';
+}
+
+export interface PlayerInjuriesData {
+  current?: any;
+  history: PlayerInjuryItem[];
+}
+
+export interface PlayerDetailData extends Player {
+  date_of_birth?: string | Date | null;
+  nationality_detail?: {
+    id: string;
+    name: string;
+    code?: string;
+    flag_url?: string;
+  } | null;
+  height?: string;
+  weight?: string;
+  preferred_foot?: string;
+  active_injury?: {
+    injury_type: string;
+    severity: string;
+    days_remaining: number;
+    expected_return_date?: string;
+  } | null;
+  birthday_text?: string;
+  worth_display?: string;
+  weekly_wages_display?: string;
+  discipline?: {
+    status: 'CLEAN' | 'WARNING' | 'SUSPENDED';
+    label: string;
+    yellow_cards: number;
+    is_suspended: boolean;
+  };
+  fatigue?: {
+    condition: number;
+    percentage: number;
+    label: string;
+  };
+  experience?: {
+    percentage: number;
+    label: string;
+  };
+  average_quality?: number;
+  primary_position?: {
+    code: string;
+    name: string;
+  };
+  skills?: PlayerSkillsData;
+  matches?: PlayerMatchesData;
+  statistics?: PlayerStatisticsData;
+  transfers?: PlayerTransfersData;
+  injuries_tab?: PlayerInjuriesData;
+}
