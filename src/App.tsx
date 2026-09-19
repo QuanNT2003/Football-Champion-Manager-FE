@@ -1,38 +1,30 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Club, Player, TimelineData, User } from './types';
 import { clubsApi } from './services/clubs.service';
 import { playersApi } from './services/players.service';
 import { gameWorldApi } from './services/gameWorld.service';
 import { authApi } from './services/auth.service';
-import { Navbar } from './components/Navbar';
+
+import { GameLayout } from './layouts/GameLayout';
+import { AuthScreen } from './components/AuthScreen';
+import { ClubOnboardingScreen } from './components/ClubOnboardingScreen';
 import { DashboardView } from './components/DashboardView';
 import { SquadView } from './components/SquadView';
 import { TacticsView } from './components/TacticsView';
 import { MatchCenterView } from './components/MatchCenterView';
-import { StandingsView } from './components/StandingsView';
 import { TransfersView } from './components/TransfersView';
+import { FacilitiesView } from './components/FacilitiesView';
 import { FinancesView } from './components/FinancesView';
 import { TrainingView } from './components/TrainingView';
-import { PlayerDetailModal } from './components/PlayerDetailModal';
-import { AuthScreen } from './components/AuthScreen';
-import { ClubOnboardingScreen } from './components/ClubOnboardingScreen';
-import {
-  LayoutDashboard,
-  Users,
-  Compass,
-  Swords,
-  ShoppingCart,
-  Trophy,
-  CreditCard,
-  Dumbbell,
-  Loader2,
-} from 'lucide-react';
-
-type AppState = 'LOADING' | 'AUTH' | 'ONBOARDING' | 'GAME';
+import { StandingsView } from './components/StandingsView';
+import { Loader2 } from 'lucide-react';
 
 export function App() {
-  const [appState, setAppState] = useState<AppState>('LOADING');
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [club, setClub] = useState<Club | null>(null);
   const [timeline, setTimeline] = useState<TimelineData | null>(null);
@@ -50,13 +42,13 @@ export function App() {
   };
 
   const checkAuthState = useCallback(async () => {
-    setAppState('LOADING');
+    setIsLoading(true);
     const token = localStorage.getItem('fc_token');
 
     if (!token) {
       setUser(null);
       setClub(null);
-      setAppState('AUTH');
+      setIsLoading(false);
       return;
     }
 
@@ -67,7 +59,7 @@ export function App() {
         authApi.logout();
         setUser(null);
         setClub(null);
-        setAppState('AUTH');
+        setIsLoading(false);
         return;
       }
       setUser(profile);
@@ -81,17 +73,19 @@ export function App() {
       const myClub = await clubsApi.getMyClub().catch(() => null);
       if (!myClub || !myClub.id) {
         setClub(null);
-        setAppState('ONBOARDING');
+        setIsLoading(false);
         return;
       }
 
       setClub(myClub);
       loadClubSquad(myClub.id);
-      setAppState('GAME');
+      setIsLoading(false);
     } catch (err) {
       console.error('Error during auth verification:', err);
       authApi.logout();
-      setAppState('AUTH');
+      setUser(null);
+      setClub(null);
+      setIsLoading(false);
     }
   }, []);
 
@@ -104,13 +98,13 @@ export function App() {
     setUser(null);
     setClub(null);
     setPlayers([]);
-    setAppState('AUTH');
+    navigate('/login');
   };
 
   const handleClubClaimed = (newClub: Club) => {
     setClub(newClub);
     loadClubSquad(newClub.id);
-    setAppState('GAME');
+    navigate('/dashboard');
   };
 
   const refreshClubData = async () => {
@@ -130,7 +124,7 @@ export function App() {
       await clubsApi.upgradeFacility(club.id, facilityId);
       setGlobalNotification('Cơ sở vật chất đã bắt đầu nâng cấp thành công!');
       refreshClubData();
-      setTimeout(() => setGlobalNotification(null), 3000);
+      setTimeout(() => setGlobalNotification(null), 3500);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Nâng cấp thất bại, kiểm tra số dư');
     }
@@ -146,240 +140,200 @@ export function App() {
       await playersApi.updateTransferListing(playerId, isTransfer, isLoan, price);
       setGlobalNotification('Cập nhật trạng thái thị trường chuyển nhượng thành công!');
       if (club) loadClubSquad(club.id);
-      setTimeout(() => setGlobalNotification(null), 3000);
+      setTimeout(() => setGlobalNotification(null), 3500);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Không thể cập nhật danh sách chuyển nhượng');
     }
   };
 
-  // 1. STATE: LOADING SCREEN
-  if (appState === 'LOADING') {
+  // Sleek Gaming HUD Loading Screen
+  if (isLoading) {
     return (
-      <div className="app-loading-screen">
-        <div className="loading-card">
-          <div className="loading-logo">⚽</div>
-          <h2>Football Champion Manager</h2>
+      <div className="app-loading-screen-hud">
+        <div className="loading-card-hud">
+          <div className="loading-crest-hex">⚽</div>
+          <h2>FOOTBALL CHAMPION MANAGER</h2>
           <div className="loading-spinner-row">
-            <Loader2 className="spinner-icon" size={24} />
-            <span>Đang xác thực thông tin Huấn Luyện Viên...</span>
+            <Loader2 className="spinner-icon-hud" size={24} />
+            <span>Đang đồng bộ dữ liệu Match Engine & HLV...</span>
           </div>
         </div>
       </div>
     );
   }
 
-  // 2. STATE: AUTH SCREEN (Strict access control)
-  if (appState === 'AUTH') {
-    return <AuthScreen onAuthSuccess={checkAuthState} />;
-  }
-
-  // 3. STATE: ONBOARDING SCREEN (Logged in, but no club yet)
-  if (appState === 'ONBOARDING') {
-    return (
-      <ClubOnboardingScreen
-        user={user}
-        onClubClaimed={handleClubClaimed}
-        onLogout={handleLogout}
-      />
-    );
-  }
-
   const cashBalance = club?.financial_accounts?.[0]?.cash_balance ?? club?.finances?.cash ?? 1500000;
 
-  // 4. STATE: MAIN GAME DASHBOARD
   return (
-    <div className="app-container">
-      {globalNotification && (
-        <div className="notification-banner">
-          {globalNotification}
-        </div>
-      )}
-
-      {/* Main Navbar */}
-      <Navbar
-        club={club}
-        timeline={timeline}
-        user={user}
-        onOpenLogin={() => {}}
-        onLogout={handleLogout}
+    <Routes>
+      {/* Public Auth Routes */}
+      <Route
+        path="/login"
+        element={
+          user && club ? (
+            <Navigate to="/dashboard" replace />
+          ) : user && !club ? (
+            <Navigate to="/onboarding" replace />
+          ) : (
+            <AuthScreen onAuthSuccess={checkAuthState} defaultMode="login" />
+          )
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          user && club ? (
+            <Navigate to="/dashboard" replace />
+          ) : user && !club ? (
+            <Navigate to="/onboarding" replace />
+          ) : (
+            <AuthScreen onAuthSuccess={checkAuthState} defaultMode="register" />
+          )
+        }
       />
 
-      {/* Navigation Sub-bar */}
-      <nav className="sub-nav">
-        <button
-          className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dashboard')}
-        >
-          <LayoutDashboard size={18} />
-          <span>Tổng Quan</span>
-        </button>
+      {/* Onboarding Room Route */}
+      <Route
+        path="/onboarding"
+        element={
+          !user ? (
+            <Navigate to="/login" replace />
+          ) : club ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <ClubOnboardingScreen
+              user={user}
+              onClubClaimed={handleClubClaimed}
+              onLogout={handleLogout}
+            />
+          )
+        }
+      />
 
-        <button
-          className={`nav-tab ${activeTab === 'squad' ? 'active' : ''}`}
-          onClick={() => setActiveTab('squad')}
-        >
-          <Users size={18} />
-          <span>Đội Hình ({players.length})</span>
-        </button>
-
-        <button
-          className={`nav-tab ${activeTab === 'tactics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('tactics')}
-        >
-          <Compass size={18} />
-          <span>Chiến Thuật</span>
-        </button>
-
-        <button
-          className={`nav-tab ${activeTab === 'matches' ? 'active' : ''}`}
-          onClick={() => setActiveTab('matches')}
-        >
-          <Swords size={18} />
-          <span>Lịch Thi Đấu</span>
-        </button>
-
-        <button
-          className={`nav-tab ${activeTab === 'transfers' ? 'active' : ''}`}
-          onClick={() => setActiveTab('transfers')}
-        >
-          <ShoppingCart size={18} />
-          <span>Chuyển Nhượng</span>
-        </button>
-
-        <button
-          className={`nav-tab ${activeTab === 'facilities' ? 'active' : ''}`}
-          onClick={() => setActiveTab('facilities')}
-        >
-          <CreditCard size={18} />
-          <span>Cơ Sở Vật Chất</span>
-        </button>
-
-        <button
-          className={`nav-tab ${activeTab === 'finances' ? 'active' : ''}`}
-          onClick={() => setActiveTab('finances')}
-        >
-          <Trophy size={18} />
-          <span>Tài Chính & Shop</span>
-        </button>
-
-        <button
-          className={`nav-tab ${activeTab === 'training' ? 'active' : ''}`}
-          onClick={() => setActiveTab('training')}
-        >
-          <Dumbbell size={18} />
-          <span>Huấn Luyện</span>
-        </button>
-
-        <button
-          className={`nav-tab ${activeTab === 'standings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('standings')}
-        >
-          <Trophy size={18} />
-          <span>Bảng Xếp Hạng</span>
-        </button>
-      </nav>
-
-      {/* Main Content Area */}
-      <main className="main-content">
-        {activeTab === 'dashboard' && (
-          <DashboardView
-            club={club}
-            timeline={timeline}
-            onUpgradeFacility={handleUpgradeFacility}
-            onSwitchTab={setActiveTab}
-          />
-        )}
-
-        {activeTab === 'squad' && (
-          <SquadView
-            players={players}
-            onSelectPlayer={setSelectedPlayer}
-            onUpdateTransferListing={handleUpdateTransferListing}
-          />
-        )}
-
-        {activeTab === 'tactics' && (
-          <TacticsView
-            club={club}
-            players={players}
-          />
-        )}
-
-        {activeTab === 'matches' && (
-          <MatchCenterView
-            club={club}
-            timeline={timeline}
-            onMatchSimulated={refreshClubData}
-          />
-        )}
-
-        {activeTab === 'standings' && (
-          <StandingsView
-            club={club}
-            currentClubId={club?.id || '1'}
-          />
-        )}
-
-        {activeTab === 'transfers' && (
-          <TransfersView
-            currentClubId={club?.id || '1'}
-            cashBalance={Number(cashBalance)}
-            onRefreshFinance={refreshClubData}
-            onSelectPlayer={setSelectedPlayer}
-          />
-        )}
-
-        {activeTab === 'facilities' && club && (
-          <div className="view-container">
-            <div className="glass-panel" style={{ padding: '24px' }}>
-              <h2 style={{ marginBottom: '1.5rem', color: '#ffffff', fontFamily: 'var(--font-display)', fontWeight: 900 }}>CƠ SỞ VẬT CHẤT & NÂNG CẤP SVĐ</h2>
-              <div className="facilities-grid">
-                {(club.facilities || []).map((f) => (
-                  <div key={f.id} className="facility-card">
-                    <div>
-                      <h4 style={{ color: '#00e5ff', fontFamily: 'var(--font-display)', fontSize: '1.05rem', marginBottom: '4px' }}>{f.name}</h4>
-                      <p style={{ color: '#ffd700', fontSize: '0.85rem', fontFamily: 'var(--font-game)', fontWeight: 700 }}>CẤP ĐỘ HIỆN TẠI: {f.current_level}</p>
-                      <p style={{ color: '#00ff87', fontSize: '0.85rem', fontWeight: 600 }}>● Trạng thái: {f.status}</p>
-                    </div>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => handleUpgradeFacility(f.id)}
-                    >
-                      Nâng cấp (+1 Cấp)
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'finances' && (
-          <FinancesView
-            currentClubId={club?.id || '1'}
-            onRefreshBalance={refreshClubData}
-          />
-        )}
-
-        {activeTab === 'training' && (
-          <TrainingView
-            currentClubId={club?.id || '1'}
-          />
-        )}
-      </main>
-
-      {/* Modals */}
-      {selectedPlayer && (
-        <PlayerDetailModal
-          player={selectedPlayer}
-          currentClubId={club?.id || '1'}
-          onClose={() => setSelectedPlayer(null)}
-          onPlayerUpdated={() => {
-            if (club) loadClubSquad(club.id);
-          }}
+      {/* Main Game Layout & Nested Routes */}
+      <Route
+        element={
+          !user ? (
+            <Navigate to="/login" replace />
+          ) : !club ? (
+            <Navigate to="/onboarding" replace />
+          ) : (
+            <GameLayout
+              club={club}
+              user={user}
+              timeline={timeline}
+              players={players}
+              selectedPlayer={selectedPlayer}
+              globalNotification={globalNotification}
+              onLogout={handleLogout}
+              onUpgradeFacility={handleUpgradeFacility}
+              onUpdateTransferListing={handleUpdateTransferListing}
+              refreshClubData={refreshClubData}
+              loadClubSquad={loadClubSquad}
+              setSelectedPlayer={setSelectedPlayer}
+            />
+          )
+        }
+      >
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardView
+              club={club}
+              timeline={timeline}
+              onUpgradeFacility={handleUpgradeFacility}
+            />
+          }
         />
-      )}
-    </div>
+        <Route
+          path="/squad"
+          element={
+            <SquadView
+              players={players}
+              onSelectPlayer={setSelectedPlayer}
+              onUpdateTransferListing={handleUpdateTransferListing}
+            />
+          }
+        />
+        <Route
+          path="/tactics"
+          element={
+            <TacticsView
+              club={club}
+              players={players}
+            />
+          }
+        />
+        <Route
+          path="/matches"
+          element={
+            <MatchCenterView
+              club={club}
+              timeline={timeline}
+              onMatchSimulated={refreshClubData}
+            />
+          }
+        />
+        <Route
+          path="/transfers"
+          element={
+            <TransfersView
+              currentClubId={club?.id || '1'}
+              cashBalance={cashBalance}
+              onRefreshFinance={refreshClubData}
+              onSelectPlayer={setSelectedPlayer}
+            />
+          }
+        />
+        <Route
+          path="/facilities"
+          element={
+            <FacilitiesView
+              club={club}
+              onUpgradeFacility={handleUpgradeFacility}
+            />
+          }
+        />
+        <Route
+          path="/finances"
+          element={
+            <FinancesView
+              currentClubId={club?.id || '1'}
+              onRefreshBalance={refreshClubData}
+            />
+          }
+        />
+        <Route
+          path="/training"
+          element={
+            <TrainingView
+              currentClubId={club?.id || '1'}
+            />
+          }
+        />
+        <Route
+          path="/standings"
+          element={
+            <StandingsView
+              club={club}
+              currentClubId={club?.id || '1'}
+            />
+          }
+        />
+      </Route>
+
+      {/* Fallback Catch-all Route */}
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to={user && club ? '/dashboard' : user ? '/onboarding' : '/login'}
+            replace
+          />
+        }
+      />
+    </Routes>
   );
 }
 

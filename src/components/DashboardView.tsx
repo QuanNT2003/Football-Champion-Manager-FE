@@ -1,262 +1,260 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Club, TimelineData } from '../types';
-import { Building2, Award, TrendingUp, Clock, HeartPulse, Radio, ArrowUpRight, Shield, Zap, Sparkles } from 'lucide-react';
+import {
+  Building2,
+  Calendar,
+  Users,
+  Coins,
+  DollarSign,
+  TrendingUp,
+  Award,
+  ArrowUpRight,
+  ShieldCheck,
+  Compass,
+  Swords,
+  ChevronRight,
+  Flame,
+} from 'lucide-react';
 
 interface Props {
   club: Club | null;
-  timeline?: TimelineData | null;
-  onUpgradeFacility: (facilityId: string) => void;
-  onSwitchTab: (tab: string) => void;
+  timeline: TimelineData | null;
+  onUpgradeFacility?: (facilityId: string) => void;
+  onSwitchTab?: (tab: string) => void;
 }
 
 export const DashboardView: React.FC<Props> = ({
   club,
   timeline,
   onUpgradeFacility,
-  onSwitchTab
+  onSwitchTab,
 }) => {
+  const navigate = useNavigate();
+  const [logoError, setLogoError] = useState(false);
+
+  const handleNavigate = (path: string) => {
+    if (onSwitchTab) onSwitchTab(path);
+    navigate(`/${path}`);
+  };
+
   if (!club) {
     return (
-      <div className="glass-panel" style={{ padding: '40px', textAlign: 'center' }}>
-        <h2>Bạn chưa chọn hoặc quản lý Câu Lạc Bộ nào</h2>
-        <p style={{ color: '#64748b', marginTop: '10px' }}>
-          Vui lòng chọn một CLB để bắt đầu sự nghiệp huấn luyện viên!
-        </p>
+      <div className="game-empty-state">
+        <div className="empty-icon-hex">⚽</div>
+        <h3>CHƯA KÝ HỢP ĐỒNG QUẢN LÝ CLB</h3>
+        <p>Vui lòng nhậm chức câu lạc bộ để truy cập Trung tâm Chỉ huy Quản lý.</p>
+        <button className="btn-primary" onClick={() => navigate('/onboarding')}>
+          ĐẾN PHÒNG NHẬM CHỨC HLV
+        </button>
       </div>
     );
   }
 
   const currentDay = timeline?.season?.current_day || 1;
   const totalDays = timeline?.season?.total_days || 40;
-  const progressPercent = Math.min(100, Math.round((currentDay / totalDays) * 100));
+  const seasonNum = timeline?.season?.season_number || 1;
+
+  // Lấy chữ viết tắt câu lạc bộ (ví dụ: Phan Thiet -> PT)
+  const getClubInitials = (name: string, shortName?: string) => {
+    if (shortName && shortName.trim()) return shortName.trim().slice(0, 5);
+    const words = name.replace(/[()]/g, '').trim().split(/\s+/);
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.slice(0, 3).toUpperCase();
+  };
+
+  const hasValidLogo = club.logo_url && !logoError && !club.logo_url.includes('default_logo');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
-      {/* Online Matchday Schedule Banner (Daylight Broadcast Style) */}
-      <div className="glass-panel" style={{
-        padding: '24px 32px',
-        background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-        border: 'none',
-        boxShadow: '0 8px 25px rgba(2, 132, 199, 0.25)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '20px',
-        color: '#ffffff'
-      }}>
-        <div style={{ flex: '1 1 400px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-            <span className="badge badge-green" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', background: '#dcfce7', color: '#15803d' }}>
-              <Radio size={14} /> MÁY CHỦ ONLINE REAL-TIME
-            </span>
-            <span style={{ fontSize: '0.85rem', color: '#e0f2fe', fontFamily: 'var(--font-game)' }}>
-              MÙA GIẢI: <strong style={{ color: '#ffffff' }}>MÙA {timeline?.season?.season_number || 1}</strong>
-            </span>
-          </div>
-
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.85rem', fontWeight: 900, color: '#ffffff', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            VÒNG ĐẤU {currentDay} / {totalDays}
-          </h2>
-
-          {/* Progress bar */}
-          <div style={{ width: '100%', height: '10px', background: 'rgba(255,255,255,0.25)', borderRadius: '5px', overflow: 'hidden', margin: '12px 0' }}>
-            <div style={{
-              width: `${progressPercent}%`,
-              height: '100%',
-              background: 'linear-gradient(90deg, #38bdf8, #86efac)',
-              borderRadius: '5px',
-              transition: 'width 0.4s ease'
-            }} />
-          </div>
-
-          <div style={{ display: 'flex', gap: '24px', fontSize: '0.82rem', color: '#e0f2fe' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Clock size={15} color="#bae6fd" /> Lịch thi đấu tự động 21h30 hàng ngày
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <HeartPulse size={15} color="#86efac" /> Hồi phục thể lực tự động theo thời gian thực
-            </span>
-          </div>
+    <div className="view-container dashboard-page-hud">
+      {/* HUD Top Broadcast Banner */}
+      <div className="hud-broadcast-ticker">
+        <div className="ticker-badge">
+          <span className="live-dot" />
+          <span>MATCH ENGINE LIVE</span>
         </div>
-
-        {/* Match Center Quick Action */}
-        <div>
-          <button
-            className="btn"
-            onClick={() => onSwitchTab('matches')}
-            style={{
-              padding: '16px 30px',
-              fontSize: '1.05rem',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              background: '#ffffff',
-              color: '#0284c7',
-              boxShadow: '0 4px 0 #cbd5e1, 0 8px 20px rgba(0,0,0,0.15)'
-            }}
-          >
-            <Zap size={20} color="#0284c7" />
-            <span>VÀO TRUNG TÂM TRẬN ĐẤU</span>
-          </button>
+        <div className="ticker-text">
+          <span>🏆 MÙA GIẢI {seasonNum} • VÒNG {currentDay}/{totalDays} ĐANG DIỄN RA • THỊ TRƯỜNG CHUYỂN NHƯỢNG ĐANG MỞ • 112 QUỐC GIA ĐỒNG BỘ TRỰC TUYẾN</span>
         </div>
       </div>
 
-      {/* Club Hero Banner */}
-      <div className="glass-panel" style={{ padding: '26px 30px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
-          <div style={{
-            width: '84px',
-            height: '84px',
-            borderRadius: '20px',
-            background: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)',
-            border: '2.5px solid #7dd3fc',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '40px',
-            boxShadow: '0 4px 14px rgba(2, 132, 199, 0.15)'
-          }}>
-            🛡️
+      {/* Hero Club Banner */}
+      <div className="club-hero-card-hud">
+        <div className="club-hero-left">
+          {/* Logo / Badge Box - Clean, no text overflow */}
+          <div className="club-badge-glow">
+            {hasValidLogo ? (
+              <img
+                src={club.logo_url}
+                alt=""
+                onError={() => setLogoError(true)}
+                className="club-img"
+              />
+            ) : (
+              <div className="club-initials-badge">
+                <span className="club-crest-icon">⚽</span>
+                <span className="club-initials-text">{getClubInitials(club.name, club.short_name)}</span>
+              </div>
+            )}
           </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.9rem', fontWeight: 900, color: '#0f172a' }}>{club.name}</h2>
-              <span className="badge badge-green">{typeof club.country === 'object' ? (club.country as any)?.name || 'International' : (club.country || 'International')}</span>
+
+          <div className="club-hero-info">
+            <div className="club-tier-tag">
+              <ShieldCheck size={14} />
+              <span>CÂU LẠC BỘ CHUYÊN NGHIỆP</span>
             </div>
-            <p style={{ color: '#64748b', fontSize: '0.92rem', marginTop: '6px' }}>
-              HLV Trưởng: <strong style={{ color: '#0284c7', fontFamily: 'var(--font-game)' }}>{club.manager?.username || 'Bạn (Manager)'}</strong> | Thành phố: {club.city || 'Châu Âu'}
+            <h2 className="club-title-hud">{club.name}</h2>
+            <p className="club-sub-hud">
+              {club.country || 'Toàn cầu'} • {club.city || 'Thành Phố Sân Nhà'} • SVĐ: {club.stadium?.name || club.stadiums?.[0]?.name || 'Sân Vận Động Chính'}
             </p>
+
+            <div className="club-pill-tags-hud">
+              <span className="pill-item-hud">
+                <Users size={14} />
+                <span>{club.squadCount || 16} Cầu Thủ</span>
+              </span>
+              <span className="pill-item-hud">
+                <Flame size={14} />
+                <span>Tier 3 Chuyên Nghiệp</span>
+              </span>
+            </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '28px' }}>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 800, fontFamily: 'var(--font-game)' }}>DANH TIẾNG CLB</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', marginTop: '4px' }}>
-              <Award color="#d97706" size={22} />
-              <strong style={{ fontSize: '1.6rem', color: '#d97706', fontFamily: 'var(--font-game)' }}>{club.reputation}</strong>
+        <div className="club-hero-stats-hud">
+          <div className="hero-stat-hud">
+            <span className="hero-stat-label">DANH TIẾNG CLB</span>
+            <div className="hero-stat-val">
+              <Award size={20} />
+              <span>{club.reputation}</span>
             </div>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 800, fontFamily: 'var(--font-game)' }}>ĐIỂM XẾP HẠNG</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', marginTop: '4px' }}>
-              <TrendingUp color="#0284c7" size={22} />
-              <strong style={{ fontSize: '1.6rem', color: '#0284c7', fontFamily: 'var(--font-game)' }}>{club.ranking_points}</strong>
+
+          <div className="hero-stat-hud">
+            <span className="hero-stat-label">ĐIỂM HẠNG ĐẤU</span>
+            <div className="hero-stat-val">
+              <TrendingUp size={20} />
+              <span>{club.ranking_points}</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Quick Interactive Gaming Tiles */}
+      <div className="gaming-tiles-grid">
+        <div className="gaming-tile-card squad-tile" onClick={() => handleNavigate('squad')}>
+          <div className="tile-icon-box">👥</div>
+          <div className="tile-content">
+            <h4>QUẢN LÝ ĐỘI HÌNH</h4>
+            <p>Danh sách cầu thủ, chỉ số OVR, thể lực & hợp đồng</p>
+          </div>
+          <ChevronRight size={20} className="tile-arrow" />
+        </div>
+
+        <div className="gaming-tile-card tactics-tile" onClick={() => handleNavigate('tactics')}>
+          <div className="tile-icon-box">📋</div>
+          <div className="tile-content">
+            <h4>SA BÀN CHIẾN THUẬT 2D</h4>
+            <p>Sơ đồ 4-3-3, 4-4-2, puck nam châm & lệnh chỉ đạo</p>
+          </div>
+          <ChevronRight size={20} className="tile-arrow" />
+        </div>
+
+        <div className="gaming-tile-card matches-tile" onClick={() => handleNavigate('matches')}>
+          <div className="tile-icon-box">⚽</div>
+          <div className="tile-content">
+            <h4>TRUNG TÂM TRẬN ĐẤU</h4>
+            <p>Mô phỏng 90 phút trực tiếp, bán vé & bình luận</p>
+          </div>
+          <ChevronRight size={20} className="tile-arrow" />
+        </div>
+
+        <div className="gaming-tile-card transfers-tile" onClick={() => handleNavigate('transfers')}>
+          <div className="tile-icon-box">🛒</div>
+          <div className="tile-content">
+            <h4>THỊ TRƯỜNG CHUYỂN NHƯỢNG</h4>
+            <p>Săn tài năng trẻ, gửi đề nghị đàm phán mua/bán</p>
+          </div>
+          <ChevronRight size={20} className="tile-arrow" />
         </div>
       </div>
 
       {/* Stadium Card */}
-      <div className="glass-panel" style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '10px', color: '#0f172a' }}>
-            <Building2 color="#059669" size={22} />
-            SÂN VẬN ĐỘNG ĐỘI NHÀ
-          </h3>
-          <span className="badge badge-gold">TIÊU CHUẨN FIFA PRO</span>
+      <div className="hud-panel-card">
+        <div className="hud-panel-header">
+          <div className="header-title-hud">
+            <Building2 className="text-emerald" size={22} />
+            <h3>SÂN VẬN ĐỘNG & ĐẠI BẢN DOANH ĐỘI NHÀ</h3>
+          </div>
+          <button className="btn-hud-link" onClick={() => handleNavigate('facilities')}>
+            <span>NÂNG CẤP SVĐ</span>
+            <ArrowUpRight size={16} />
+          </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-          <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-game)' }}>TÊN SÂN</span>
-            <strong style={{ display: 'block', fontSize: '1.15rem', marginTop: '6px', color: '#0f172a' }}>
+        <div className="stadium-grid-hud">
+          <div className="stadium-box-hud">
+            <span className="box-sub">TÊN SÂN VẬN ĐỘNG</span>
+            <strong className="box-title">
               {club.stadium?.name || club.stadiums?.[0]?.name || 'Sân Vận Động Chính'}
             </strong>
           </div>
-          <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-game)' }}>SỨC CHỨA KHÁN GIẢ</span>
-            <strong style={{ display: 'block', fontSize: '1.25rem', marginTop: '6px', color: '#059669', fontFamily: 'var(--font-game)' }}>
-              {(club.stadium?.capacity || club.stadiums?.[0]?.capacity || 45000).toLocaleString()} CHỖ NGỒI
+
+          <div className="stadium-box-hud">
+            <span className="box-sub">SỨC CHỨA KHÁN ĐÀI</span>
+            <strong className="box-title text-cyan">
+              {(club.stadium?.capacity || club.stadiums?.[0]?.capacity || 45000).toLocaleString()} <small>CHỖ NGỒI</small>
             </strong>
           </div>
-          <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '14px', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-game)' }}>MẶT SÂN THI ĐẤU</span>
-            <strong style={{ display: 'block', fontSize: '1.15rem', marginTop: '6px', color: '#0284c7' }}>CỎ TỰ NHIÊN HYBRID</strong>
+
+          <div className="stadium-box-hud">
+            <span className="box-sub">MẶT SÂN THI ĐẤU</span>
+            <strong className="box-title text-emerald">CỎ TỰ NHIÊN HYBRID FIFA PRO</strong>
           </div>
         </div>
       </div>
 
-      {/* Facilities Grid */}
-      <div className="glass-panel" style={{ padding: '24px' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.25rem', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '10px', color: '#0f172a' }}>
-          <Building2 color="#0284c7" size={22} />
-          CƠ SỞ VẬT CHẤT CÂU LẠC BỘ (1-CLICK NÂNG CẤP)
-        </h3>
+      {/* Infrastructure 1-click preview */}
+      <div className="hud-panel-card">
+        <div className="hud-panel-header">
+          <div className="header-title-hud">
+            <Award className="text-cyan" size={22} />
+            <h3>HẠ TẦNG CÂU LẠC BỘ (1-CLICK NÂNG CẤP NHANH)</h3>
+          </div>
+          <button className="btn-hud-link" onClick={() => handleNavigate('facilities')}>
+            <span>XEM TẤT CẢ ({club.facilities?.length || 5} CƠ SỞ)</span>
+            <ChevronRight size={16} />
+          </button>
+        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <div className="facilities-preview-grid-hud">
           {(club.facilities || club.club_facilities || [
-            { id: '1', name: 'Trung Tâm Huấn Luyện (Training)', code: 'TRAINING', current_level: 3, status: 'OPERATIONAL' },
-            { id: '2', name: 'Học Viện Đào Tạo Trẻ (Youth)', code: 'YOUTH', current_level: 2, status: 'OPERATIONAL' },
-            { id: '3', name: 'Phòng Y Tế & Phục Hồi (Medical)', code: 'MEDICAL', current_level: 3, status: 'OPERATIONAL' },
-            { id: '4', name: 'Văn Phòng Thương Mại (Commercial)', code: 'COMMERCIAL', current_level: 1, status: 'OPERATIONAL' },
-          ]).map((facility) => (
-            <div
-              key={facility.id}
-              className="facility-card"
-            >
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <strong style={{ fontSize: '1rem', color: '#0f172a', fontFamily: 'var(--font-display)' }}>{facility.name}</strong>
-                  <span className="badge badge-gold">CẤP {facility.current_level}</span>
-                </div>
-                <p style={{ fontSize: '0.82rem', color: '#059669', fontWeight: 600 }}>
-                  ● Hoạt động tối ưu
-                </p>
+            { id: '1', name: 'Trung Tâm Huấn Luyện', code: 'TRAINING', current_level: 3, status: 'OPERATIONAL' },
+            { id: '2', name: 'Học Viện Đào Tạo Trẻ', code: 'YOUTH', current_level: 2, status: 'OPERATIONAL' },
+            { id: '3', name: 'Phòng Y Tế & Phục Hồi', code: 'MEDICAL', current_level: 3, status: 'OPERATIONAL' },
+            { id: '4', name: 'Mạng Lưới Tuyển Trạch', code: 'SCOUTING', current_level: 1, status: 'OPERATIONAL' },
+          ]).slice(0, 4).map((facility) => (
+            <div key={facility.id} className="facility-quick-card-hud">
+              <div className="quick-header">
+                <strong>{facility.name}</strong>
+                <span className="lvl-badge-hud">CẤP {facility.current_level}</span>
               </div>
+              <p className="quick-status text-emerald">● Đang hoạt động tối ưu</p>
 
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => onUpgradeFacility(facility.id)}
-                style={{ width: '100%', justifyContent: 'center' }}
-              >
-                <ArrowUpRight size={16} />
-                <span>Nâng Lên Cấp {facility.current_level + 1} (€500.000)</span>
-              </button>
+              {onUpgradeFacility && (
+                <button
+                  type="button"
+                  className="btn-quick-upgrade-hud"
+                  onClick={() => onUpgradeFacility(facility.id)}
+                >
+                  <ArrowUpRight size={14} />
+                  <span>Nâng Lên Cấp {facility.current_level + 1}</span>
+                </button>
+              )}
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Quick Navigation Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-        <div
-          className="glass-panel"
-          style={{ padding: '22px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease' }}
-          onClick={() => onSwitchTab('squad')}
-        >
-          <div style={{ fontSize: '36px' }}>👥</div>
-          <div>
-            <strong style={{ display: 'block', fontSize: '1.1rem', color: '#0f172a', fontFamily: 'var(--font-display)' }}>QUẢN LÝ ĐỘI HÌNH</strong>
-            <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Xem thẻ bài cầu thủ FUT & chỉ số</span>
-          </div>
-        </div>
-
-        <div
-          className="glass-panel"
-          style={{ padding: '22px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease' }}
-          onClick={() => onSwitchTab('tactics')}
-        >
-          <div style={{ fontSize: '36px' }}>📋</div>
-          <div>
-            <strong style={{ display: 'block', fontSize: '1.1rem', color: '#0f172a', fontFamily: 'var(--font-display)' }}>CHIẾN THUẬT 2D</strong>
-            <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Sơ đồ sa bàn & puck nam châm 3D</span>
-          </div>
-        </div>
-
-        <div
-          className="glass-panel"
-          style={{ padding: '22px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.2s ease' }}
-          onClick={() => onSwitchTab('matches')}
-        >
-          <div style={{ fontSize: '36px' }}>⚽</div>
-          <div>
-            <strong style={{ display: 'block', fontSize: '1.1rem', color: '#0f172a', fontFamily: 'var(--font-display)' }}>TRUNG TÂM TRẬN ĐẤU</strong>
-            <span style={{ fontSize: '0.82rem', color: '#64748b' }}>Mô phỏng 90 phút & bán vé SVĐ</span>
-          </div>
         </div>
       </div>
     </div>

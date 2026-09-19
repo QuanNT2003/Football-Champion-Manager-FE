@@ -1,19 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../services/auth.service';
-import { Shield, Lock, User, Mail, LogIn, UserPlus, AlertCircle, Sparkles } from 'lucide-react';
+import { Shield, Lock, User, Mail, LogIn, UserPlus, AlertCircle, Sparkles, Trophy, Globe, Flame } from 'lucide-react';
 
 interface Props {
   onAuthSuccess: () => void;
+  defaultMode?: 'login' | 'register';
 }
 
-export const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'login' }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const [mode, setMode] = useState<'login' | 'register'>(
+    location.pathname.includes('register') ? 'register' : defaultMode
+  );
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (location.pathname.includes('register')) {
+      setMode('register');
+    } else if (location.pathname.includes('login')) {
+      setMode('login');
+    }
+  }, [location.pathname]);
+
+  const switchMode = (newMode: 'login' | 'register') => {
+    setMode(newMode);
+    setError(null);
+    navigate(newMode === 'login' ? '/login' : '/register');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +81,7 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
 
   const handleDemoAccount = () => {
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    setMode('register');
+    switchMode('register');
     setUsername(`coach_${randomSuffix}`);
     setEmail(`coach_${randomSuffix}@football.com`);
     setPassword('Pass1234!');
@@ -69,52 +90,63 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        {/* Header & Logo */}
+    <div className="auth-arena-page">
+      {/* Background ambient lighting */}
+      <div className="stadium-spotlight left" />
+      <div className="stadium-spotlight right" />
+      <div className="hud-grid-overlay" />
+
+      <div className="auth-card-hud">
+        {/* Header with Esports Badge */}
         <div className="auth-header">
-          <div className="auth-logo-badge">
-            <span className="auth-logo-icon">⚽</span>
+          <div className="auth-badge-hexagon">
+            <div className="hexagon-inner">
+              <span className="auth-logo-icon">⚽</span>
+            </div>
           </div>
-          <h1 className="auth-title">Football Champion Manager</h1>
+          <div className="auth-title-tag">
+            <Flame size={14} className="text-amber animate-pulse" />
+            <span>ONLINE MULTIPLAYER MANAGER</span>
+          </div>
+          <h1 className="auth-title">FOOTBALL CHAMPION</h1>
           <p className="auth-subtitle">
-            Hệ thống Quản lý Bóng đá Trực tuyến Chuyên nghiệp & Cạnh tranh Toàn cầu
+            Hệ thống Quản lý Bóng đá Thực chiến • Tranh hùng 112 Quốc gia & Cúp Châu Lục
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="auth-tabs">
+        <div className="auth-tabs-hud">
           <button
             type="button"
             className={`auth-tab-btn ${mode === 'login' ? 'active' : ''}`}
-            onClick={() => { setMode('login'); setError(null); }}
+            onClick={() => switchMode('login')}
           >
             <LogIn size={18} />
-            <span>Đăng Nhập</span>
+            <span>ĐĂNG NHẬP HLV</span>
           </button>
           <button
             type="button"
             className={`auth-tab-btn ${mode === 'register' ? 'active' : ''}`}
-            onClick={() => { setMode('register'); setError(null); }}
+            onClick={() => switchMode('register')}
           >
             <UserPlus size={18} />
-            <span>Đăng Ký HLV</span>
+            <span>ĐĂNG KÝ BẰNG HLV</span>
           </button>
         </div>
 
         {/* Error Notification */}
         {error && (
-          <div className="auth-alert">
+          <div className="auth-alert-hud">
             <AlertCircle size={18} />
             <span>{error}</span>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label>Tên đăng nhập {mode === 'login' ? 'hoặc Email' : ''}</label>
-            <div className="input-with-icon">
+        <form onSubmit={handleSubmit} className="auth-form-hud">
+          <div className="form-group-hud">
+            <label>TÊN ĐĂNG NHẬP {mode === 'login' ? 'HOẶC EMAIL' : ''}</label>
+            <div className="input-hud-wrap">
               <User size={18} className="input-icon" />
               <input
                 type="text"
@@ -124,13 +156,14 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
                 autoFocus
                 required
               />
+              <div className="hud-corner-accent" />
             </div>
           </div>
 
           {mode === 'register' && (
-            <div className="form-group">
-              <label>Địa chỉ Email</label>
-              <div className="input-with-icon">
+            <div className="form-group-hud">
+              <label>ĐỊA CHỈ EMAIL LIÊN HỆ</label>
+              <div className="input-hud-wrap">
                 <Mail size={18} className="input-icon" />
                 <input
                   type="email"
@@ -139,28 +172,30 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
+                <div className="hud-corner-accent" />
               </div>
             </div>
           )}
 
-          <div className="form-group">
-            <label>Mật khẩu</label>
-            <div className="input-with-icon">
+          <div className="form-group-hud">
+            <label>MẬT KHẨU TÀI KHOẢN</label>
+            <div className="input-hud-wrap">
               <Lock size={18} className="input-icon" />
               <input
                 type="password"
-                placeholder="Nhập mật khẩu bí mật..."
+                placeholder="Nhập mật khẩu bảo mật..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <div className="hud-corner-accent" />
             </div>
           </div>
 
           {mode === 'register' && (
-            <div className="form-group">
-              <label>Xác nhận mật khẩu</label>
-              <div className="input-with-icon">
+            <div className="form-group-hud">
+              <label>XÁC NHẬN MẬT KHẨU</label>
+              <div className="input-hud-wrap">
                 <Lock size={18} className="input-icon" />
                 <input
                   type="password"
@@ -169,44 +204,52 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess }) => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
+                <div className="hud-corner-accent" />
               </div>
             </div>
           )}
 
           <button
             type="submit"
-            className="auth-submit-btn"
+            className="btn-auth-submit-hud"
             disabled={loading}
           >
             {loading ? (
-              <span className="btn-spinner">Đang xử lý...</span>
+              <span className="btn-spinner">Đang xác thực thông tin...</span>
             ) : mode === 'login' ? (
               <>
                 <LogIn size={20} />
-                <span>Vào Trung Tâm Quản Lý</span>
+                <span>VÀO PHÒNG ĐIỀU HÀNH CHIẾN THUẬT</span>
               </>
             ) : (
               <>
                 <UserPlus size={20} />
-                <span>Hoàn Tất Đăng Ký HLV</span>
+                <span>HOÀN TẤT NHẬN CHỨNG CHỈ HLV</span>
               </>
             )}
           </button>
         </form>
 
         {/* Quick Demo Helper */}
-        <div className="auth-footer">
+        <div className="auth-footer-hud">
           <button
             type="button"
-            className="auth-demo-btn"
+            className="btn-demo-hud"
             onClick={handleDemoAccount}
           >
-            <Sparkles size={16} />
-            <span>Tạo nhanh thông tin HLV ngẫu nhiên để thử nghiệm</span>
+            <Sparkles size={16} className="text-amber" />
+            <span>Tạo nhanh hồ sơ HLV ngẫu nhiên (Thử nghiệm ngay)</span>
           </button>
-          <div className="auth-note">
-            <Shield size={14} />
-            <span>Phiên bản Online Máy Chủ Mùa 1 • Dữ liệu đồng bộ theo thời gian thực</span>
+
+          <div className="server-telemetry-row">
+            <div className="telemetry-item">
+              <Globe size={14} className="text-cyan" />
+              <span>Máy chủ Mùa 1 Toàn Cầu</span>
+            </div>
+            <div className="telemetry-item">
+              <Trophy size={14} className="text-amber" />
+              <span>Real-time Engine 90 Phút</span>
+            </div>
           </div>
         </div>
       </div>

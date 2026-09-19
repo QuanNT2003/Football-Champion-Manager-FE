@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Club, StarterCountry, StarterTier, User } from '../types';
 import { clubsApi } from '../services/clubs.service';
-import { authApi } from '../services/auth.service';
 import {
   Globe,
   Trophy,
@@ -18,6 +17,7 @@ import {
   Sparkles,
   ShieldCheck,
   Award,
+  Flame,
 } from 'lucide-react';
 
 interface Props {
@@ -45,7 +45,6 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
   const [claimError, setClaimError] = useState<string | null>(null);
   const [claimedClub, setClaimedClub] = useState<Club | null>(null);
 
-  // Load starter countries on mount
   useEffect(() => {
     loadCountries();
   }, []);
@@ -63,8 +62,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setSearchQuery(val);
+    setSearchQuery(e.target.value);
   };
 
   const filteredCountries = countries.filter((c) =>
@@ -96,7 +94,6 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
     setClaimError(null);
 
     try {
-      // Small suspense delay for high-stakes random draw feel
       await new Promise((resolve) => setTimeout(resolve, 1400));
       const result = await clubsApi.claimRandomStarterClub(selectedCountry.id, selectedTier);
       if (result && result.club) {
@@ -119,7 +116,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
         return {
           title: 'Giải Hạng Nhì (Tier 3)',
           badge: 'Thử Thách Nâng Cao',
-          badgeColor: '#0284c7',
+          badgeColor: '#00e5ff',
           desc: 'Các câu lạc bộ có truyền thống, đội hình khá dày dặn, cơ sở vật chất ổn định. Mục tiêu cạnh tranh suất lên hạng Nhất!',
           stars: '⭐⭐⭐',
         };
@@ -127,7 +124,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
         return {
           title: 'Giải Hạng Ba (Tier 4)',
           badge: 'Thử Thách Tiêu Chuẩn',
-          badgeColor: '#0ea5e9',
+          badgeColor: '#00ff87',
           desc: 'Môi trường cân bằng cho các HLV xây dựng lối chơi từ cơ bản, tìm kiếm nhân tài và bứt phá tiềm năng.',
           stars: '⭐⭐',
         };
@@ -135,7 +132,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
         return {
           title: 'Giải Hạng Tư (Tier 5)',
           badge: 'Khởi Nghiệp Đích Thực',
-          badgeColor: '#38bdf8',
+          badgeColor: '#ffd700',
           desc: 'Hành trình từ giải đấu nền tảng đi lên. Thể hiện tài thao lược của HLV để kiến tạo đế chế bóng đá từ hai bàn tay trắng.',
           stars: '⭐',
         };
@@ -143,7 +140,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
         return {
           title: `Giải Hạng ${tierNum}`,
           badge: 'Khởi Nghiệp',
-          badgeColor: '#0284c7',
+          badgeColor: '#00e5ff',
           desc: 'Câu lạc bộ giàu tiềm năng đang chờ đón bạn dẫn dắt.',
           stars: '⭐',
         };
@@ -151,81 +148,90 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
   };
 
   return (
-    <div className="onboarding-page">
-      {/* Top Bar */}
-      <header className="onboarding-topbar">
-        <div className="onboarding-brand">
-          <span className="onboarding-brand-icon">⚽</span>
+    <div className="onboarding-arena-page">
+      <div className="stadium-spotlight left" />
+      <div className="stadium-spotlight right" />
+      <div className="hud-grid-overlay" />
+
+      {/* Top Bar HUD */}
+      <header className="onboarding-topbar-hud">
+        <div className="onboarding-brand-hud">
+          <span className="brand-icon-hex">⚽</span>
           <div>
-            <h2>Football Champion Manager</h2>
-            <p>Hồ Sơ Nhậm Chức Huấn Luyện Viên</p>
+            <h2>FOOTBALL CHAMPION MANAGER</h2>
+            <p>HỒ SƠ KHỞI NGHIỆP HUẤN LUYỆN VIÊN TRƯỞNG</p>
           </div>
         </div>
 
-        <div className="onboarding-user-info">
-          <span className="user-greeting">
-            Xin chào, <strong>{user?.username || 'Huấn Luyện Viên'}</strong>!
-          </span>
-          <button className="onboarding-logout-btn" onClick={onLogout} title="Đăng xuất">
+        <div className="onboarding-user-hud">
+          <div className="user-greeting-pill">
+            <span className="dot-online" />
+            <span>HLV: <strong>{user?.username || 'TÂN HLV'}</strong></span>
+          </div>
+          <button className="btn-logout-hud" onClick={onLogout} title="Đăng xuất">
             <LogOut size={16} />
-            <span>Đổi tài khoản</span>
+            <span>Đổi Tài Khoản</span>
           </button>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="onboarding-content">
+      <main className="onboarding-content-hud">
         {/* Step Stepper Header */}
-        <div className="onboarding-stepper">
-          <div className={`stepper-node ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
-            <div className="stepper-circle">
+        <div className="onboarding-stepper-hud">
+          <div className={`stepper-node-hud ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
+            <div className="stepper-circle-hud">
               {step > 1 ? <CheckCircle2 size={20} /> : <Globe size={20} />}
             </div>
-            <div className="stepper-label">
-              <span>Bước 1</span>
-              <strong>Chọn Quốc Gia</strong>
+            <div className="stepper-label-hud">
+              <span>BƯỚC 1</span>
+              <strong>CHỌN QUỐC GIA</strong>
             </div>
           </div>
 
-          <div className={`stepper-line ${step >= 2 ? 'active' : ''}`} />
+          <div className={`stepper-line-hud ${step >= 2 ? 'active' : ''}`} />
 
-          <div className={`stepper-node ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
-            <div className="stepper-circle">
+          <div className={`stepper-node-hud ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
+            <div className="stepper-circle-hud">
               {step > 2 ? <CheckCircle2 size={20} /> : <Trophy size={20} />}
             </div>
-            <div className="stepper-label">
-              <span>Bước 2</span>
-              <strong>Chọn Hạng Đấu</strong>
+            <div className="stepper-label-hud">
+              <span>BƯỚC 2</span>
+              <strong>CHỌN HẠNG ĐẤU</strong>
             </div>
           </div>
 
-          <div className={`stepper-line ${step >= 3 ? 'active' : ''}`} />
+          <div className={`stepper-line-hud ${step >= 3 ? 'active' : ''}`} />
 
-          <div className={`stepper-node ${step === 3 ? 'active' : ''}`}>
-            <div className="stepper-circle">
+          <div className={`stepper-node-hud ${step === 3 ? 'active' : ''}`}>
+            <div className="stepper-circle-hud">
               <Dices size={20} />
             </div>
-            <div className="stepper-label">
-              <span>Bước 3</span>
-              <strong>Bốc Thăm Nhận CLB</strong>
+            <div className="stepper-label-hud">
+              <span>BƯỚC 3</span>
+              <strong>BỐC THĂM NHẬN CLB</strong>
             </div>
           </div>
         </div>
 
         {/* STEP 1: CHỌN QUỐC GIA */}
         {step === 1 && (
-          <div className="onboarding-step-view">
-            <div className="step-header">
-              <h3>Bước 1: Chọn Quốc Gia Để Bắt Đầu Sự Nghiệp</h3>
+          <div className="onboarding-card-hud">
+            <div className="step-header-hud">
+              <div className="step-badge">
+                <Flame size={14} className="text-amber" />
+                <span>LIÊN ĐOÀN THÀNH VIÊN FIFA</span>
+              </div>
+              <h3>BƯỚC 1: LỰA CHỌN QUỐC GIA ĐỂ BẮT ĐẦU SỰ NGHIỆP</h3>
               <p>
-                Hệ thống hỗ trợ 205 Liên đoàn Bóng đá Quốc gia. Bạn sẽ khởi nghiệp tại giải đấu quốc nội của đất nước này.
+                Hệ sinh thái hỗ trợ 112 Liên đoàn bóng đá quốc gia. Bạn sẽ khởi nghiệp tại giải đấu quốc nội của đất nước này.
               </p>
-              
-              <div className="country-search-bar">
+
+              <div className="country-search-bar-hud">
                 <Search size={18} className="search-icon" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm quốc gia (ví dụ: Vietnam, England, Spain, Brazil, Japan...)"
+                  placeholder="Tìm nhanh quốc gia (ví dụ: Vietnam, England, Spain, Brazil, Japan...)"
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />
@@ -233,47 +239,48 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
             </div>
 
             {loadingCountries ? (
-              <div className="loading-state">
-                <div className="spinner" />
-                <p>Đang tải danh sách Quốc gia và các CLB khả dụng...</p>
+              <div className="loading-state-hud">
+                <div className="spinner-hud" />
+                <p>Đang tải dữ liệu 112 Liên đoàn Quốc gia và các CLB khả dụng...</p>
               </div>
             ) : (
               <>
-                <div className="countries-grid">
+                <div className="countries-grid-hud">
                   {filteredCountries.slice(0, 48).map((c) => {
                     const isSelected = selectedCountry?.id === c.id;
                     return (
                       <div
                         key={c.id}
-                        className={`country-card ${isSelected ? 'selected' : ''}`}
+                        className={`country-card-hud ${isSelected ? 'selected' : ''}`}
                         onClick={() => setSelectedCountry(c)}
                       >
-                        <div className="country-card-header">
-                          <span className="country-flag-icon">🏳️</span>
-                          <span className="country-code-badge">{c.code}</span>
+                        <div className="country-card-top">
+                          <span className="country-flag-icon">{c.flag_url ? <img src={c.flag_url} alt={c.name} style={{ width: 24, height: 16, objectFit: 'cover', borderRadius: 2 }} /> : '🏳️'}</span>
+                          <span className="country-code-pill">{c.code}</span>
                         </div>
-                        <h4 className="country-name">{c.name}</h4>
-                        <div className="country-stats">
-                          <span className="available-tag">
-                            {c.unclaimed_clubs} CLB trống (Tier 3-5)
+                        <h4 className="country-name-hud">{c.name}</h4>
+                        <div className="country-stats-hud">
+                          <span className="unclaimed-tag">
+                            {c.unclaimed_clubs} CLB TRỐNG
                           </span>
                         </div>
+                        {isSelected && <div className="card-selected-glow" />}
                       </div>
                     );
                   })}
                 </div>
 
                 {filteredCountries.length === 0 && (
-                  <div className="empty-search-state">
+                  <div className="empty-search-state-hud">
                     <p>Không tìm thấy Quốc gia nào khớp với "{searchQuery}"</p>
                   </div>
                 )}
 
-                <div className="onboarding-actions">
-                  <div className="selected-summary">
+                <div className="onboarding-actions-hud">
+                  <div className="selected-summary-hud">
                     {selectedCountry ? (
                       <span>
-                        Đang chọn: <strong>{selectedCountry.name} ({selectedCountry.code})</strong>
+                        Đã chọn: <strong className="text-cyan">{selectedCountry.name} ({selectedCountry.code})</strong>
                       </span>
                     ) : (
                       <span className="hint-text">Vui lòng nhấp chọn 1 Quốc gia ở trên</span>
@@ -281,13 +288,13 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                   </div>
                   <button
                     type="button"
-                    className="btn-next-step"
+                    className="btn-next-step-hud"
                     disabled={!selectedCountry}
                     onClick={() => {
                       if (selectedCountry) handleSelectCountry(selectedCountry);
                     }}
                   >
-                    <span>Tiếp Tục Chọn Hạng Đấu</span>
+                    <span>TIẾP TỤC CHỌN HẠNG ĐẤU</span>
                     <ArrowRight size={18} />
                   </button>
                 </div>
@@ -298,32 +305,32 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
 
         {/* STEP 2: CHỌN HẠNG ĐẤU */}
         {step === 2 && (
-          <div className="onboarding-step-view">
-            <div className="step-header">
-              <div className="selected-country-banner">
+          <div className="onboarding-card-hud">
+            <div className="step-header-hud">
+              <div className="selected-country-banner-hud">
                 <span>Quốc gia đã chọn:</span>
-                <strong>{selectedCountry?.name} ({selectedCountry?.code})</strong>
+                <strong className="text-cyan">{selectedCountry?.name} ({selectedCountry?.code})</strong>
                 <button
                   type="button"
-                  className="btn-change-country"
+                  className="btn-change-country-hud"
                   onClick={() => setStep(1)}
                 >
-                  Đổi Quốc gia
+                  Đổi Quốc Gia
                 </button>
               </div>
-              <h3>Bước 2: Chọn Hạng Đấu Khởi Nghiệp</h3>
+              <h3>BƯỚC 2: CHỌN HẠNG ĐẤU KHỞI NGHIỆP</h3>
               <p>
-                Quy định giải đấu: HLV mới được phép lựa chọn khởi nghiệp tại <strong>Tier 3</strong>, <strong>Tier 4</strong> hoặc <strong>Tier 5</strong>.
+                Quy chuẩn công bằng: HLV mới được cấp quyền khởi nghiệp tại <strong>Tier 3</strong>, <strong>Tier 4</strong> hoặc <strong>Tier 5</strong>.
               </p>
             </div>
 
             {loadingTiers ? (
-              <div className="loading-state">
-                <div className="spinner" />
+              <div className="loading-state-hud">
+                <div className="spinner-hud" />
                 <p>Đang kiểm tra các Hạng đấu tại {selectedCountry?.name}...</p>
               </div>
             ) : (
-              <div className="tiers-list">
+              <div className="tiers-list-hud">
                 {[3, 4, 5].map((tNum) => {
                   const meta = getTierMeta(tNum);
                   const isSelected = selectedTier === tNum;
@@ -333,36 +340,37 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                   return (
                     <div
                       key={tNum}
-                      className={`tier-card ${isSelected ? 'selected' : ''}`}
+                      className={`tier-card-hud ${isSelected ? 'selected' : ''}`}
                       onClick={() => setSelectedTier(tNum)}
                     >
-                      <div className="tier-card-left">
-                        <div className="tier-badge-pill" style={{ backgroundColor: meta.badgeColor }}>
-                          Tier {tNum}
+                      <div className="tier-card-left-hud">
+                        <div className="tier-badge-row">
+                          <span className="tier-badge-pill" style={{ color: meta.badgeColor, borderColor: meta.badgeColor }}>
+                            {meta.badge}
+                          </span>
+                          <span className="tier-stars">{meta.stars}</span>
                         </div>
-                        <span className="tier-difficulty">{meta.stars} {meta.badge}</span>
                         <h4>{meta.title}</h4>
                         <p>{meta.desc}</p>
-                        
-                        <div className="tier-perks">
+                        <div className="starter-perks-row">
                           <div className="perk-item">
-                            <DollarSign size={14} color="#059669" />
+                            <DollarSign size={14} className="text-emerald" />
                             <span>Ngân sách ban đầu: €1,500,000 CASH</span>
                           </div>
                           <div className="perk-item">
-                            <Coins size={14} color="#d97706" />
+                            <Coins size={14} className="text-amber" />
                             <span>Thưởng tân thủ: 200 GOLD</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="tier-card-right">
-                        <div className="unclaimed-badge">
+                      <div className="tier-card-right-hud">
+                        <div className="unclaimed-badge-hud">
                           <strong>{count}</strong>
-                          <span>CLB còn trống</span>
+                          <span>CLB CÒN TRỐNG</span>
                         </div>
-                        <div className="tier-radio">
-                          <div className={`radio-circle ${isSelected ? 'checked' : ''}`} />
+                        <div className="tier-radio-hud">
+                          <div className={`radio-circle-hud ${isSelected ? 'checked' : ''}`} />
                         </div>
                       </div>
                     </div>
@@ -371,10 +379,10 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
               </div>
             )}
 
-            <div className="onboarding-actions">
+            <div className="onboarding-actions-hud">
               <button
                 type="button"
-                className="btn-prev-step"
+                className="btn-prev-step-hud"
                 onClick={() => setStep(1)}
               >
                 <ArrowLeft size={18} />
@@ -383,11 +391,11 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
 
               <button
                 type="button"
-                className="btn-next-step"
+                className="btn-next-step-hud"
                 disabled={!selectedTier}
                 onClick={() => setStep(3)}
               >
-                <span>Tiếp Tục Sang Bước Bốc Thăm</span>
+                <span>TIẾP TỤC SANG BƯỚC BỐC THĂM</span>
                 <ArrowRight size={18} />
               </button>
             </div>
@@ -396,44 +404,44 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
 
         {/* STEP 3: BỐC THĂM & NHẬN CLB */}
         {step === 3 && (
-          <div className="onboarding-step-view">
+          <div className="onboarding-card-hud">
             {!claimedClub ? (
-              <div className="claim-prompt-card">
-                <div className="claim-icon-wrapper">
-                  <Dices size={48} className={claiming ? 'spin-dice' : ''} />
+              <div className="claim-prompt-card-hud">
+                <div className="claim-icon-wrapper-hud">
+                  <Dices size={56} className={claiming ? 'spin-dice-hud' : 'text-cyan'} />
                 </div>
-                <h3>Bốc Thăm Phân Bổ Câu Lạc Bộ Ngẫu Nhiên</h3>
-                <p className="claim-desc">
-                  Bạn đã chọn khởi nghiệp tại <strong>{selectedCountry?.name}</strong> ở <strong>{getTierMeta(selectedTier || 3).title}</strong>.
+                <h3>LỄ BỐC THĂM PHÂN BỔ CÂU LẠC BỘ TRỰC TIẾP</h3>
+                <p className="claim-desc-hud">
+                  HLV đã chọn khởi nghiệp tại <strong className="text-cyan">{selectedCountry?.name}</strong> ở <strong className="text-emerald">{getTierMeta(selectedTier || 3).title}</strong>.
                   <br />
-                  Hệ thống sẽ tiến hành bốc thăm phân bổ ngẫu nhiên 1 câu lạc bộ chưa có chủ và trao quyền quản lý trọn đời cho bạn!
+                  Hệ thống Match Server sẽ bốc thăm phân bổ ngẫu nhiên 1 CLB chuyên nghiệp chưa có chủ và trao quyền quản lý tối cao cho bạn!
                 </p>
 
                 {claimError && (
-                  <div className="claim-error-banner">
+                  <div className="claim-error-banner-hud">
                     <p>{claimError}</p>
                   </div>
                 )}
 
-                <div className="claim-summary-box">
-                  <div className="summary-item">
-                    <span>Quốc Gia:</span>
-                    <strong>{selectedCountry?.name} ({selectedCountry?.code})</strong>
+                <div className="claim-summary-box-hud">
+                  <div className="summary-item-hud">
+                    <span>QUỐC GIA:</span>
+                    <strong className="text-cyan">{selectedCountry?.name} ({selectedCountry?.code})</strong>
                   </div>
-                  <div className="summary-item">
-                    <span>Hạng Đấu:</span>
-                    <strong>Tier {selectedTier} - {getTierMeta(selectedTier || 3).title}</strong>
+                  <div className="summary-item-hud">
+                    <span>HẠNG ĐẤU:</span>
+                    <strong className="text-emerald">Tier {selectedTier} - {getTierMeta(selectedTier || 3).title}</strong>
                   </div>
-                  <div className="summary-item">
-                    <span>Cơ chế:</span>
-                    <strong>Random gán 1 CLB trống</strong>
+                  <div className="summary-item-hud">
+                    <span>QUY CHUẨN:</span>
+                    <strong className="text-amber">Bốc thăm ngẫu nhiên CLB trống</strong>
                   </div>
                 </div>
 
-                <div className="claim-action-buttons">
+                <div className="claim-action-buttons-hud">
                   <button
                     type="button"
-                    className="btn-prev-step"
+                    className="btn-prev-step-hud"
                     disabled={claiming}
                     onClick={() => setStep(2)}
                   >
@@ -443,19 +451,19 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
 
                   <button
                     type="button"
-                    className="btn-claim-random"
+                    className="btn-claim-random-hud"
                     disabled={claiming}
                     onClick={handleStartClaim}
                   >
                     {claiming ? (
                       <>
-                        <div className="spinner" />
-                        <span>Đang bốc thăm ngẫu nhiên CLB...</span>
+                        <div className="spinner-hud" />
+                        <span>Đang bốc thăm CLB ngẫu nhiên...</span>
                       </>
                     ) : (
                       <>
                         <Sparkles size={20} />
-                        <span>Ký Hợp Đồng & Bốc Thăm Ngẫu Nhiên</span>
+                        <span>BỐC THĂM & KÝ HỢP ĐỒNG QUẢN LÝ</span>
                       </>
                     )}
                   </button>
@@ -463,64 +471,64 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
               </div>
             ) : (
               /* CLAIM CELEBRATION REVEAL */
-              <div className="claim-reveal-card">
-                <div className="reveal-badge">
+              <div className="claim-reveal-card-hud">
+                <div className="reveal-badge-hud">
                   <Award size={20} />
                   <span>KÝ KẾT HỢP ĐỒNG THÀNH CÔNG</span>
                 </div>
 
-                <h2 className="reveal-title">🎉 Chúc Mừng Tân HLV Trưởng! 🎉</h2>
-                <p className="reveal-subtitle">
+                <h2 className="reveal-title-hud">🎉 CHÚC MỪNG TÂN HUẤN LUYỆN VIÊN TRƯỞNG! 🎉</h2>
+                <p className="reveal-subtitle-hud">
                   Bạn đã chính thức trở thành nhà quản lý tối cao của câu lạc bộ:
                 </p>
 
-                <div className="revealed-club-box">
-                  <div className="club-logo-circle">⚽</div>
-                  <div className="club-identity">
+                <div className="revealed-club-box-hud">
+                  <div className="club-logo-hex">⚽</div>
+                  <div className="club-identity-hud">
                     <h3>{claimedClub.name}</h3>
-                    <div className="club-tags">
-                      <span className="tag-item">Quốc gia: {claimedClub.country || selectedCountry?.name}</span>
-                      {claimedClub.city && <span className="tag-item">Thành phố: {claimedClub.city}</span>}
-                      <span className="tag-item">Hạng: Tier {selectedTier}</span>
+                    <div className="club-tags-hud">
+                      <span className="tag-item-hud">Quốc gia: {claimedClub.country || selectedCountry?.name}</span>
+                      {claimedClub.city && <span className="tag-item-hud">Thành phố: {claimedClub.city}</span>}
+                      <span className="tag-item-hud">Hạng đấu: Tier {selectedTier}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="reveal-details-grid">
-                  <div className="reveal-detail-item">
-                    <Building2 size={20} color="#0284c7" />
+                <div className="reveal-details-grid-hud">
+                  <div className="reveal-detail-item-hud">
+                    <Building2 size={22} className="text-cyan" />
                     <div>
-                      <span>Sân Vận Động</span>
-                      <strong>{claimedClub.stadium?.name || 'Sân vận động Trung tâm'}</strong>
+                      <span>SÂN VẬN ĐỘNG</span>
+                      <strong>{claimedClub.stadium?.name || 'Sân Vận Động Trung Tâm'}</strong>
                       <small>Sức chứa: {(claimedClub.stadium?.capacity || 15000).toLocaleString()} chỗ</small>
                     </div>
                   </div>
 
-                  <div className="reveal-detail-item">
-                    <Users size={20} color="#0284c7" />
+                  <div className="reveal-detail-item-hud">
+                    <Users size={22} className="text-cyan" />
                     <div>
-                      <span>Đội Hình Khởi Đầu</span>
+                      <span>ĐỘI HÌNH KHỞI ĐẦU</span>
                       <strong>{claimedClub.squadCount || 16} Cầu Thủ Sẵn Sàng</strong>
                       <small>Đã ký hợp đồng chuyên nghiệp</small>
                     </div>
                   </div>
 
-                  <div className="reveal-detail-item">
-                    <DollarSign size={20} color="#059669" />
+                  <div className="reveal-detail-item-hud">
+                    <DollarSign size={22} className="text-emerald" />
                     <div>
-                      <span>Ngân Sách Tiền Mặt</span>
-                      <strong style={{ color: '#059669' }}>
+                      <span>NGÂN SÁCH TIỀN MẶT</span>
+                      <strong className="text-emerald">
                         €{(claimedClub.finances?.cash || 1500000).toLocaleString()} CASH
                       </strong>
-                      <small>Sử dụng mua sắm & nâng cấp SVĐ</small>
+                      <small>Dành cho chuyển nhượng & nâng cấp</small>
                     </div>
                   </div>
 
-                  <div className="reveal-detail-item">
-                    <Coins size={20} color="#d97706" />
+                  <div className="reveal-detail-item-hud">
+                    <Coins size={22} className="text-amber" />
                     <div>
-                      <span>Vàng Khởi Nghiệp</span>
-                      <strong style={{ color: '#d97706' }}>
+                      <span>VÀNG KHỞI NGHIỆP</span>
+                      <strong className="text-amber">
                         {(claimedClub.finances?.gold || 200).toLocaleString()} GOLD
                       </strong>
                       <small>Đổi tài nguyên đặc biệt</small>
@@ -528,14 +536,14 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                   </div>
                 </div>
 
-                <div className="reveal-action">
+                <div className="reveal-action-hud">
                   <button
                     type="button"
-                    className="btn-enter-game"
+                    className="btn-enter-game-hud"
                     onClick={() => onClubClaimed(claimedClub)}
                   >
-                    <ShieldCheck size={20} />
-                    <span>Bắt Đầu Sự Nghiệp Quản Lý CLB Ngay ⚽</span>
+                    <ShieldCheck size={22} />
+                    <span>BẮT ĐẦU SỰ NGHIỆP QUẢN LÝ CLB NGAY ⚽</span>
                   </button>
                 </div>
               </div>
