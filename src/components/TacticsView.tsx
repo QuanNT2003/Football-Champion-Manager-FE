@@ -107,7 +107,7 @@ export const TacticsView: React.FC<Props> = ({
   const loadData = async () => {
     setLoading(true);
     try {
-      // 1. Load formations list
+      // 1. Tải danh sách sơ đồ mẫu
       let formList = initialFormations || [];
       if (formList.length === 0) {
         const res = await tacticsApi.getFormations();
@@ -115,7 +115,7 @@ export const TacticsView: React.FC<Props> = ({
         setFormations(formList);
       }
 
-      // 2. Load Club Tactics directly from Database
+      // 2. Tải chiến thuật và đội hình lưu trực tiếp từ CSDL
       if (club?.id) {
         const tacticRes: any = await tacticsApi.getClubTactics(club.id);
         if (tacticRes) {
@@ -135,36 +135,27 @@ export const TacticsView: React.FC<Props> = ({
             formationId: formId,
           });
 
-          // Build lineup map strictly from saved club_tactic_positions
+          // Nạp trực tiếp 11 vị trí từ club_tactic_positions trong CSDL
           const savedPositions = tacticRes.club_tactic_positions || [];
           const newLineup: Record<string, Player | null> = {};
-          const usedPlayerIds = new Set<string>();
 
           savedPositions.forEach((pos: any) => {
-            if (pos.formation_position_id) {
-              const matchedPlayer = players.find(
-                (p) => p.id.toString() === pos.player_id?.toString()
-              );
-              if (matchedPlayer) {
-                newLineup[pos.formation_position_id.toString()] = matchedPlayer;
-                usedPlayerIds.add(matchedPlayer.id.toString());
-              }
-            }
-          });
-
-          // Find formation positions for this formation
-          const targetFormation = formList.find((f: any) => f.id.toString() === formId) || formList[0];
-          const formPositions = targetFormation?.formation_positions || [];
-
-          // Fill any empty slots with best available players
-          const availablePlayers = players.filter((p) => !usedPlayerIds.has(p.id.toString()));
-          let availIdx = 0;
-
-          formPositions.forEach((fp: any) => {
-            if (!newLineup[fp.id.toString()] && availIdx < availablePlayers.length) {
-              const assigned = availablePlayers[availIdx++];
-              newLineup[fp.id.toString()] = assigned;
-              usedPlayerIds.add(assigned.id.toString());
+            if (pos.formation_position_id && pos.players) {
+              const p = pos.players;
+              // Nếu có mảng players prop, lấy dữ liệu giàu hơn, ngược lại dùng pos.players
+              const enriched = players.find((pl) => pl.id.toString() === p.id.toString()) || {
+                id: p.id.toString(),
+                name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+                first_name: p.first_name,
+                last_name: p.last_name,
+                squad_number: p.squad_number,
+                photo_url: p.photo_url || '/assets/players/default.png',
+                age: p.age || 22,
+                preferred_foot: p.preferred_foot || 'RIGHT',
+                position: p.position || pos.formation_positions?.slot_code || 'MID',
+                overall_rating: p.overall_rating || 60,
+              };
+              newLineup[pos.formation_position_id.toString()] = enriched as Player;
             }
           });
 
@@ -187,6 +178,57 @@ export const TacticsView: React.FC<Props> = ({
       null
     );
   }, [formations, selectedFormationId]);
+
+  // Đồng bộ thêm thông tin cầu thủ khi mảng `players` từ component cha có dữ liệu
+  useEffect(() => {
+    if (!players || players.length === 0 || !currentFormation?.formation_positions) return;
+
+    setLineupMap((prev) => {
+      let changed = false;
+      const updated = { ...prev };
+      const currentAssignedIds = new Set<string>();
+
+      // Giữ nguyên các cầu thủ đã có trong lineupMap, enrich thêm thông tin từ players
+      Object.entries(updated).forEach(([slotId, player]) => {
+        if (player) {
+          const fresh = players.find((p) => p.id.toString() === player.id.toString());
+          if (fresh && fresh !== player) {
+            updated[slotId] = fresh;
+            changed = true;
+          }
+          currentAssignedIds.add(player.id.toString());
+        }
+      });
+
+      // Chỉ điền vào các slot THỰC SỰ TRỐNG
+      const availablePlayers = players.filter((p) => !currentAssignedIds.has(p.id.toString()));
+      currentFormation.formation_positions.forEach((pos) => {
+        const slotKey = pos.id.toString();
+        if (!updated[slotKey]) {
+          // Ưu tiên đúng vị trí sở trường
+          const match = availablePlayers.find(
+            (p) => !currentAssignedIds.has(p.id.toString()) && getPlayerPos(p).toUpperCase() === pos.slot_code.toUpperCase()
+          );
+          if (match) {
+            updated[slotKey] = match;
+            currentAssignedIds.add(match.id.toString());
+            changed = true;
+          } else {
+            const nextP = availablePlayers.find((p) => !currentAssignedIds.has(p.id.toString()));
+            if (nextP) {
+              updated[slotKey] = nextP;
+              currentAssignedIds.add(nextP.id.toString());
+              changed = true;
+            }
+          }
+        }
+      });
+
+      return changed ? updated : prev;
+    });
+  }, [players, currentFormation]);
+
+
 
 
   // AUTO-SYNC: When players array loads or changes, fill any empty slots in the current formation
