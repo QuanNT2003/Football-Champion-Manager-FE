@@ -58,7 +58,7 @@ export const Navbar: React.FC<Props> = ({
           <div>
             <span className="pill-sub">TIẾN ĐỘ MÙA GIẢI</span>
             <strong className="pill-val text-cyan">
-              VÒNG {currentDay} / {totalDays}
+              DAY {currentDay} / {totalDays}
             </strong>
           </div>
         </div>

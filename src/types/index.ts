@@ -125,7 +125,6 @@ export interface Player {
   } | null;
   status?: PlayerStatus | null;
   player_status?: PlayerStatus | null;
-  attributes_summary?: Record<string, any> | null;
   player_attributes?: Record<string, any> | null;
   player_financial_data?: {
     market_value?: number;

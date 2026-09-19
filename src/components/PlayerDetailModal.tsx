@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Player, PlayerDetailData } from '../types';
+import { formatCurrency, formatNumber } from '../utils/formatters';
 import { playersApi } from '../services/players.service';
 import {
   X,
@@ -123,15 +124,32 @@ export const PlayerDetailModal: React.FC<Props> = ({
 
   const displayedSkills = getDisplayedSkills();
 
-  // Basic info fallbacks
+  // Basic info from DB
   const pName = detail?.name || `${player.first_name} ${player.last_name}`.trim();
-  const pAge = detail?.age ?? player.age ?? 24;
-  const pBirthday = detail?.birthday_text || ((player as any).date_of_birth ? new Date((player as any).date_of_birth).toLocaleDateString('vi-VN') : '');
-  const pHeight = detail?.height || ((player as any).height ? `${(player as any).height}cm` : '-');
-  const pFoot = detail?.preferred_foot || (player as any).preferred_foot || '-';
-  const pPotential = detail?.potential ?? player.potential ?? 1;
-  const pPos = detail?.primary_position?.name || detail?.position?.name || player.position?.name || '-';
+  const pAge = detail?.age ?? player.age ?? 20;
+  const pPos = detail?.primary_position?.name || detail?.position?.name || player.position?.name || 'Cầu thủ';
   const pPosCode = detail?.primary_position?.code || detail?.position?.code || player.position?.code || '-';
+  
+  // Chiều cao & Cân nặng chuẩn hóa từ DB
+  const rawHeight = detail?.height || (player as any).height;
+  const pHeight = rawHeight && rawHeight !== '-' 
+    ? `${Math.round(parseFloat(String(rawHeight).replace(/[^\d.]/g, '')))} cm` 
+    : '-';
+
+  const rawWeight = detail?.weight || (player as any).weight;
+  const pWeight = rawWeight && rawWeight !== '-' 
+    ? `${Math.round(parseFloat(String(rawWeight).replace(/[^\d.]/g, '')))} kg` 
+    : '-';
+
+  // Chân thuận
+  const rawFoot = (detail?.preferred_foot || (player as any).preferred_foot || 'RIGHT').toUpperCase();
+  const pFoot = rawFoot === 'LEFT' ? 'Left (Trái)' : rawFoot === 'BOTH' ? 'Both (Hai chân)' : 'Right (Phải)';
+
+  // Danh tiếng & Tiềm năng
+  const pReputation = detail?.reputation ?? player.reputation ?? 0;
+  const pPotential = detail?.potential ?? player.potential ?? 0;
+
+  // Điểm OVR / Average Quality
   const pQuality = (detail?.average_quality ?? player.overall_rating ?? 50.0).toFixed(2);
   const pClubName = detail?.club?.name || player.club?.name || 'Tự do';
   const pCountry = typeof detail?.nationality === 'object'
@@ -139,28 +157,24 @@ export const PlayerDetailModal: React.FC<Props> = ({
     : typeof player.nationality === 'object'
     ? (player.nationality as any)?.name
     : (detail?.nationality || player.nationality || '-');
-  const pShirtNo = detail?.squad_number ?? player.squad_number ?? 10;
-  const pWorth = detail?.worth_display || (player.market_value ? `€ ${(Number(player.market_value) / 1000000).toFixed(2)}M` : '€ 0.0M');
-  const pWages = detail?.weekly_wages_display || (player.contract?.salary ? `€ ${(Number(player.contract.salary) / 52 / 1000).toFixed(2)}K` : 'Chưa ký HĐ');
+  const pShirtNo = detail?.squad_number ?? player.squad_number ?? 1;
 
-  // Discipline
-  const disc = detail?.discipline || {
-    status: 'CLEAN',
-    label: 'Clean',
-    yellow_cards: 0,
-    is_suspended: false,
-  };
+  // Giá trị thị trường và Lương tuần dùng chung hàm formatCurrency duy nhất
+  const pMarketValue = detail?.market_value ?? player.market_value;
+  const pWorth = formatCurrency(pMarketValue);
 
-  // Fatigue & Experience
-  const fatigue = detail?.fatigue?.percentage ?? 0;
-  const experience = detail?.experience?.percentage ?? 0;
+  const pWeeklyWage = (detail as any)?.weekly_wage ?? (player.contract?.salary ? Math.round(Number(player.contract.salary) / 52) : null);
+  const pWages = pWeeklyWage && pWeeklyWage > 0 
+    ? `${formatCurrency(pWeeklyWage)} / tuần` 
+    : (detail?.weekly_wages_display || 'Chưa ký HĐ');
 
-  // Star potential rendering
-  const renderStars = (stars: number) => {
+  // Hiển thị sao tiềm năng theo thang chuẩn 1-100 (mỗi 20 điểm = 1 sao)
+  const renderStars = (pot: number) => {
+    const starCount = pot > 5 ? Math.min(5, Math.max(1, Math.round(pot / 20))) : Math.max(1, pot);
     const list = [];
     for (let i = 1; i <= 5; i++) {
       list.push(
-        <span key={i} className={i <= stars ? 'star-gold' : 'star-muted'}>
+        <span key={i} className={i <= starCount ? 'star-gold' : 'star-muted'}>
           ★
         </span>
       );
@@ -244,28 +258,19 @@ export const PlayerDetailModal: React.FC<Props> = ({
             </div>
             <div className="pm-info-row">
               <span className="pm-label">Age:</span>
-              <span className="pm-value">
-                {pAge} <span className="pm-muted-note">({pBirthday})</span>
-              </span>
+              <span className="pm-value pm-val-bold">{pAge}</span>
             </div>
             <div className="pm-info-row">
               <span className="pm-label">Height:</span>
               <span className="pm-value">{pHeight}</span>
             </div>
             <div className="pm-info-row">
+              <span className="pm-label">Weight:</span>
+              <span className="pm-value">{pWeight}</span>
+            </div>
+            <div className="pm-info-row">
               <span className="pm-label">Preferred Foot:</span>
               <span className="pm-value">{pFoot}</span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">Potential:</span>
-              <span className="pm-stars-wrap">{renderStars(pPotential)}</span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">Discipline:</span>
-              <span className="pm-value pm-discipline-tag">
-                {disc.label}
-                <HelpCircle size={13} className="pm-inline-help" />
-              </span>
             </div>
             <div className="pm-info-row">
               <span className="pm-label">Average Quality:</span>
@@ -273,7 +278,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Column 2: Club, Wages, Fatigue & Experience */}
+          {/* Column 2: Club, Reputation, Potential, Value & Wages */}
           <div className="pm-info-col">
             <div className="pm-info-row">
               <span className="pm-label">Team:</span>
@@ -292,6 +297,21 @@ export const PlayerDetailModal: React.FC<Props> = ({
               </span>
             </div>
             <div className="pm-info-row">
+              <span className="pm-label">Reputation:</span>
+              <span className="pm-value pm-reputation-val">
+                <Award size={14} className="pm-icon-badge" />
+                {formatNumber(pReputation)}
+              </span>
+            </div>
+            <div className="pm-info-row">
+              <span className="pm-label">Potential:</span>
+              <div className="pm-potential-wrap">
+                <span className="pm-val-bold" style={{ color: 'var(--color-navy-blue)' }}>{pPotential}</span>
+                <span className="pm-muted-note" style={{ fontSize: '0.75rem', marginRight: '6px' }}>/100</span>
+                <div className="pm-stars-wrap">{renderStars(pPotential)}</div>
+              </div>
+            </div>
+            <div className="pm-info-row">
               <span className="pm-label">Worth:</span>
               <span className="pm-value pm-worth-val">
                 <Coins size={14} className="pm-coin-icon" /> {pWorth}
@@ -299,32 +319,9 @@ export const PlayerDetailModal: React.FC<Props> = ({
             </div>
             <div className="pm-info-row">
               <span className="pm-label">Weekly Wages:</span>
-              <span className="pm-value">
+              <span className="pm-value pm-val-bold" style={{ color: '#047857' }}>
                 {pWages}
-                <HelpCircle size={13} className="pm-inline-help" />
               </span>
-            </div>
-
-            {/* Fatigue Progress Bar */}
-            <div className="pm-progress-row">
-              <span className="pm-label">Fatigue:</span>
-              <div className="pm-bar-track">
-                <div
-                  className="pm-bar-fill pm-fatigue-fill"
-                  style={{ width: `${Math.min(100, Math.max(5, fatigue))}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Experience Progress Bar */}
-            <div className="pm-progress-row">
-              <span className="pm-label">Experience:</span>
-              <div className="pm-bar-track">
-                <div
-                  className="pm-bar-fill pm-experience-fill"
-                  style={{ width: `${Math.min(100, Math.max(5, experience))}%` }}
-                />
-              </div>
             </div>
           </div>
         </div>

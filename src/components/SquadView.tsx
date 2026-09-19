@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Player } from '../types';
+import { formatCurrency } from '../utils/formatters';
 import { Search, Users, Shield, Award, Zap, ChevronRight } from 'lucide-react';
 
 interface Props {
@@ -23,11 +24,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
 
   const getOvrRating = (player: Player) => {
     if (player.overall_rating && player.overall_rating > 0) return player.overall_rating;
-    if (player.reputation) {
-      if (player.reputation > 100) return Math.min(99, Math.round(player.reputation / 100));
-      return player.reputation;
-    }
-    return 75;
+    return 50;
   };
 
   const filtered = players.filter((p) => {
@@ -229,7 +226,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                     </td>
                     <td>
                       <strong style={{ color: '#059669', fontFamily: 'var(--font-game)', fontSize: '0.95rem' }}>
-                        €{(Number(player.market_value || 2500000) / 1000000).toFixed(1)}M
+                        {formatCurrency(player.market_value)}
                       </strong>
                     </td>
                     <td style={{ textAlign: 'right' }}>
