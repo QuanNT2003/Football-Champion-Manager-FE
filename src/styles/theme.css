@@ -1,0 +1,14 @@
+@theme {
+  --color-primary: #0284c7;
+  --color-primary-hover: #0369a1;
+  --color-primary-light: #e0f2fe;
+  --color-accent-gold: #f59e0b;
+  --color-neon-green: #10b981;
+  --color-pos-gk: #d97706;
+  --color-pos-def: #2563eb;
+  --color-pos-mid: #059669;
+  --color-pos-fwd: #dc2626;
+
+  --font-game: 'Chakra Petch', sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
