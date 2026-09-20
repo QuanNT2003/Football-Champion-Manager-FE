@@ -5199,3 +5199,709 @@ body {
   0% { transform: scale(1); }
   100% { transform: scale(1.06); }
 }
+
+
+/* ==========================================================================
+   TRANSFERS, FINANCES & TRAINING MODULES - STADIUM DAYLIGHT THEME
+   ========================================================================== */
+
+/* --- CORE LAYOUT & UTILITIES --- */
+.flex-center {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.grid-2 {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 1.5rem !important;
+}
+
+@media (max-width: 1024px) {
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.grid-3 {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 1.25rem !important;
+}
+
+@media (max-width: 900px) {
+  .grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Colors */
+.text-primary { color: var(--primary) !important; }
+.text-success { color: var(--neon-green) !important; }
+.text-warning { color: var(--accent-gold) !important; }
+.text-danger  { color: var(--danger) !important; }
+.text-muted   { color: #64748b !important; }
+.text-center  { text-align: center !important; }
+
+/* --- VIEW HEADERS & STAT CHIPS --- */
+.view-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 1.5rem !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+
+.view-title {
+  font-size: 1.6rem !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+  letter-spacing: -0.5px !important;
+}
+
+.view-subtitle {
+  font-size: 0.875rem !important;
+  color: #64748b !important;
+  margin: 0.25rem 0 0 0 !important;
+}
+
+.stat-chip {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 9999px !important;
+  padding: 0.45rem 1.1rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+  gap: 0.4rem !important;
+}
+
+/* --- BUTTON GROUPS & EXTRA BUTTONS --- */
+.btn-group {
+  display: inline-flex !important;
+  background: #f1f5f9 !important;
+  padding: 4px !important;
+  border-radius: 12px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  gap: 4px !important;
+}
+
+.btn-group .btn {
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  padding: 0.5rem 1.1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-group .btn.btn-primary {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important;
+}
+
+.btn-group .btn.btn-outline {
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+}
+
+.btn-group .btn.btn-outline:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.btn-xs {
+  padding: 0.3rem 0.65rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #047857 !important;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* --- BADGES --- */
+.badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.25rem 0.6rem !important;
+  border-radius: 6px !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.3px !important;
+  text-transform: uppercase !important;
+}
+
+.badge-primary {
+  background: #e0f2fe !important;
+  color: #0284c7 !important;
+  border: 1px solid #bae6fd !important;
+}
+
+.badge-success {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1px solid #86efac !important;
+}
+
+.badge-warning {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border: 1px solid #fde047 !important;
+}
+
+.badge-danger {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fca5a5 !important;
+}
+
+.badge-outline {
+  background: transparent !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+/* --- SEARCH & FILTERS --- */
+.search-bar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  padding: 0.55rem 0.85rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.search-bar:focus-within {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
+}
+
+.search-input {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  width: 100% !important;
+  font-size: 0.875rem !important;
+  color: #0f172a !important;
+}
+
+/* --- TABLE & PLAYER LISTINGS --- */
+.table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 6px !important;
+  color: #334155 !important;
+}
+
+.table th {
+  background: #f8fafc !important;
+  color: #64748b !important;
+  font-family: var(--font-game) !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+  padding: 12px 14px !important;
+  text-align: left !important;
+  border-top: 1px solid #e2e8f0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.table td {
+  background: #ffffff !important;
+  padding: 12px 14px !important;
+  font-size: 0.88rem !important;
+  border-top: 1px solid #f1f5f9 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  vertical-align: middle !important;
+}
+
+.table tbody tr:hover td {
+  background: #f8fafc !important;
+}
+
+.table tr td:first-child {
+  border-top-left-radius: 10px !important;
+  border-bottom-left-radius: 10px !important;
+  border-left: 1px solid #f1f5f9 !important;
+}
+
+.table tr td:last-child {
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+  border-right: 1px solid #f1f5f9 !important;
+}
+
+.player-avatar-sm {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  border: 1.5px solid #cbd5e1 !important;
+  background: #f1f5f9 !important;
+  object-fit: cover !important;
+  flex-shrink: 0 !important;
+}
+
+.pos-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.72rem !important;
+  font-weight: 900 !important;
+  padding: 2px 6px !important;
+  border-radius: 5px !important;
+  color: #ffffff !important;
+  min-width: 36px !important;
+  text-align: center !important;
+}
+
+.pos-badge.pos-gk { background: #d97706 !important; }
+.pos-badge.pos-def { background: #2563eb !important; }
+.pos-badge.pos-mid { background: #059669 !important; }
+.pos-badge.pos-fwd { background: #dc2626 !important; }
+
+.ovr-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.85rem !important;
+  font-weight: 900 !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  background: #0f172a !important;
+  color: #38bdf8 !important;
+  border: 1px solid #38bdf8 !important;
+  min-width: 32px !important;
+}
+
+/* --- CARDS & PANELS --- */
+.card-title {
+  font-size: 1.1rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin-bottom: 1rem !important;
+}
+
+/* 1. Stat Card (Finances) */
+.stat-card {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  padding: 1.25rem 1.5rem !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03) !important;
+  transition: all 0.2s ease !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* 2. Offer Card (Transfers) */
+.offer-card {
+  padding: 1rem 1.25rem !important;
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.offer-card:hover {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 3. Transaction Item (Finances & Training History) */
+.tx-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0.75rem 1rem !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  transition: background 0.15s ease !important;
+}
+
+.tx-item:hover {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.tx-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.tx-in {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+}
+
+.tx-out {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+/* 4. Shop Card (Finances Gold Exchange) */
+.shop-card {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 1rem 1.25rem !important;
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+}
+
+.shop-card:hover {
+  border-color: #cbd5e1 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 5. Drill Card (Training) */
+.drill-card {
+  padding: 1rem !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-align: left !important;
+}
+
+.drill-card:hover {
+  border-color: #38bdf8 !important;
+  background: #f0f9ff !important;
+  transform: translateY(-2px) !important;
+}
+
+.drill-card.active {
+  border-color: #0284c7 !important;
+  background: #e0f2fe !important;
+  box-shadow: 0 0 0 2px #38bdf8 !important;
+}
+
+/* --- MODAL (Make Offer) --- */
+.modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 999 !important;
+  padding: 1rem !important;
+}
+
+.modal-content {
+  background: #ffffff !important;
+  border-radius: 18px !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+  width: 100% !important;
+  animation: modalScale 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+@keyframes modalScale {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.input-text {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 0.85rem !important;
+  font-size: 0.9rem !important;
+  color: #0f172a !important;
+  outline: none !important;
+  transition: border-color 0.2s ease !important;
+}
+
+.input-text:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
+}
+
+/* --- ALERTS --- */
+.alert {
+  padding: 0.85rem 1.25rem !important;
+  border-radius: 10px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+}
+
+.alert-success {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1.5px solid #86efac !important;
+}
+
+.alert-danger, .alert-error {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1.5px solid #fca5a5 !important;
+}
+
+.alert-warning {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border: 1.5px solid #fde047 !important;
+}
+
+/* --- SPINNER --- */
+.spinner {
+  width: 32px !important;
+  height: 32px !important;
+  border: 3px solid #e2e8f0 !important;
+  border-top-color: var(--primary) !important;
+  border-radius: 50% !important;
+  animation: spin 0.8s linear infinite !important;
+  margin: 0 auto !important;
+}
+
+/* ==========================================
+   TRANSFERS & STAFF MARKET ENHANCEMENTS
+   ========================================== */
+.player-avatar-sm {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  color: #1e293b !important;
+  user-select: none !important;
+}
+
+.player-avatar-sm.avatar-pos-gk {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border-color: #f59e0b !important;
+}
+
+.player-avatar-sm.avatar-pos-def {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+  border-color: #3b82f6 !important;
+}
+
+.player-avatar-sm.avatar-pos-mid {
+  background: #d1fae5 !important;
+  color: #047857 !important;
+  border-color: #10b981 !important;
+}
+
+.player-avatar-sm.avatar-pos-fwd {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border-color: #ef4444 !important;
+}
+
+/* Staff badges */
+.badge-role {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.badge-role-head {
+  background: #f3e8ff !important;
+  color: #7e22ce !important;
+  border: 1px solid #d8b4fe !important;
+}
+
+.badge-role-assistant {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  border: 1px solid #7dd3fc !important;
+}
+
+.badge-role-fitness {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border: 1px solid #fcd34d !important;
+}
+
+.badge-role-scout {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1px solid #6ee7b7 !important;
+}
+
+.badge-role-physio {
+  background: #ffe4e6 !important;
+  color: #be123c !important;
+  border: 1px solid #fda4af !important;
+}
+
+/* Staff coaching licenses */
+.badge-license {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 2px 7px !important;
+  border-radius: 4px !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  min-width: 32px !important;
+  text-align: center !important;
+}
+
+.badge-license-pro {
+  background: linear-gradient(135deg, #1e1b4b, #312e81) !important;
+  color: #fbbf24 !important;
+  border: 1px solid #f59e0b !important;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.25) !important;
+}
+
+.badge-license-a {
+  background: #0f172a !important;
+  color: #38bdf8 !important;
+  border: 1px solid #0284c7 !important;
+}
+
+.badge-license-b {
+  background: #1e293b !important;
+  color: #94a3b8 !important;
+  border: 1px solid #475569 !important;
+}
+
+.badge-license-c {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+/* Tactical Style Tag */
+.tactical-style-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 2px 8px !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 9999px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+}
+
+/* ==========================================
+   TABLE COLUMN ALIGNMENTS (FIX FORCED LEFT)
+   ========================================== */
+.table th.th-center,
+.table td.td-center,
+.table th.text-center,
+.table td.text-center {
+  text-align: center !important;
+}
+
+.table th.th-right,
+.table td.td-right,
+.table th.text-right,
+.table td.text-right {
+  text-align: right !important;
+}
+
+.table th.th-left,
+.table td.td-left,
+.table th.text-left,
+.table td.text-left {
+  text-align: left !important;
+}
+
+/* Ensure flex contents inside table cells align properly */
+.td-center-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.td-right-content {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+/* Refined player table cells */
+.table td {
+  height: 64px !important;
+}
+
+.player-avatar-sm {
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  border-radius: 50% !important;
+}
+
+/* Fix alignment for player and staff name cells */
+.player-info-cell,
+.staff-info-cell,
+.flex-start {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: 18px !important;
+}
