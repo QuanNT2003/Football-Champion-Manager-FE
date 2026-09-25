@@ -128,14 +128,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
           desc: 'Môi trường cân bằng cho các HLV xây dựng lối chơi từ cơ bản, tìm kiếm nhân tài và bứt phá tiềm năng.',
           stars: '⭐⭐',
         };
-      case 5:
-        return {
-          title: 'Giải Hạng Tư (Tier 5)',
-          badge: 'Khởi Nghiệp Đích Thực',
-          badgeColor: '#ffd700',
-          desc: 'Hành trình từ giải đấu nền tảng đi lên. Thể hiện tài thao lược của HLV để kiến tạo đế chế bóng đá từ hai bàn tay trắng.',
-          stars: '⭐',
-        };
+
       default:
         return {
           title: `Giải Hạng ${tierNum}`,
@@ -224,7 +217,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
               </div>
               <h3>BƯỚC 1: LỰA CHỌN QUỐC GIA ĐỂ BẮT ĐẦU SỰ NGHIỆP</h3>
               <p>
-                Hệ sinh thái hỗ trợ 112 Liên đoàn bóng đá quốc gia. Bạn sẽ khởi nghiệp tại giải đấu quốc nội của đất nước này.
+                Hệ sinh thái hỗ trợ 96 Liên đoàn bóng đá quốc gia. Bạn sẽ khởi nghiệp tại giải đấu quốc nội của đất nước này.
               </p>
 
               <div className="country-search-bar-hud">
@@ -241,7 +234,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
             {loadingCountries ? (
               <div className="loading-state-hud">
                 <div className="spinner-hud" />
-                <p>Đang tải dữ liệu 112 Liên đoàn Quốc gia và các CLB khả dụng...</p>
+                <p>Đang tải dữ liệu 96 Liên đoàn Quốc gia và các CLB khả dụng...</p>
               </div>
             ) : (
               <>
@@ -320,7 +313,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
               </div>
               <h3>BƯỚC 2: CHỌN HẠNG ĐẤU KHỞI NGHIỆP</h3>
               <p>
-                Quy chuẩn công bằng: HLV mới được cấp quyền khởi nghiệp tại <strong>Tier 3</strong>, <strong>Tier 4</strong> hoặc <strong>Tier 5</strong>.
+                Quy chuẩn công bằng: HLV mới được cấp quyền khởi nghiệp tại <strong>Tier 3 (Giải Hạng Nhì)</strong> hoặc <strong>Tier 4 (Giải Hạng Ba)</strong>.
               </p>
             </div>
 
@@ -331,7 +324,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
               </div>
             ) : (
               <div className="tiers-list-hud">
-                {[3, 4, 5].map((tNum) => {
+                {[3, 4].map((tNum) => {
                   const meta = getTierMeta(tNum);
                   const isSelected = selectedTier === tNum;
                   const tierDb = tiers.find((item) => item.tier === tNum);
@@ -500,7 +493,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                     <div>
                       <span>SÂN VẬN ĐỘNG</span>
                       <strong>{claimedClub.stadium?.name || 'Sân Vận Động Trung Tâm'}</strong>
-                      <small>Sức chứa: {(claimedClub.stadium?.capacity || 15000).toLocaleString()} chỗ</small>
+                      <small>Sức chứa: {(claimedClub.stadium?.capacity || 5000).toLocaleString()} chỗ</small>
                     </div>
                   </div>
 

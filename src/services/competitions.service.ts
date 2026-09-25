@@ -8,6 +8,18 @@ import {
   KnockoutBracketResponse,
 } from '../types';
 
+
+export interface CompetitionCountry {
+  id: string;
+  name: string;
+  code: string;
+  flag_url?: string | null;
+  confederation?: {
+    code: string;
+    name: string;
+  } | null;
+}
+
 export interface CompetitionTeam {
   id: string;
   name: string;
@@ -27,6 +39,12 @@ export interface CompetitionTeam {
 }
 
 export const competitionsApi = {
+  
+  getCountries: (search?: string) => {
+    let url = '/competitions/countries';
+    if (search) url += `?search=${encodeURIComponent(search)}`;
+    return request<CompetitionCountry[]>(url);
+  },
   getAll: (countryId?: string) => {
     let url = '/competitions';
     if (countryId) url += `?countryId=${encodeURIComponent(countryId)}`;

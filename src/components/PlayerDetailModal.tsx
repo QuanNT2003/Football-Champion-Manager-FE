@@ -544,7 +544,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
                               {/* Progress curve line */}
                               <polyline
                                 fill="none"
-                                stroke="#0284c7"
+                                stroke="#15803d"
                                 strokeWidth="2.5"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -557,7 +557,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
                                 const y = getY(p.quality);
                                 return (
                                   <g key={idx}>
-                                    <circle cx={x} cy={y} r="4" fill="#0284c7" />
+                                    <circle cx={x} cy={y} r="4" fill="#15803d" />
                                     <text
                                       x={x}
                                       y={height - 4}

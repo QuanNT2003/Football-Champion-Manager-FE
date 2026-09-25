@@ -139,7 +139,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                 return (
                   <tr key={player.id} onClick={() => onSelectPlayer(player)} style={{ cursor: "pointer" }} title="Bấm để xem chi tiết cầu thủ">
                     <td>
-                      <strong style={{ color: '#0284c7', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>
+                      <strong style={{ color: '#15803d', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>
                         #{player.squad_number || '-'}
                       </strong>
                     </td>
@@ -149,8 +149,8 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                           width: '34px',
                           height: '34px',
                           borderRadius: '50%',
-                          background: '#f0f9ff',
-                          border: '1.5px solid #bae6fd',
+                          background: '#f0fdf4',
+                          border: '1.5px solid #bbf7d0',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -181,7 +181,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                       </strong>
                     </td>
                     <td>
-                      <strong style={{ color: '#0284c7', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>
+                      <strong style={{ color: '#15803d', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>
                         {player.potential_rating || player.potential || 80}
                       </strong>
                     </td>
