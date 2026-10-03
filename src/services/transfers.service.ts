@@ -100,7 +100,7 @@ export const transfersApi = {
 
   makeOffer: (data: {
     player_id: string;
-    buyer_club_id: string;
+    to_club_id?: string;
     offer_amount: number;
     is_loan?: boolean;
     proposed_wage?: number;
@@ -109,12 +109,12 @@ export const transfersApi = {
     request('/transfers/offers', {
       method: 'POST',
       body: JSON.stringify({
-        playerId: data.player_id,
-        toClubId: data.buyer_club_id,
-        offerAmount: data.offer_amount,
-        isLoan: data.is_loan,
-        proposedWage: data.proposed_wage,
-        contractYears: data.contract_years,
+        player_id: data.player_id,
+        to_club_id: data.to_club_id,
+        offer_amount: data.offer_amount,
+        is_loan: data.is_loan,
+        proposed_wage: data.proposed_wage,
+        contract_years: data.contract_years,
       }),
     }),
 

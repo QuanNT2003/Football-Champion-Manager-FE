@@ -1,3 +1,4 @@
+import { ConfirmModal } from './common/ConfirmModal';
 import React, { useState, useEffect } from 'react';
 import { Player, PlayerDetailData } from '../types';
 import { formatCurrency, formatNumber } from '../utils/formatters';
@@ -117,6 +118,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
   const [existingOffer, setExistingOffer] = useState<any>(null);
   const [loadingOffer, setLoadingOffer] = useState<boolean>(false);
   const [cancellingOffer, setCancellingOffer] = useState<boolean>(false);
+  const [confirmCancelModal, setConfirmCancelModal] = useState<boolean>(false);
 
   useEffect(() => {
     const marketVal = Number(
@@ -162,15 +164,20 @@ export const PlayerDetailModal: React.FC<Props> = ({
     }
   }, [player, currentClubId, isEligibleForOffer]);
 
-  const handleCancelExistingOffer = async () => {
+  const handleOpenCancelConfirm = () => {
+    setOfferError('');
+    setConfirmCancelModal(true);
+  };
+
+  const executeCancelOffer = async () => {
     if (!existingOffer || !currentClubId) return;
-    if (!window.confirm('Bạn có chắc chắn muốn hủy lời đề nghị chuyển nhượng này không?')) return;
     try {
       setCancellingOffer(true);
       setOfferError('');
       await transfersApi.cancelOffer(existingOffer.id, String(currentClubId));
       setOfferSuccess('Đã hủy lời đề nghị chuyển nhượng thành công!');
       setExistingOffer({ ...existingOffer, status: 'CANCELLED' });
+      setConfirmCancelModal(false);
       if (onOfferSuccess) {
         onOfferSuccess();
       }
@@ -182,31 +189,29 @@ export const PlayerDetailModal: React.FC<Props> = ({
   };
 
   const handleSendOffer = async () => {
+    setOfferError('');
+    setOfferSuccess('');
+
     if (!currentClubId) {
       setOfferError('Bạn cần quản lý một CLB để gửi đề nghị chuyển nhượng!');
       return;
     }
     if (!isLoan && cashBalance !== undefined && offerAmount > cashBalance) {
-      setOfferError('Ngân sách chuyển nhượng của CLB không đủ chi trả khoản phí này!');
+      setOfferError(`Ngân sách CLB không đủ! Bạn hiện có €${cashBalance.toLocaleString()}, trong khi phí chuyển nhượng đề xuất là €${offerAmount.toLocaleString()}. Vui lòng giảm mức giá hoặc chọn mượn cầu thủ.`);
+      return;
+    }
+    const targetPlayerId = (player as any).playerId || player.id;
+    const targetClubId = (player as any).currentClub?.id || player.club_id || (player as any).club?.id;
+    if (!targetClubId) {
+      setOfferError('Không xác định được CLB chủ quản của cầu thủ.');
       return;
     }
 
     try {
       setOfferSubmitting(true);
-      setOfferError('');
-      setOfferSuccess('');
-
-      const targetPlayerId = (player as any).playerId || player.id;
-      const targetClubId = (player as any).currentClub?.id || player.club_id || (player as any).club?.id;
-
-      if (!targetClubId) {
-        setOfferError('Không xác định được CLB chủ quản của cầu thủ.');
-        return;
-      }
-
       await transfersApi.makeOffer({
         player_id: String(targetPlayerId),
-        buyer_club_id: String(currentClubId),
+        to_club_id: String(targetClubId),
         offer_amount: isLoan ? 0 : offerAmount,
         is_loan: isLoan,
         proposed_wage: proposedWage,
@@ -218,6 +223,11 @@ export const PlayerDetailModal: React.FC<Props> = ({
           ? 'Đã gửi lời đề nghị mượn cầu thủ thành công tới CLB chủ quản!'
           : 'Đã gửi lời đề nghị mua đứt cầu thủ thành công tới CLB chủ quản!'
       );
+      setExistingOffer({
+        status: 'PENDING',
+        is_loan: isLoan,
+        offer_amount: isLoan ? 0 : offerAmount,
+      });
 
       if (onOfferSuccess) {
         onOfferSuccess();
@@ -1172,7 +1182,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
                           <button
                             type="button"
                             disabled={cancellingOffer}
-                            onClick={handleCancelExistingOffer}
+                            onClick={handleOpenCancelConfirm}
                             className="btn btn-xs btn-danger flex-center"
                             style={{ gap: '0.35rem', padding: '0.45rem 0.85rem', fontWeight: 700 }}
                           >
@@ -1552,9 +1562,33 @@ export const PlayerDetailModal: React.FC<Props> = ({
                       </div>
                     </div>
 
+                    {/* Cảnh báo không đủ ngân sách */}
+                    {!isLoan && cashBalance !== undefined && offerAmount > cashBalance && (
+                      <div
+                        style={{
+                          background: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          borderRadius: '8px',
+                          padding: '0.65rem 0.85rem',
+                          marginBottom: '0.85rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          color: '#b91c1c',
+                          fontSize: '0.84rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        <AlertCircle size={16} color="#dc2626" />
+                        <span>
+                          Ngân sách CLB (€{cashBalance.toLocaleString()}) không đủ để trả phí chuyển nhượng (€{offerAmount.toLocaleString()})! Vui lòng giảm mức giá đề nghị hoặc chọn hình thức mượn.
+                        </span>
+                      </div>
+                    )}
+
                     <button
                       type="button"
-                      disabled={offerSubmitting || (!isLoan && cashBalance !== undefined && offerAmount > cashBalance)}
+                      disabled={offerSubmitting}
                       onClick={handleSendOffer}
                       className="btn btn-primary"
                       style={{
@@ -1593,6 +1627,40 @@ export const PlayerDetailModal: React.FC<Props> = ({
             Close
           </button>
         </div>
+        {/* MODAL XÁC NHẬN HỦY LỜI ĐỀ NGHỊ */}
+        <ConfirmModal
+          isOpen={confirmCancelModal}
+          title="Xác Nhận Hủy Lời Đề Nghị"
+          variant="danger"
+          confirmText="Đồng Ý Hủy"
+          cancelText="Quay Lại"
+          isLoading={cancellingOffer}
+          onConfirm={executeCancelOffer}
+          onClose={() => !cancellingOffer && setConfirmCancelModal(false)}
+          message={
+            <div>
+              <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
+                Bạn có chắc chắn muốn rút lại lời đề nghị chuyển nhượng đang chờ phản hồi cho cầu thủ này không?
+              </p>
+              <div
+                style={{
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '10px',
+                  padding: '0.85rem 1rem',
+                  fontSize: '0.86rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.4rem',
+                }}
+              >
+                <div>Cầu thủ: <strong style={{ color: '#0f172a' }}>{player.name || player.common_name || (player.first_name ? player.first_name + ' ' + (player.last_name || '') : 'Cầu thủ')}</strong></div>
+                <div>Hình thức: <strong>{existingOffer && existingOffer.is_loan ? 'Cho Mượn' : 'Mua Đứt'}</strong></div>
+                <div>Mức phí hoàn trả: <strong style={{ color: '#dc2626' }}>{existingOffer && existingOffer.is_loan ? '€0 (Mượn)' : '€' + Number(existingOffer ? existingOffer.offer_amount : 0).toLocaleString()}</strong></div>
+              </div>
+            </div>
+          }
+        />
       </div>
     </div>
   );

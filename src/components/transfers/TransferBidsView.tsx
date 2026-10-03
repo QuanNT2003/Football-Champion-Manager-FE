@@ -14,9 +14,11 @@ import {
   Building2,
   DollarSign,
   User,
+  AlertTriangle,
 } from 'lucide-react';
 import { PlayerAvatar } from '../common/PlayerAvatar';
 import { PositionBadge } from '../common/PositionBadge';
+import { ConfirmModal } from '../common/ConfirmModal';
 
 interface TransferBidsViewProps {
   incomingOffers: TransferOffer[];
@@ -34,8 +36,18 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
   onSelectPlayer,
 }) => {
   const [activeTab, setActiveTab] = useState<'all' | 'outgoing' | 'incoming'>('all');
-  const [respondingId, setRespondingId] = useState<string | null>(null);
-  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  // Modal xác nhận state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    type: 'cancel' | 'accept' | 'reject';
+    offer: TransferOffer | null;
+  }>({
+    isOpen: false,
+    type: 'cancel',
+    offer: null,
+  });
 
   const formatMoney = (val: number) => {
     if (val === undefined || val === null || isNaN(val)) return '€0';
@@ -58,27 +70,42 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
     }
   };
 
-  const handleCancelClick = async (offerId: string) => {
-    if (!onCancelOffer) return;
-    if (window.confirm('Bạn có chắc chắn muốn hủy lời đề nghị chuyển nhượng này không?')) {
-      setCancellingId(offerId);
-      try {
-        await onCancelOffer(offerId);
-      } finally {
-        setCancellingId(null);
-      }
-    }
+  const handleOpenConfirm = (
+    type: 'cancel' | 'accept' | 'reject',
+    offer: TransferOffer
+  ) => {
+    setConfirmModal({
+      isOpen: true,
+      type,
+      offer,
+    });
   };
 
-  const handleRespondClick = async (offerId: string, response: 'ACCEPTED' | 'REJECTED') => {
-    const actionText = response === 'ACCEPTED' ? 'chấp nhận' : 'từ chối';
-    if (window.confirm(`Bạn có chắc chắn muốn ${actionText} lời đề nghị này không?`)) {
-      setRespondingId(offerId);
-      try {
-        await onRespondOffer(offerId, response);
-      } finally {
-        setRespondingId(null);
+  const handleCloseConfirm = () => {
+    if (isProcessing) return;
+    setConfirmModal({
+      isOpen: false,
+      type: 'cancel',
+      offer: null,
+    });
+  };
+
+  const handleConfirmAction = async () => {
+    const { type, offer } = confirmModal;
+    if (!offer) return;
+
+    try {
+      setIsProcessing(true);
+      if (type === 'cancel' && onCancelOffer) {
+        await onCancelOffer(offer.id);
+      } else if (type === 'accept') {
+        await onRespondOffer(offer.id, 'ACCEPTED');
+      } else if (type === 'reject') {
+        await onRespondOffer(offer.id, 'REJECTED');
       }
+      handleCloseConfirm();
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -139,6 +166,110 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
 
   const pendingIncomingCount = incomingOffers.filter((o) => o.status === 'PENDING').length;
   const pendingOutgoingCount = outgoingOffers.filter((o) => o.status === 'PENDING').length;
+
+  // Render nội dung trong ConfirmModal tùy theo loại
+  const renderConfirmContent = () => {
+    const offer = confirmModal.offer;
+    if (!offer) return null;
+
+    const p = offer.player;
+    const playerName = p?.common_name || (p ? `${p.first_name || ''} ${p.last_name || ''}`.trim() : 'Cầu thủ');
+    const isLoan = Boolean(offer.is_loan);
+    const amount = Number(offer.offer_amount);
+
+    if (confirmModal.type === 'cancel') {
+      return (
+        <div>
+          <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
+            Bạn có chắc chắn muốn hủy lời đề nghị chuyển nhượng này không?
+          </p>
+          <div
+            style={{
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: '10px',
+              padding: '0.85rem 1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.45rem',
+              fontSize: '0.86rem',
+            }}
+          >
+            <div>Cầu thủ: <strong style={{ color: '#0f172a' }}>{playerName}</strong></div>
+            <div>Gửi tới CLB: <strong style={{ color: '#0f172a' }}>{offer.seller_club?.name || offer.to_club?.name || 'CLB Đối Tác'}</strong></div>
+            <div>Hình thức: <strong>{isLoan ? 'Mượn Cầu Thủ' : 'Mua Đứt'}</strong></div>
+            <div>Phí đề nghị: <strong style={{ color: '#dc2626' }}>{isLoan ? '€0 (Mượn)' : formatMoney(amount)}</strong></div>
+          </div>
+          <p style={{ margin: '0.85rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+            * Lưu ý: Thao tác hủy lời đề nghị sẽ được cập nhật ngay lập tức và không thể hoàn tác.
+          </p>
+        </div>
+      );
+    }
+
+    if (confirmModal.type === 'accept') {
+      return (
+        <div>
+          <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
+            Bạn có đồng ý {isLoan ? 'cho mượn' : 'chuyển nhượng bán'} cầu thủ này theo các điều khoản sau?
+          </p>
+          <div
+            style={{
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '10px',
+              padding: '0.85rem 1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.45rem',
+              fontSize: '0.86rem',
+            }}
+          >
+            <div>Cầu thủ: <strong style={{ color: '#0f172a' }}>{playerName}</strong></div>
+            <div>CLB đối tác: <strong style={{ color: '#0f172a' }}>{offer.buyer_club?.name || offer.from_club?.name || 'Rival Club'}</strong></div>
+            <div>Hình thức: <strong style={{ color: '#16a34a' }}>{isLoan ? 'Cho Mượn Cầu Thủ' : 'Chuyển Nhượng Mua Đứt'}</strong></div>
+            <div>
+              Số tiền nhận được: <strong style={{ fontSize: '1.05rem', color: '#15803d' }}>{isLoan ? '€0 (Mượn)' : formatMoney(amount)}</strong>
+            </div>
+          </div>
+          <p style={{ margin: '0.85rem 0 0 0', fontSize: '0.82rem', color: '#16a34a', fontWeight: 600 }}>
+            ✓ Khoản tiền sẽ được cộng trực tiếp vào số dư tiền mặt của CLB ngay khi hoàn tất.
+          </p>
+        </div>
+      );
+    }
+
+    if (confirmModal.type === 'reject') {
+      return (
+        <div>
+          <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
+            Bạn có chắc chắn muốn từ chối lời đề nghị từ CLB đối tác không?
+          </p>
+          <div
+            style={{
+              background: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: '10px',
+              padding: '0.85rem 1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.45rem',
+              fontSize: '0.86rem',
+            }}
+          >
+            <div>Cầu thủ: <strong style={{ color: '#0f172a' }}>{playerName}</strong></div>
+            <div>CLB đề nghị: <strong style={{ color: '#0f172a' }}>{offer.buyer_club?.name || offer.from_club?.name || 'Rival Club'}</strong></div>
+            <div>Mức giá đề xuất: <strong style={{ color: '#dc2626' }}>{isLoan ? '€0 (Mượn)' : formatMoney(amount)}</strong></div>
+          </div>
+          <p style={{ margin: '0.85rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+            * CLB đối tác sẽ nhận được phản hồi từ chối thương vụ này.
+          </p>
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -206,6 +337,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                   fontSize: '0.72rem',
                   padding: '1px 6px',
                   borderRadius: '10px',
+                  animation: 'pulse 2s infinite',
                 }}
               >
                 {pendingIncomingCount}
@@ -504,7 +636,6 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                         {offer.status === 'PENDING' && onCancelOffer && (
                           <button
                             type="button"
-                            disabled={cancellingId === offer.id}
                             className="btn btn-xs btn-danger flex-center"
                             style={{
                               gap: '0.35rem',
@@ -512,11 +643,11 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                               fontWeight: 700,
                               borderRadius: '6px',
                             }}
-                            onClick={() => handleCancelClick(offer.id)}
+                            onClick={() => handleOpenConfirm('cancel', offer)}
                             title="Hủy lời đề nghị chuyển nhượng này"
                           >
                             <Trash2 size={13} />
-                            <span>{cancellingId === offer.id ? 'Đang hủy...' : 'HỦY ĐỀ NGHỊ'}</span>
+                            <span>HỦY ĐỀ NGHỊ</span>
                           </button>
                         )}
                       </div>
@@ -799,7 +930,6 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <button
                               type="button"
-                              disabled={respondingId === offer.id}
                               className="btn btn-xs btn-success flex-center"
                               style={{
                                 gap: '0.3rem',
@@ -810,14 +940,13 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                                 borderColor: '#16a34a',
                                 color: '#ffffff',
                               }}
-                              onClick={() => handleRespondClick(offer.id, 'ACCEPTED')}
+                              onClick={() => handleOpenConfirm('accept', offer)}
                             >
                               <Check size={14} />
                               <span>{isLoan ? 'Đồng Ý Cho Mượn' : 'Chấp Nhận Bán'}</span>
                             </button>
                             <button
                               type="button"
-                              disabled={respondingId === offer.id}
                               className="btn btn-xs btn-danger flex-center"
                               style={{
                                 gap: '0.3rem',
@@ -825,7 +954,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                                 fontWeight: 800,
                                 borderRadius: '6px',
                               }}
-                              onClick={() => handleRespondClick(offer.id, 'REJECTED')}
+                              onClick={() => handleOpenConfirm('reject', offer)}
                             >
                               <X size={14} />
                               <span>Từ Chối</span>
@@ -845,6 +974,35 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* CONFIRM MODAL ĐỒNG NHẤT VÀ ĐẸP MẮT */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={
+          confirmModal.type === 'cancel'
+            ? 'Xác Nhận Hủy Lời Đề Nghị'
+            : confirmModal.type === 'accept'
+            ? 'Xác Nhận Chấp Thuận Chuyển Nhượng'
+            : 'Xác Nhận Từ Chối Đề Nghị'
+        }
+        variant={
+          confirmModal.type === 'accept'
+            ? 'success'
+            : 'danger'
+        }
+        confirmText={
+          confirmModal.type === 'cancel'
+            ? 'Đồng Ý Hủy'
+            : confirmModal.type === 'accept'
+            ? 'Chấp Nhận Ngay'
+            : 'Xác Nhận Từ Chối'
+        }
+        cancelText="Quay Lại"
+        isLoading={isProcessing}
+        onConfirm={handleConfirmAction}
+        onClose={handleCloseConfirm}
+        message={renderConfirmContent()}
+      />
     </div>
   );
 };
