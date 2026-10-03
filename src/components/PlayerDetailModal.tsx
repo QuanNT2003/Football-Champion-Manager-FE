@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Player, PlayerDetailData } from '../types';
 import { formatCurrency, formatNumber } from '../utils/formatters';
 import { playersApi } from '../services/players.service';
+import { transfersApi } from '../services/transfers.service';
 import {
   X,
   ChevronLeft,
@@ -17,30 +18,216 @@ import {
   ArrowRight,
   Activity,
   HeartPulse,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface Props {
   player: Player;
   playersList?: Player[];
   currentClubId?: string;
+  cashBalance?: number;
+  initialTab?: 'skills' | 'matches' | 'statistics' | 'transfers' | 'injuries' | 'offer';
   onClose: () => void;
   onSelectPlayer?: (player: Player) => void;
   onPlayerUpdated?: () => void;
+  onOfferSuccess?: () => void;
 }
 
 export const PlayerDetailModal: React.FC<Props> = ({
   player,
   playersList = [],
   currentClubId,
+  cashBalance,
+  initialTab,
   onClose,
   onSelectPlayer,
+  onOfferSuccess,
 }) => {
-  const [activeTab, setActiveTab] = useState<'skills' | 'matches' | 'statistics' | 'transfers' | 'injuries'>('skills');
-  const [skillCategory, setSkillCategory] = useState<'KEY' | 'ALL' | 'PHYSICAL' | 'TECHNICAL' | 'MENTAL' | 'GOALKEEPING'>('KEY');
   const [detail, setDetail] = useState<PlayerDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [compared, setCompared] = useState<boolean>(false);
+  const [skillCategory, setSkillCategory] = useState<'KEY' | 'ALL' | 'PHYSICAL' | 'TECHNICAL' | 'MENTAL' | 'GOALKEEPING'>('KEY');
+
+  // Kiểm tra cầu thủ có thuộc CLB của người dùng không
+  const isOwnClub = Boolean(
+    currentClubId && (
+      String(player.club_id) === String(currentClubId) ||
+      String((player as any).currentClub?.id) === String(currentClubId) ||
+      String((player as any).club?.id) === String(currentClubId) ||
+      (detail?.club?.id ? String(detail.club.id) === String(currentClubId) : false)
+    )
+  );
+
+  // Kiểm tra cầu thủ có đang trong diện chuyển nhượng (bán / mượn / tự do) không
+  const isTransferListed = Boolean(
+    (player as any).is_transfer_listed ||
+    player.player_status?.is_transfer_listed ||
+    detail?.status?.is_transfer_listed
+  );
+
+  const isLoanListed = Boolean(
+    (player as any).is_loan_listed ||
+    player.player_status?.is_loan_listed ||
+    detail?.status?.is_loan_listed
+  );
+
+  const isFreeAgent = Boolean(
+    (player as any).is_free_agent ||
+    (!player.club_id && !(player as any).currentClub?.id && !(player as any).club?.id) ||
+    (detail !== null && !detail.club)
+  );
+
+  // Chỉ hiển thị tab Offer khi: Cầu thủ KHÔNG thuộc CLB của mình VÀ đang trong diện chuyển nhượng
+  const isEligibleForOffer = !isOwnClub && (isTransferListed || isLoanListed || isFreeAgent);
+
+  const [activeTab, setActiveTab] = useState<'skills' | 'matches' | 'statistics' | 'transfers' | 'injuries' | 'offer'>(() => {
+    if (initialTab === 'offer') {
+      return isEligibleForOffer ? 'offer' : 'skills';
+    }
+    return initialTab || 'skills';
+  });
+
+  useEffect(() => {
+    if (initialTab === 'offer') {
+      if (isEligibleForOffer) {
+        setActiveTab('offer');
+      } else {
+        setActiveTab('skills');
+      }
+    } else if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, isEligibleForOffer]);
+
+  useEffect(() => {
+    if (activeTab === 'offer' && !isEligibleForOffer) {
+      setActiveTab('skills');
+    }
+  }, [isEligibleForOffer, activeTab]);
+
+  // Offer State
+  const [isLoan, setIsLoan] = useState<boolean>(false);
+  const [offerAmount, setOfferAmount] = useState<number>(0);
+  const [proposedWage, setProposedWage] = useState<number>(0);
+  const [contractYears, setContractYears] = useState<number>(3);
+  const [offerSubmitting, setOfferSubmitting] = useState<boolean>(false);
+  const [offerError, setOfferError] = useState<string>('');
+  const [offerSuccess, setOfferSuccess] = useState<string>('');
+  const [existingOffer, setExistingOffer] = useState<any>(null);
+  const [loadingOffer, setLoadingOffer] = useState<boolean>(false);
+  const [cancellingOffer, setCancellingOffer] = useState<boolean>(false);
+
+  useEffect(() => {
+    const marketVal = Number(
+      (player as any).asking_price ||
+      player.market_value ||
+      (player as any).player_financial_data?.market_value ||
+      2500000
+    );
+    setOfferAmount(marketVal);
+    const defaultWage = Math.round(Math.max(1000, marketVal * 0.005));
+    setProposedWage(defaultWage);
+    setContractYears(3);
+    setIsLoan(false);
+    setOfferError('');
+    setOfferSuccess('');
+    setExistingOffer(null);
+
+    if (isEligibleForOffer && currentClubId && player?.id) {
+      setLoadingOffer(true);
+      transfersApi
+        .getPlayerOffer(String(currentClubId), String(player.id))
+        .then((prevOffer) => {
+          if (prevOffer) {
+            setExistingOffer(prevOffer);
+            setIsLoan(Boolean(prevOffer.is_loan));
+            if (prevOffer.offer_amount !== undefined) {
+              setOfferAmount(Number(prevOffer.offer_amount));
+            }
+            if (prevOffer.proposed_wage !== undefined) {
+              setProposedWage(Number(prevOffer.proposed_wage));
+            }
+            if (prevOffer.contract_years !== undefined) {
+              setContractYears(Number(prevOffer.contract_years));
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to load previous offer:', err);
+        })
+        .finally(() => {
+          setLoadingOffer(false);
+        });
+    }
+  }, [player, currentClubId, isEligibleForOffer]);
+
+  const handleCancelExistingOffer = async () => {
+    if (!existingOffer || !currentClubId) return;
+    if (!window.confirm('Bạn có chắc chắn muốn hủy lời đề nghị chuyển nhượng này không?')) return;
+    try {
+      setCancellingOffer(true);
+      setOfferError('');
+      await transfersApi.cancelOffer(existingOffer.id, String(currentClubId));
+      setOfferSuccess('Đã hủy lời đề nghị chuyển nhượng thành công!');
+      setExistingOffer({ ...existingOffer, status: 'CANCELLED' });
+      if (onOfferSuccess) {
+        onOfferSuccess();
+      }
+    } catch (err: any) {
+      setOfferError(err.response?.data?.message || err.message || 'Không thể hủy đề nghị.');
+    } finally {
+      setCancellingOffer(false);
+    }
+  };
+
+  const handleSendOffer = async () => {
+    if (!currentClubId) {
+      setOfferError('Bạn cần quản lý một CLB để gửi đề nghị chuyển nhượng!');
+      return;
+    }
+    if (!isLoan && cashBalance !== undefined && offerAmount > cashBalance) {
+      setOfferError('Ngân sách chuyển nhượng của CLB không đủ chi trả khoản phí này!');
+      return;
+    }
+
+    try {
+      setOfferSubmitting(true);
+      setOfferError('');
+      setOfferSuccess('');
+
+      const targetPlayerId = (player as any).playerId || player.id;
+      const targetClubId = (player as any).currentClub?.id || player.club_id || (player as any).club?.id;
+
+      if (!targetClubId) {
+        setOfferError('Không xác định được CLB chủ quản của cầu thủ.');
+        return;
+      }
+
+      await transfersApi.makeOffer({
+        player_id: String(targetPlayerId),
+        buyer_club_id: String(currentClubId),
+        offer_amount: isLoan ? 0 : offerAmount,
+        is_loan: isLoan,
+        proposed_wage: proposedWage,
+        contract_years: contractYears,
+      });
+
+      setOfferSuccess(
+        isLoan
+          ? 'Đã gửi lời đề nghị mượn cầu thủ thành công tới CLB chủ quản!'
+          : 'Đã gửi lời đề nghị mua đứt cầu thủ thành công tới CLB chủ quản!'
+      );
+
+      if (onOfferSuccess) {
+        onOfferSuccess();
+      }
+    } catch (err: any) {
+      setOfferError(err.response?.data?.message || err.message || 'Không thể gửi đề nghị chuyển nhượng.');
+    } finally {
+      setOfferSubmitting(false);
+    }
+  };
 
   // Load detailed player info from API
   useEffect(() => {
@@ -363,6 +550,16 @@ export const PlayerDetailModal: React.FC<Props> = ({
             <HeartPulse size={15} />
             <span>Lịch Sử Chấn Thương</span>
           </button>
+          {isEligibleForOffer && (
+            <button
+              className={`pm-tab-btn ${activeTab === 'offer' ? 'active' : ''}`}
+              onClick={() => setActiveTab('offer')}
+              style={activeTab === 'offer' ? { color: '#16a34a', borderBottomColor: '#16a34a', fontWeight: 700 } : {}}
+            >
+              <Coins size={15} />
+              <span>Đề Nghị Hợp Đồng (Offer)</span>
+            </button>
+          )}
         </div>
 
         {/* Tab Content Body */}
@@ -867,6 +1064,521 @@ export const PlayerDetailModal: React.FC<Props> = ({
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 6: OFFER (ĐỀ NGHỊ CHUYỂN NHƯỢNG & HỢP ĐỒNG) */}
+              {isEligibleForOffer && activeTab === 'offer' && (
+                <div style={{ padding: '0.5rem 0.25rem' }}>
+                  {/* Alert thông báo kết quả */}
+                  {offerSuccess && (
+                    <div
+                      style={{
+                        padding: '1rem 1.25rem',
+                        marginBottom: '1.25rem',
+                        borderRadius: '10px',
+                        background: '#f0fdf4',
+                        border: '1.5px solid #22c55e',
+                        color: '#15803d',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                      }}
+                    >
+                      <Award size={20} color="#16a34a" />
+                      <span>{offerSuccess}</span>
+                    </div>
+                  )}
+
+                  {offerError && (
+                    <div
+                      style={{
+                        padding: '1rem 1.25rem',
+                        marginBottom: '1.25rem',
+                        borderRadius: '10px',
+                        background: '#fef2f2',
+                        border: '1.5px solid #ef4444',
+                        color: '#b91c1c',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                      }}
+                    >
+                      <AlertCircle size={20} color="#dc2626" />
+                      <span>{offerError}</span>
+                    </div>
+                  )}
+
+                  {/* Banner tải đề nghị trước đó */}
+                  {loadingOffer && (
+                    <div style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div className="spinner" style={{ width: 14, height: 14 }} />
+                      <span>Đang kiểm tra lời đề nghị trước đó của bạn cho cầu thủ này...</span>
+                    </div>
+                  )}
+
+                  {existingOffer && (
+                    <div
+                      style={{
+                        padding: '1rem 1.25rem',
+                        marginBottom: '1.25rem',
+                        borderRadius: '10px',
+                        border: existingOffer.status === 'PENDING' ? '1.5px solid #f59e0b' : existingOffer.status === 'ACCEPTED' ? '1.5px solid #16a34a' : existingOffer.status === 'REJECTED' ? '1.5px solid #dc2626' : '1.5px solid #94a3b8',
+                        background: existingOffer.status === 'PENDING' ? '#fffbeb' : existingOffer.status === 'ACCEPTED' ? '#f0fdf4' : existingOffer.status === 'REJECTED' ? '#fef2f2' : '#f8fafc',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.65rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '1.15rem' }}>
+                            {existingOffer.status === 'PENDING' ? '⏳' : existingOffer.status === 'ACCEPTED' ? '✅' : existingOffer.status === 'REJECTED' ? '❌' : 'ℹ️'}
+                          </span>
+                          <strong style={{ fontSize: '0.95rem', color: existingOffer.status === 'PENDING' ? '#b45309' : existingOffer.status === 'ACCEPTED' ? '#15803d' : existingOffer.status === 'REJECTED' ? '#b91c1c' : '#475569' }}>
+                            {existingOffer.status === 'PENDING' ? 'Bạn đang có một lời đề nghị chờ phản hồi' : existingOffer.status === 'ACCEPTED' ? 'Lời đề nghị của bạn đã được chấp thuận!' : existingOffer.status === 'REJECTED' ? 'Lời đề nghị trước đó đã bị từ chối' : 'Lời đề nghị trước đó đã bị hủy'}
+                          </strong>
+                        </div>
+                        <span
+                          className={`badge ${
+                            existingOffer.status === 'PENDING'
+                              ? 'badge-warning'
+                              : existingOffer.status === 'ACCEPTED'
+                              ? 'badge-success'
+                              : existingOffer.status === 'REJECTED'
+                              ? 'badge-danger'
+                              : 'badge-outline'
+                          }`}
+                          style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem', fontWeight: 800 }}
+                        >
+                          {existingOffer.status}
+                        </span>
+                      </div>
+
+                      <div style={{ fontSize: '0.86rem', color: '#1e293b', display: 'flex', gap: '1.5rem', flexWrap: 'wrap', background: 'rgba(255,255,255,0.85)', padding: '0.6rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.06)' }}>
+                        <div>Hình thức: <strong>{existingOffer.is_loan ? 'Cho Mượn' : 'Mua Đứt'}</strong></div>
+                        <div>Phí đề nghị: <strong style={{ color: '#15803d' }}>{existingOffer.is_loan ? '€0 (Mượn)' : `€${Number(existingOffer.offer_amount || 0).toLocaleString()}`}</strong></div>
+                        <div>Lương cam kết: <strong style={{ color: '#d97706' }}>€{Number(existingOffer.proposed_wage || 0).toLocaleString()} / tuần</strong></div>
+                        <div>Thời hạn: <strong>{existingOffer.contract_years || 3} năm</strong></div>
+                      </div>
+
+                      {existingOffer.status === 'PENDING' && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
+                          <button
+                            type="button"
+                            disabled={cancellingOffer}
+                            onClick={handleCancelExistingOffer}
+                            className="btn btn-xs btn-danger flex-center"
+                            style={{ gap: '0.35rem', padding: '0.45rem 0.85rem', fontWeight: 700 }}
+                          >
+                            {cancellingOffer ? 'Đang hủy...' : '✕ HỦY ĐỀ NGHỊ NÀY'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }}>
+                    {/* PHẦN 1: ĐỀ NGHỊ CHO CLB */}
+                    <div
+                      style={{
+                        padding: '1.25rem',
+                        borderRadius: '12px',
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem',
+                      }}
+                    >
+                      <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
+                        <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          🏢 Phần 1: Đề Nghị Cho CLB Chủ Quản
+                        </h4>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                          Thỏa thuận hình thức chuyển giao và mức phí chuyển nhượng
+                        </div>
+                      </div>
+
+                      {/* Loại chuyển nhượng: Mua đứt / Mượn */}
+                      <div>
+                        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>
+                          Hình thức chuyển nhượng:
+                        </label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                          <button
+                            type="button"
+                            onClick={() => setIsLoan(false)}
+                            style={{
+                              padding: '0.65rem 1rem',
+                              borderRadius: '8px',
+                              border: !isLoan ? '2px solid #16a34a' : '1px solid #cbd5e1',
+                              background: !isLoan ? '#f0fdf4' : '#ffffff',
+                              color: !isLoan ? '#15803d' : '#475569',
+                              fontWeight: 700,
+                              fontSize: '0.88rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.4rem',
+                              transition: 'all 0.2s',
+                            }}
+                          >
+                            🔵 Mua Đứt (Permanent)
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setIsLoan(true)}
+                            style={{
+                              padding: '0.65rem 1rem',
+                              borderRadius: '8px',
+                              border: isLoan ? '2px solid #eab308' : '1px solid #cbd5e1',
+                              background: isLoan ? '#fefce8' : '#ffffff',
+                              color: isLoan ? '#854d0e' : '#475569',
+                              fontWeight: 700,
+                              fontSize: '0.88rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.4rem',
+                              transition: 'all 0.2s',
+                            }}
+                          >
+                            🟡 Mượn Cầu Thủ (Loan)
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Nếu là MUA ĐỨT: Hiển thị ô nhập giá chuyển nhượng */}
+                      {!isLoan ? (
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                            <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
+                              Phí chuyển nhượng đề nghị (€):
+                            </label>
+                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                              Định giá: <strong>€{Number((player as any).asking_price || player.market_value || 2500000).toLocaleString()}</strong>
+                            </span>
+                          </div>
+
+                          <div style={{ position: 'relative' }}>
+                            <input
+                              type="number"
+                              min={0}
+                              step={100000}
+                              value={offerAmount || ''}
+                              onChange={(e) => setOfferAmount(Math.max(0, Number(e.target.value)))}
+                              className="input-text"
+                              style={{
+                                width: '100%',
+                                padding: '0.65rem 1rem',
+                                fontSize: '1.05rem',
+                                fontWeight: 800,
+                                color: '#15803d',
+                              }}
+                            />
+                            <span style={{ position: 'absolute', right: 12, top: 10, fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
+                              €{(offerAmount / 1000000).toFixed(2)}M
+                            </span>
+                          </div>
+
+                          {/* Quick Adjust Buttons */}
+                          <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.6rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              className="btn btn-xs btn-outline"
+                              onClick={() => setOfferAmount(Number((player as any).asking_price || player.market_value || 2500000))}
+                            >
+                              Theo giá thị trường
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-xs btn-outline"
+                              onClick={() => setOfferAmount(Math.max(0, offerAmount - 500000))}
+                            >
+                              -€500K
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-xs btn-outline"
+                              onClick={() => setOfferAmount(offerAmount + 500000)}
+                            >
+                              +€500K
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-xs btn-outline"
+                              onClick={() => setOfferAmount(offerAmount + 1000000)}
+                            >
+                              +€1.0M
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-xs btn-outline"
+                              onClick={() => setOfferAmount(offerAmount + 5000000)}
+                            >
+                              +€5.0M
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Nếu là MƯỢN: KHÔNG CÓ Ô NHẬP GIÁ */
+                        <div
+                          style={{
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            background: '#fefce8',
+                            border: '1px dashed #ca8a04',
+                            color: '#713f12',
+                            fontSize: '0.84rem',
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          <strong>ℹ️ Mượn cầu thủ không mất phí chuyển nhượng:</strong>
+                          <p style={{ margin: '4px 0 0 0', color: '#854d0e' }}>
+                            CLB chủ quản đồng ý cho mượn mà không thu phí chuyển nhượng. Bạn chỉ cần thỏa thuận thời hạn mượn và chi trả lương cầu thủ ở Phần 2.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* PHẦN 2: THỎA THUẬN HỢP ĐỒNG CẦU THỦ */}
+                    <div
+                      style={{
+                        padding: '1.25rem',
+                        borderRadius: '12px',
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1rem',
+                      }}
+                    >
+                      <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
+                        <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          ✍️ Phần 2: Thỏa Thuận Hợp Đồng Cầu Thủ
+                        </h4>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
+                          Điều khoản đãi ngộ và cam kết thời gian gắn bó với CLB
+                        </div>
+                      </div>
+
+                      {/* Thời gian hợp đồng */}
+                      <div>
+                        <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>
+                          Thời gian hợp đồng:
+                        </label>
+                        {!isLoan ? (
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.35rem' }}>
+                            {[1, 2, 3, 4, 5].map((yr) => (
+                              <button
+                                key={yr}
+                                type="button"
+                                onClick={() => setContractYears(yr)}
+                                style={{
+                                  padding: '0.55rem 0.2rem',
+                                  borderRadius: '6px',
+                                  fontSize: '0.82rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  border: contractYears === yr ? '2px solid #16a34a' : '1px solid #cbd5e1',
+                                  background: contractYears === yr ? '#dcfce7' : '#ffffff',
+                                  color: contractYears === yr ? '#15803d' : '#475569',
+                                  transition: 'all 0.15s',
+                                  textAlign: 'center',
+                                }}
+                              >
+                                {yr} Năm
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                            <button
+                              type="button"
+                              onClick={() => setContractYears(1)}
+                              style={{
+                                padding: '0.55rem 0.5rem',
+                                borderRadius: '6px',
+                                fontSize: '0.82rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                border: contractYears === 1 ? '2px solid #ca8a04' : '1px solid #cbd5e1',
+                                background: contractYears === 1 ? '#fef9c3' : '#ffffff',
+                                color: contractYears === 1 ? '#854d0e' : '#475569',
+                                transition: 'all 0.15s',
+                                textAlign: 'center',
+                              }}
+                            >
+                              Nửa Mùa (20 ngày)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setContractYears(2)}
+                              style={{
+                                padding: '0.55rem 0.5rem',
+                                borderRadius: '6px',
+                                fontSize: '0.82rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                border: contractYears === 2 ? '2px solid #ca8a04' : '1px solid #cbd5e1',
+                                background: contractYears === 2 ? '#fef9c3' : '#ffffff',
+                                color: contractYears === 2 ? '#854d0e' : '#475569',
+                                transition: 'all 0.15s',
+                                textAlign: 'center',
+                              }}
+                            >
+                              Cả Mùa Giải (40 ngày)
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Lương cầu thủ */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
+                            Mức lương đề nghị (€/tuần):
+                          </label>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                            Lương đề xuất: <strong>€{Math.round(Number((player as any).asking_price || player.market_value || 2500000) * 0.005).toLocaleString()}</strong>
+                          </span>
+                        </div>
+
+                        <div style={{ position: 'relative' }}>
+                          <input
+                            type="number"
+                            min={0}
+                            step={1000}
+                            value={proposedWage || ''}
+                            onChange={(e) => setProposedWage(Math.max(0, Number(e.target.value)))}
+                            className="input-text"
+                            style={{
+                              width: '100%',
+                              padding: '0.65rem 1rem',
+                              fontSize: '1.05rem',
+                              fontWeight: 800,
+                              color: '#d97706',
+                            }}
+                          />
+                          <span style={{ position: 'absolute', right: 12, top: 10, fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
+                            / tuần
+                          </span>
+                        </div>
+
+                        {/* Nút chỉnh lương nhanh */}
+                        <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.6rem', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-outline"
+                            onClick={() => setProposedWage(Math.round(Number((player as any).asking_price || player.market_value || 2500000) * 0.005))}
+                          >
+                            Lương chuẩn
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-outline"
+                            onClick={() => setProposedWage(Math.max(500, proposedWage - 1000))}
+                          >
+                            -€1,000
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-outline"
+                            onClick={() => setProposedWage(proposedWage + 1000)}
+                          >
+                            +€1,000
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-outline"
+                            onClick={() => setProposedWage(proposedWage + 5000)}
+                          >
+                            +€5,000
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* TỔNG KẾT & XÁC NHẬN GỬI ĐI */}
+                  <div
+                    style={{
+                      marginTop: '1.5rem',
+                      padding: '1.25rem 1.5rem',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                      border: '1px solid #cbd5e1',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '1rem',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.82rem', color: '#64748b' }}>Tóm tắt chi phí giao dịch:</div>
+                      <div style={{ display: 'flex', gap: '1.25rem', marginTop: '4px', flexWrap: 'wrap' }}>
+                        <div>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Phí chuyển nhượng: </span>
+                          <strong style={{ fontSize: '0.95rem', color: isLoan ? '#854d0e' : '#15803d' }}>
+                            {isLoan ? '€0 (Mượn)' : `€${offerAmount.toLocaleString()}`}
+                          </strong>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Lương cam kết: </span>
+                          <strong style={{ fontSize: '0.95rem', color: '#d97706' }}>
+                            €{proposedWage.toLocaleString()} / tuần
+                          </strong>
+                        </div>
+                        {cashBalance !== undefined && (
+                          <div>
+                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Ngân sách CLB: </span>
+                            <strong style={{ fontSize: '0.95rem', color: cashBalance >= (isLoan ? 0 : offerAmount) ? '#16a34a' : '#dc2626' }}>
+                              €{cashBalance.toLocaleString()}
+                            </strong>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={offerSubmitting || (!isLoan && cashBalance !== undefined && offerAmount > cashBalance)}
+                      onClick={handleSendOffer}
+                      className="btn btn-primary"
+                      style={{
+                        padding: '0.75rem 1.75rem',
+                        fontSize: '0.95rem',
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)',
+                      }}
+                    >
+                      {offerSubmitting ? (
+                        <>
+                          <div className="spinner" style={{ width: 16, height: 16 }} />
+                          <span>Đang gửi đề nghị...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 size={18} />
+                          <span>Xác Nhận Gửi Lời Đề Nghị</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               )}

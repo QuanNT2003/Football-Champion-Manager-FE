@@ -295,14 +295,32 @@ export interface PlayerStat {
 export interface TransferOffer {
   id: string;
   player_id: string;
-  player?: Player;
-  buyer_club_id: string;
-  buyer_club?: { id: string; name: string };
-  seller_club_id: string;
-  seller_club?: { id: string; name: string };
+  player?: Player & {
+    common_name?: string;
+    age?: number;
+    reputation?: number;
+    ovr?: number;
+    photo_url?: string;
+    position?: string;
+    nationality?: string;
+    flag_url?: string | null;
+    market_value?: number;
+  };
+  from_club_id?: string;
+  to_club_id?: string;
+  buyer_club_id?: string;
+  buyer_club?: { id: string; name: string; logo_url?: string };
+  seller_club_id?: string;
+  seller_club?: { id: string; name: string; logo_url?: string };
+  from_club?: { id: string; name: string; logo_url?: string };
+  to_club?: { id: string; name: string; logo_url?: string };
   offer_amount: number;
   proposed_wage?: number;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED';
+  contract_years?: number;
+  is_loan?: boolean;
+  transfer_type?: string;
+  currency_type?: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED' | 'EXPIRED';
   created_at?: string;
 }
 
