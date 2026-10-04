@@ -4,6 +4,7 @@ import { Club, Player, TimelineData, User } from '../types';
 import { Navbar } from '../components/Navbar';
 import { PlayerDetailModal } from '../components/PlayerDetailModal';
 import {
+  Briefcase,
   LayoutDashboard,
   Users,
   Compass,
@@ -78,6 +79,13 @@ export const GameLayout: React.FC<Props> = ({
         >
           <Users size={18} />
           <span>Đội Hình ({players.length})</span>
+        </NavLink>
+        <NavLink
+          to="/staff"
+          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
+        >
+          <Briefcase size={18} />
+          <span>Ban Huấn Luyện</span>
         </NavLink>
 
         <NavLink

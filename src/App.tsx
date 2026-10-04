@@ -18,6 +18,7 @@ import { FacilitiesView } from './components/FacilitiesView';
 import { FinancesView } from './components/FinancesView';
 import { TrainingView } from './components/TrainingView';
 import { StandingsView } from './components/StandingsView';
+import { ClubStaffView } from './components/ClubStaffView';
 import { Loader2 } from 'lucide-react';
 
 export function App() {
@@ -253,6 +254,16 @@ export function App() {
               players={players}
               onSelectPlayer={setSelectedPlayer}
               onUpdateTransferListing={handleUpdateTransferListing}
+            />
+          }
+        />
+        <Route
+          path="/staff"
+          element={
+            <ClubStaffView
+              clubId={club?.id || '1'}
+              cashBalance={cashBalance}
+              onNavigateToMarket={() => navigate('/transfers')}
             />
           }
         />

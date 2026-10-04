@@ -233,7 +233,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                           style={{ gap: '0.35rem', margin: '0 auto' }}
                           onClick={() => onOpenHireModal(st)}
                         >
-                          <Briefcase size={14} /> Tuyển Dụng
+                          <Briefcase size={14} /> Tuyển Mộ
                         </button>
                       )}
                     </td>

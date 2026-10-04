@@ -1,3 +1,4 @@
+import { StaffDetailModal } from './StaffDetailModal';
 import React, { useState, useEffect, useMemo } from 'react';
 import { transfersApi, StaffMarketItem, FilterOptionsResponse } from '../services/transfers.service';
 import { Player, TransferOffer } from '../types';
@@ -5,6 +6,7 @@ import { ShoppingCart, DollarSign, ArrowRightLeft, Users } from 'lucide-react';
 
 import { PlayerMarketTable } from './transfers/PlayerMarketTable';
 import { StaffMarketTable } from './transfers/StaffMarketTable';
+import { ClubStaffView } from './ClubStaffView';
 import { TransferBidsView } from './transfers/TransferBidsView';
 import { PlayerDetailModal } from './PlayerDetailModal';
 import { StaffHireModal } from './transfers/StaffHireModal';
@@ -50,6 +52,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   const [staffList, setStaffList] = useState<StaffMarketItem[]>([]);
   const [staffLoading, setStaffLoading] = useState(false);
   const [staffRoleFilter, setStaffRoleFilter] = useState('');
+  const [staffSubTab, setStaffSubTab] = useState<'market' | 'my_club'>('market');
   const [staffSearch, setStaffSearch] = useState('');
   const [staffPage, setStaffPage] = useState(1);
   const [staffTotalPages, setStaffTotalPages] = useState(1);
@@ -351,23 +354,73 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
 
       {/* TAB 2: NHÂN VIÊN */}
       {activeTab === 'staff' && (
-        <StaffMarketTable
-          staffList={staffList}
-          loading={staffLoading}
-          currentClubId={currentClubId}
-          search={staffSearch}
-          roleFilter={staffRoleFilter}
-          page={staffPage}
-          totalPages={staffTotalPages}
-          onSearchChange={setStaffSearch}
-          onSearchSubmit={handleStaffSearchSubmit}
-          onRoleFilterChange={(role) => {
-            setStaffRoleFilter(role);
-            setStaffPage(1);
-          }}
-          onPageChange={setStaffPage}
-          onOpenHireModal={openHireStaffModal}
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Sub-tabs Switcher */}
+          <div style={{ display: 'flex', gap: '0.5rem', background: '#f1f5f9', padding: '0.35rem', borderRadius: '10px', width: 'fit-content' }}>
+            <button
+              type="button"
+              onClick={() => setStaffSubTab('market')}
+              style={{
+                padding: '0.45rem 1rem',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                background: staffSubTab === 'market' ? '#ffffff' : 'transparent',
+                color: staffSubTab === 'market' ? '#0f172a' : '#64748b',
+                boxShadow: staffSubTab === 'market' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              }}
+            >
+              🌐 Thị Trường Tuyển Mộ
+            </button>
+            <button
+              type="button"
+              onClick={() => setStaffSubTab('my_club')}
+              style={{
+                padding: '0.45rem 1rem',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                background: staffSubTab === 'my_club' ? '#ffffff' : 'transparent',
+                color: staffSubTab === 'my_club' ? '#0f172a' : '#64748b',
+                boxShadow: staffSubTab === 'my_club' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              }}
+            >
+              🏢 Ban Huấn Luyện Của Bạn
+            </button>
+          </div>
+
+          {staffSubTab === 'market' ? (
+            <StaffMarketTable
+              staffList={staffList}
+              loading={staffLoading}
+              currentClubId={currentClubId}
+              search={staffSearch}
+              roleFilter={staffRoleFilter}
+              page={staffPage}
+              totalPages={staffTotalPages}
+              onSearchChange={setStaffSearch}
+              onSearchSubmit={handleStaffSearchSubmit}
+              onRoleFilterChange={(role) => {
+                setStaffRoleFilter(role);
+                setStaffPage(1);
+              }}
+              onPageChange={setStaffPage}
+              onOpenHireModal={openHireStaffModal}
+            />
+          ) : (
+            <ClubStaffView
+              clubId={currentClubId}
+              cashBalance={cashBalance}
+              onNavigateToMarket={() => setStaffSubTab('market')}
+            />
+          )}
+        </div>
       )}
 
       {/* TAB 3: ĐỀ NGHỊ CHUYỂN NHƯỢNG */}
@@ -421,15 +474,22 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
       )}
 
       {/* MODAL 3: TUYỂN DỤNG NHÂN VIÊN */}
-      <StaffHireModal
-        staff={selectedStaffForHire}
-        cashBalance={cashBalance}
-        hiring={hiringStaff}
-        error={hireError}
-        success={hireSuccess}
-        onClose={() => setSelectedStaffForHire(null)}
-        onConfirm={handleHireStaff}
-      />
+      {/* MODAL CHI TIẾT & ĐỀ NGHỊ TUYỂN MỘ NHÂN SỰ */}
+      {selectedStaffForHire && (
+        <StaffDetailModal
+          staff={selectedStaffForHire}
+          staffList={staffList}
+          currentClubId={currentClubId}
+          cashBalance={cashBalance}
+          onClose={() => setSelectedStaffForHire(null)}
+          onSelectStaff={(st) => setSelectedStaffForHire(st)}
+          onOfferSuccess={() => {
+            loadStaff();
+            loadOffers();
+            onRefreshFinance();
+          }}
+        />
+      )}
     </div>
   );
 };
