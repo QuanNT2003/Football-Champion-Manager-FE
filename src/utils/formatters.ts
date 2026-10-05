@@ -58,3 +58,5 @@ export function formatNumber(num: number | string | null | undefined): string {
   if (isNaN(n)) return '0';
   return n.toLocaleString('vi-VN');
 }
+
+export { getFacepackUrl } from './image';

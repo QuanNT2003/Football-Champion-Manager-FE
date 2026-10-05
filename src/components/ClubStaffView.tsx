@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { transfersApi, StaffMarketItem } from '../services/transfers.service';
 import { StaffDetailModal } from './StaffDetailModal';
+import { getFacepackUrl } from '../utils/formatters';
 
 interface Props {
   clubId: string;
@@ -401,7 +402,7 @@ export const ClubStaffView: React.FC<Props> = ({
                   <div style={{ position: 'relative' }}>
                     {st.photoUrl ? (
                       <img
-                        src={st.photoUrl}
+                        src={getFacepackUrl(st.photoUrl)}
                         alt=""
                         style={{ width: 52, height: 52, borderRadius: '12px', objectFit: 'cover' }}
                       />

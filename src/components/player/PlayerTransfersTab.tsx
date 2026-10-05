@@ -10,7 +10,7 @@ interface Props {
 export const PlayerTransfersTab: React.FC<Props> = ({ detail }) => {
   return (
                 <div className="pm-transfers-view">
-                  <h4 className="pm-sub-title">≡ƒòÆ Transfer History</h4>
+                  <h4 className="pm-sub-title">🕒 Transfer History</h4>
                   <div className="pm-table-wrapper">
                     <table className="pm-data-table">
                       <thead>
@@ -26,7 +26,7 @@ export const PlayerTransfersTab: React.FC<Props> = ({ detail }) => {
                         {(!detail?.transfers?.history || detail.transfers.history.length === 0) ? (
                           <tr>
                             <td colSpan={5} style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
-                              Ch╞░a c├│ dß╗» liß╗çu chuyß╗ân nh╞░ß╗úng trong c╞í sß╗ƒ dß╗» liß╗çu
+                              Chưa có dữ liệu chuyển nhượng trong cơ sở dữ liệu
                             </td>
                           </tr>
                         ) : (detail.transfers.history.map((t, idx) => (
@@ -47,9 +47,9 @@ export const PlayerTransfersTab: React.FC<Props> = ({ detail }) => {
 
                   {/* Potential Upgrades */}
                   <div className="pm-potential-box">
-                    <h4 className="pm-sub-title">≡ƒôê Potential Upgrades</h4>
+                    <h4 className="pm-sub-title">📈 Potential Upgrades</h4>
                     <p className="pm-potential-desc">
-                      Nhß╗»ng cß║ºu thß╗º c├│ chß╗ë sß╗æ OVR v├á tiß╗üm n─âng t╞░╞íng tß╗▒ hiß╗çn ─æang c├│ mß║╖t tr├¬n thß╗ï tr╞░ß╗¥ng chuyß╗ân nh╞░ß╗úng hoß║╖c trong hß╗ìc viß╗çn b├│ng ─æ├í.
+                      Những cầu thủ có chỉ số OVR và tiềm năng tương tự hiện đang có mặt trên thị trường chuyển nhượng hoặc trong học viện bóng đá.
                     </p>
                   </div>
                 </div>

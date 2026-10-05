@@ -7,7 +7,7 @@ import { PlayerInjuriesTab } from './PlayerInjuriesTab';
 import { PlayerOfferTab } from './PlayerOfferTab';
 import React, { useState, useEffect } from 'react';
 import { Player, PlayerDetailData } from '../../types';
-import { formatCurrency, formatNumber } from '../../utils/formatters';
+import { formatCurrency, formatNumber, getFacepackUrl } from '../../utils/formatters';
 import { playersApi } from '../../services/players.service';
 import { transfersApi } from '../../services/transfers.service';
 import {
@@ -56,7 +56,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
   const [compared, setCompared] = useState<boolean>(false);
   const [skillCategory, setSkillCategory] = useState<'KEY' | 'ALL' | 'PHYSICAL' | 'TECHNICAL' | 'MENTAL' | 'GOALKEEPING'>('KEY');
 
-  // Kiß╗âm tra cß║ºu thß╗º c├│ thuß╗Öc CLB cß╗ºa ng╞░ß╗¥i d├╣ng kh├┤ng
+  // Kiểm tra cầu thủ có thuộc CLB của người dùng không
   const isOwnClub = Boolean(
     currentClubId && (
       String(player.club_id) === String(currentClubId) ||
@@ -66,7 +66,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
     )
   );
 
-  // Kiß╗âm tra cß║ºu thß╗º c├│ ─æang trong diß╗çn chuyß╗ân nh╞░ß╗úng (b├ín / m╞░ß╗ún / tß╗▒ do) kh├┤ng
+  // Kiểm tra cầu thủ có đang trong diện chuyển nhượng (bán / mượn / tự do) không
   const isTransferListed = Boolean(
     (player as any).is_transfer_listed ||
     player.player_status?.is_transfer_listed ||
@@ -85,7 +85,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
     (detail !== null && !detail.club)
   );
 
-  // Chß╗ë hiß╗ân thß╗ï tab Offer khi: Cß║ºu thß╗º KH├öNG thuß╗Öc CLB cß╗ºa m├¼nh V├Ç ─æang trong diß╗çn chuyß╗ân nh╞░ß╗úng
+  // Chỉ hiển thị tab Offer khi: Cầu thủ KHÔNG thuộc CLB của mình VÀ đang trong diện chuyển nhượng
   const isEligibleForOffer = !isOwnClub && (isTransferListed || isLoanListed || isFreeAgent);
 
   const [activeTab, setActiveTab] = useState<'skills' | 'matches' | 'statistics' | 'transfers' | 'injuries' | 'offer'>(() => {
@@ -181,14 +181,14 @@ export const PlayerDetailModal: React.FC<Props> = ({
       setCancellingOffer(true);
       setOfferError('');
       await transfersApi.cancelOffer(existingOffer.id, String(currentClubId));
-      setOfferSuccess('─É├ú hß╗ºy lß╗¥i ─æß╗ü nghß╗ï chuyß╗ân nh╞░ß╗úng th├ánh c├┤ng!');
+      setOfferSuccess('Đã hủy lời đề nghị chuyển nhượng thành công!');
       setExistingOffer({ ...existingOffer, status: 'CANCELLED' });
       setConfirmCancelModal(false);
       if (onOfferSuccess) {
         onOfferSuccess();
       }
     } catch (err: any) {
-      setOfferError(err.response?.data?.message || err.message || 'Kh├┤ng thß╗â hß╗ºy ─æß╗ü nghß╗ï.');
+      setOfferError(err.response?.data?.message || err.message || 'Không thể hủy đề nghị.');
     } finally {
       setCancellingOffer(false);
     }
@@ -199,17 +199,17 @@ export const PlayerDetailModal: React.FC<Props> = ({
     setOfferSuccess('');
 
     if (!currentClubId) {
-      setOfferError('Bß║ín cß║ºn quß║ún l├╜ mß╗Öt CLB ─æß╗â gß╗¡i ─æß╗ü nghß╗ï chuyß╗ân nh╞░ß╗úng!');
+      setOfferError('Bạn cần quản lý một CLB để gửi đề nghị chuyển nhượng!');
       return;
     }
     if (!isLoan && cashBalance !== undefined && offerAmount > cashBalance) {
-      setOfferError(`Ng├ón s├ích CLB kh├┤ng ─æß╗º! Bß║ín hiß╗çn c├│ Γé¼${cashBalance.toLocaleString()}, trong khi ph├¡ chuyß╗ân nh╞░ß╗úng ─æß╗ü xuß║Ñt l├á Γé¼${offerAmount.toLocaleString()}. Vui l├▓ng giß║úm mß╗⌐c gi├í hoß║╖c chß╗ìn m╞░ß╗ún cß║ºu thß╗º.`);
+      setOfferError(`Ngân sách CLB không đủ! Bạn hiện có €${cashBalance.toLocaleString()}, trong khi phí chuyển nhượng đề xuất là €${offerAmount.toLocaleString()}. Vui lòng giảm mức giá hoặc chọn mượn cầu thủ.`);
       return;
     }
     const targetPlayerId = (player as any).playerId || player.id;
     const targetClubId = (player as any).currentClub?.id || player.club_id || (player as any).club?.id;
     if (!targetClubId) {
-      setOfferError('Kh├┤ng x├íc ─æß╗ïnh ─æ╞░ß╗úc CLB chß╗º quß║ún cß╗ºa cß║ºu thß╗º.');
+      setOfferError('Không xác định được CLB chủ quản của cầu thủ.');
       return;
     }
 
@@ -226,8 +226,8 @@ export const PlayerDetailModal: React.FC<Props> = ({
 
       setOfferSuccess(
         isLoan
-          ? '─É├ú gß╗¡i lß╗¥i ─æß╗ü nghß╗ï m╞░ß╗ún cß║ºu thß╗º th├ánh c├┤ng tß╗¢i CLB chß╗º quß║ún!'
-          : '─É├ú gß╗¡i lß╗¥i ─æß╗ü nghß╗ï mua ─æß╗⌐t cß║ºu thß╗º th├ánh c├┤ng tß╗¢i CLB chß╗º quß║ún!'
+          ? 'Đã gửi lời đề nghị mượn cầu thủ thành công tới CLB chủ quản!'
+          : 'Đã gửi lời đề nghị mua đứt cầu thủ thành công tới CLB chủ quản!'
       );
       setExistingOffer({
         status: 'PENDING',
@@ -239,7 +239,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
         onOfferSuccess();
       }
     } catch (err: any) {
-      setOfferError(err.response?.data?.message || err.message || 'Kh├┤ng thß╗â gß╗¡i ─æß╗ü nghß╗ï chuyß╗ân nh╞░ß╗úng.');
+      setOfferError(err.response?.data?.message || err.message || 'Không thể gửi đề nghị chuyển nhượng.');
     } finally {
       setOfferSubmitting(false);
     }
@@ -289,32 +289,32 @@ export const PlayerDetailModal: React.FC<Props> = ({
   // Get skills dynamically based on DB attributes & position key attributes
   const getDisplayedSkills = () => {
     if (!detail?.skills) {
-      return { left: [], right: [], total: 0, label: 'Chß╗ë sß╗æ cß╗æt l├╡i' };
+      return { left: [], right: [], total: 0, label: 'Chỉ số cốt lõi' };
     }
 
     let list: any[] = [];
-    let label = 'Chß╗ë sß╗æ cß╗æt l├╡i vß╗ï tr├¡ (10)';
+    let label = 'Chỉ số cốt lõi vị trí (10)';
 
     if (skillCategory === 'KEY') {
       list = (detail.skills.key_attributes && detail.skills.key_attributes.length > 0)
         ? detail.skills.key_attributes
         : [...(detail.skills.left_column || []), ...(detail.skills.right_column || [])];
-      label = `Chß╗ë sß╗æ cß╗æt l├╡i vß╗ï tr├¡ (${list.length})`;
+      label = `Chỉ số cốt lõi vị trí (${list.length})`;
     } else if (skillCategory === 'PHYSICAL') {
       list = detail.skills.categories?.physical || [];
-      label = `Thß╗â chß║Ñt - Physical (${list.length})`;
+      label = `Thể chất - Physical (${list.length})`;
     } else if (skillCategory === 'TECHNICAL') {
       list = detail.skills.categories?.technical || [];
-      label = `Kß╗╣ thuß║¡t - Technical (${list.length})`;
+      label = `Kỹ thuật - Technical (${list.length})`;
     } else if (skillCategory === 'MENTAL') {
       list = detail.skills.categories?.mental || [];
-      label = `T├óm l├╜ & Nhß║¡n thß╗⌐c - Mental (${list.length})`;
+      label = `Tâm lý & Nhận thức - Mental (${list.length})`;
     } else if (skillCategory === 'GOALKEEPING') {
       list = detail.skills.categories?.goalkeeping || [];
-      label = `Kß╗╣ n─âng Thß╗º m├┤n - Goalkeeping (${list.length})`;
+      label = `Kỹ năng Thủ môn - Goalkeeping (${list.length})`;
     } else {
       list = detail.skills.all_attributes || [];
-      label = `Tß║Ñt cß║ú chß╗ë sß╗æ (${list.length})`;
+      label = `Tất cả chỉ số (${list.length})`;
     }
 
     const half = Math.ceil(list.length / 2);
@@ -330,10 +330,10 @@ export const PlayerDetailModal: React.FC<Props> = ({
   // Basic info from DB
   const pName = detail?.name || `${player.first_name} ${player.last_name}`.trim();
   const pAge = detail?.age ?? player.age ?? 20;
-  const pPos = detail?.primary_position?.name || detail?.position?.name || player.position?.name || 'Cß║ºu thß╗º';
+  const pPos = detail?.primary_position?.name || detail?.position?.name || player.position?.name || 'Cầu thủ';
   const pPosCode = detail?.primary_position?.code || detail?.position?.code || player.position?.code || '-';
   
-  // Chiß╗üu cao & C├ón nß║╖ng chuß║⌐n h├│a tß╗½ DB
+  // Chiều cao & Cân nặng chuẩn hóa từ DB
   const rawHeight = detail?.height || (player as any).height;
   const pHeight = rawHeight && rawHeight !== '-' 
     ? `${Math.round(parseFloat(String(rawHeight).replace(/[^\d.]/g, '')))} cm` 
@@ -344,17 +344,17 @@ export const PlayerDetailModal: React.FC<Props> = ({
     ? `${Math.round(parseFloat(String(rawWeight).replace(/[^\d.]/g, '')))} kg` 
     : '-';
 
-  // Ch├ón thuß║¡n
+  // Chân thuận
   const rawFoot = (detail?.preferred_foot || (player as any).preferred_foot || 'RIGHT').toUpperCase();
-  const pFoot = rawFoot === 'LEFT' ? 'Left (Tr├íi)' : rawFoot === 'BOTH' ? 'Both (Hai ch├ón)' : 'Right (Phß║úi)';
+  const pFoot = rawFoot === 'LEFT' ? 'Left (Trái)' : rawFoot === 'BOTH' ? 'Both (Hai chân)' : 'Right (Phải)';
 
-  // Danh tiß║┐ng & Tiß╗üm n─âng
+  // Danh tiếng & Tiềm năng
   const pReputation = detail?.reputation ?? player.reputation ?? 0;
   const pPotential = detail?.potential ?? player.potential ?? 0;
 
-  // ─Éiß╗âm OVR / Average Quality
+  // Điểm OVR / Average Quality
   const pQuality = (detail?.average_quality ?? player.overall_rating ?? 50.0).toFixed(2);
-  const pClubName = detail?.club?.name || player.club?.name || 'Tß╗▒ do';
+  const pClubName = detail?.club?.name || player.club?.name || 'Tự do';
   const pCountry = typeof detail?.nationality === 'object'
     ? (detail?.nationality as any)?.name
     : typeof player.nationality === 'object'
@@ -362,23 +362,23 @@ export const PlayerDetailModal: React.FC<Props> = ({
     : (detail?.nationality || player.nationality || '-');
   const pShirtNo = detail?.squad_number ?? player.squad_number ?? 1;
 
-  // Gi├í trß╗ï thß╗ï tr╞░ß╗¥ng v├á L╞░╞íng tuß║ºn d├╣ng chung h├ám formatCurrency duy nhß║Ñt
+  // Giá trị thị trường và Lương tuần dùng chung hàm formatCurrency duy nhất
   const pMarketValue = detail?.market_value ?? player.market_value;
   const pWorth = formatCurrency(pMarketValue);
 
   const pWeeklyWage = (detail as any)?.weekly_wage ?? (player.contract?.salary ? Math.round(Number(player.contract.salary) / 52) : null);
   const pWages = pWeeklyWage && pWeeklyWage > 0 
-    ? `${formatCurrency(pWeeklyWage)} / tuß║ºn` 
-    : (detail?.weekly_wages_display || 'Ch╞░a k├╜ H─É');
+    ? `${formatCurrency(pWeeklyWage)} / tuần` 
+    : (detail?.weekly_wages_display || 'Chưa ký HĐ');
 
-  // Hiß╗ân thß╗ï sao tiß╗üm n─âng theo thang chuß║⌐n 1-100 (mß╗ùi 20 ─æiß╗âm = 1 sao)
+  // Hiển thị sao tiềm năng theo thang chuẩn 1-100 (mỗi 20 điểm = 1 sao)
   const renderStars = (pot: number) => {
     const starCount = pot > 5 ? Math.min(5, Math.max(1, Math.round(pot / 20))) : Math.max(1, pot);
     const list = [];
     for (let i = 1; i <= 5; i++) {
       list.push(
         <span key={i} className={i <= starCount ? 'star-gold' : 'star-muted'}>
-          Γÿà
+          ★
         </span>
       );
     }
@@ -394,7 +394,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
             <button
               className="pm-nav-btn"
               onClick={handlePrev}
-              title="Cß║ºu thß╗º tr╞░ß╗¢c"
+              title="Cầu thủ trước"
               disabled={!hasPrev}
             >
               <ChevronLeft size={20} />
@@ -402,25 +402,25 @@ export const PlayerDetailModal: React.FC<Props> = ({
             <button
               className="pm-nav-btn"
               onClick={handleNext}
-              title="Cß║ºu thß╗º tiß║┐p theo"
+              title="Cầu thủ tiếp theo"
               disabled={!hasNext}
             >
               <ChevronRight size={20} />
             </button>
             <h2 className="pm-player-title">{pName}</h2>
-            <button className="pm-icon-btn" title="Chß╗ënh sß╗¡a t├¬n / biß╗çt danh">
+            <button className="pm-icon-btn" title="Chỉnh sửa tên / biệt danh">
               <Edit2 size={16} />
             </button>
             <button
               className={`pm-icon-btn ${isFavorite ? 'fav-active' : ''}`}
               onClick={() => setIsFavorite(!isFavorite)}
-              title="─É├ính dß║Ñu y├¬u th├¡ch"
+              title="Đánh dấu yêu thích"
             >
               <Star size={17} fill={isFavorite ? '#eab308' : 'none'} color={isFavorite ? '#eab308' : '#64748b'} />
             </button>
           </div>
 
-          <button className="pm-close-btn" onClick={onClose} title="─É├│ng">
+          <button className="pm-close-btn" onClick={onClose} title="Đóng">
             <X size={20} />
           </button>
         </div>
@@ -432,7 +432,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
             <div className="pm-avatar-box">
               {detail?.photo_url || player.photo_url ? (
                 <img
-                  src={detail?.photo_url || player.photo_url}
+                  src={getFacepackUrl(detail?.photo_url || player.photo_url)}
                   alt=""
                   className="pm-avatar-img"
                   onError={(e) => {
@@ -441,12 +441,12 @@ export const PlayerDetailModal: React.FC<Props> = ({
                 />
               ) : (
                 <div className="pm-avatar-placeholder">
-                  <span className="pm-placeholder-icon">≡ƒæñ</span>
+                  <span className="pm-placeholder-icon">👤</span>
                 </div>
               )}
             </div>
             {/* Jersey Badge */}
-            <div className="pm-jersey-badge" title={`Sß╗æ ├ío: ${pShirtNo}`}>
+            <div className="pm-jersey-badge" title={`Số áo: ${pShirtNo}`}>
               <span className="pm-jersey-num">{pShirtNo}</span>
             </div>
           </div>
@@ -536,35 +536,35 @@ export const PlayerDetailModal: React.FC<Props> = ({
             onClick={() => setActiveTab('skills')}
           >
             <Star size={15} />
-            <span>Kß╗╣ N─âng</span>
+            <span>Kỹ Năng</span>
           </button>
           <button
             className={`pm-tab-btn ${activeTab === 'matches' ? 'active' : ''}`}
             onClick={() => setActiveTab('matches')}
           >
             <Activity size={15} />
-            <span>Trß║¡n ─Éß║Ñu</span>
+            <span>Trận Đấu</span>
           </button>
           <button
             className={`pm-tab-btn ${activeTab === 'statistics' ? 'active' : ''}`}
             onClick={() => setActiveTab('statistics')}
           >
             <Award size={15} />
-            <span>Lß╗ïch Sß╗¡ C├íc M├╣a</span>
+            <span>Lịch Sử Các Mùa</span>
           </button>
           <button
             className={`pm-tab-btn ${activeTab === 'transfers' ? 'active' : ''}`}
             onClick={() => setActiveTab('transfers')}
           >
             <Coins size={15} />
-            <span>Chuyß╗ân Nh╞░ß╗úng</span>
+            <span>Chuyển Nhượng</span>
           </button>
           <button
             className={`pm-tab-btn ${activeTab === 'injuries' ? 'active' : ''}`}
             onClick={() => setActiveTab('injuries')}
           >
             <HeartPulse size={15} />
-            <span>Lß╗ïch Sß╗¡ Chß║Ñn Th╞░╞íng</span>
+            <span>Lịch Sử Chấn Thương</span>
           </button>
           {isEligibleForOffer && (
             <button
@@ -573,7 +573,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
               style={activeTab === 'offer' ? { color: '#16a34a', borderBottomColor: '#16a34a', fontWeight: 700 } : {}}
             >
               <Coins size={15} />
-              <span>─Éß╗ü Nghß╗ï Hß╗úp ─Éß╗ông (Offer)</span>
+              <span>Đề Nghị Hợp Đồng (Offer)</span>
             </button>
           )}
         </div>
@@ -583,7 +583,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
           {loading ? (
             <div className="pm-loading-state">
               <div className="pm-spinner" />
-              <span>─Éang tß║úi hß╗ô s╞í cß║ºu thß╗º...</span>
+              <span>Đang tải hồ sơ cầu thủ...</span>
             </div>
           ) : (
             <>
@@ -657,20 +657,20 @@ export const PlayerDetailModal: React.FC<Props> = ({
             Close
           </button>
         </div>
-        {/* MODAL X├üC NHß║¼N Hß╗ªY Lß╗£I ─Éß╗Ç NGHß╗è */}
+        {/* MODAL XÁC NHẬN HỦY LỜI ĐỀ NGHỊ */}
         <ConfirmModal
           isOpen={confirmCancelModal}
-          title="X├íc Nhß║¡n Hß╗ºy Lß╗¥i ─Éß╗ü Nghß╗ï"
+          title="Xác Nhận Hủy Lời Đề Nghị"
           variant="danger"
-          confirmText="─Éß╗ông ├¥ Hß╗ºy"
-          cancelText="Quay Lß║íi"
+          confirmText="Đồng Ý Hủy"
+          cancelText="Quay Lại"
           isLoading={cancellingOffer}
           onConfirm={executeCancelOffer}
           onClose={() => !cancellingOffer && setConfirmCancelModal(false)}
           message={
             <div>
               <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
-                Bß║ín c├│ chß║»c chß║»n muß╗æn r├║t lß║íi lß╗¥i ─æß╗ü nghß╗ï chuyß╗ân nh╞░ß╗úng ─æang chß╗¥ phß║ún hß╗ôi cho cß║ºu thß╗º n├áy kh├┤ng?
+                Bạn có chắc chắn muốn rút lại lời đề nghị chuyển nhượng đang chờ phản hồi cho cầu thủ này không?
               </p>
               <div
                 style={{
@@ -684,9 +684,9 @@ export const PlayerDetailModal: React.FC<Props> = ({
                   gap: '0.4rem',
                 }}
               >
-                <div>Cß║ºu thß╗º: <strong style={{ color: '#0f172a' }}>{player.name || player.common_name || (player.first_name ? player.first_name + ' ' + (player.last_name || '') : 'Cß║ºu thß╗º')}</strong></div>
-                <div>H├¼nh thß╗⌐c: <strong>{existingOffer && existingOffer.is_loan ? 'Cho M╞░ß╗ún' : 'Mua ─Éß╗⌐t'}</strong></div>
-                <div>Mß╗⌐c ph├¡ ho├án trß║ú: <strong style={{ color: '#dc2626' }}>{existingOffer && existingOffer.is_loan ? 'Γé¼0 (M╞░ß╗ún)' : 'Γé¼' + Number(existingOffer ? existingOffer.offer_amount : 0).toLocaleString()}</strong></div>
+                <div>Cầu thủ: <strong style={{ color: '#0f172a' }}>{player.name || player.common_name || (player.first_name ? player.first_name + ' ' + (player.last_name || '') : 'Cầu thủ')}</strong></div>
+                <div>Hình thức: <strong>{existingOffer && existingOffer.is_loan ? 'Cho Mượn' : 'Mua Đứt'}</strong></div>
+                <div>Mức phí hoàn trả: <strong style={{ color: '#dc2626' }}>{existingOffer && existingOffer.is_loan ? '€0 (Mượn)' : '€' + Number(existingOffer ? existingOffer.offer_amount : 0).toLocaleString()}</strong></div>
               </div>
             </div>
           }

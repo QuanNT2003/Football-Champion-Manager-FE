@@ -66,7 +66,7 @@ export const PlayerStatsTab: React.FC<Props> = ({ detail }) => {
                         {(!detail?.statistics?.seasons || detail.statistics.seasons.length === 0) ? (
                           <tr>
                             <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
-                              Ch╞░a c├│ thß╗æng k├¬ m├╣a giß║úi n├áo trong c╞í sß╗ƒ dß╗» liß╗çu
+                              Chưa có thống kê mùa giải nào trong cơ sở dữ liệu
                             </td>
                           </tr>
                         ) : (detail.statistics.seasons.map((s, idx) => (

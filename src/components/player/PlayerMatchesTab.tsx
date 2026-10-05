@@ -36,7 +36,7 @@ export const PlayerMatchesTab: React.FC<Props> = ({ detail }) => {
                         {(!detail?.matches?.list || detail.matches.list.length === 0) ? (
                           <tr>
                             <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
-                              Ch╞░a c├│ trß║¡n ─æß║Ñu n├áo ─æ╞░ß╗úc ghi nhß║¡n trong c╞í sß╗ƒ dß╗» liß╗çu
+                              Chưa có trận đấu nào được ghi nhận trong cơ sở dữ liệu
                             </td>
                           </tr>
                         ) : (detail.matches.list.map((m, idx) => (

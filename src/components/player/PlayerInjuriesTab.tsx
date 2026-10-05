@@ -15,10 +15,10 @@ export const PlayerInjuriesTab: React.FC<Props> = ({ detail }) => {
                       <div className="pm-status-alert pm-status-injured">
                         <AlertCircle size={20} />
                         <div>
-                          <strong>─Éang gß║╖p chß║Ñn th╞░╞íng: {detail.active_injury.injury_type}</strong>
+                          <strong>Đang gặp chấn thương: {detail.active_injury.injury_type}</strong>
                           <p>
-                            Mß╗⌐c ─æß╗Ö: {detail.active_injury.severity} ΓÇó Dß╗▒ kiß║┐n nghß╗ë thi ─æß║Ñu th├¬m{' '}
-                            {detail.active_injury.days_remaining} ng├áy nß╗»a.
+                            Mức độ: {detail.active_injury.severity} • Dự kiến nghỉ thi đấu thêm{' '}
+                            {detail.active_injury.days_remaining} ngày nữa.
                           </p>
                         </div>
                       </div>
@@ -26,30 +26,30 @@ export const PlayerInjuriesTab: React.FC<Props> = ({ detail }) => {
                       <div className="pm-status-alert pm-status-healthy">
                         <HeartPulse size={20} />
                         <div>
-                          <strong>Thß╗â trß║íng ho├án to├án khß╗Åe mß║ính</strong>
-                          <p>Cß║ºu thß╗º sß║╡n s├áng 100% cho mß╗ìi trß║¡n ─æß║Ñu v├á c├íc b├ái tß║¡p huß║Ñn luyß╗çn.</p>
+                          <strong>Thể trạng hoàn toàn khỏe mạnh</strong>
+                          <p>Cầu thủ sẵn sàng 100% cho mọi trận đấu và các bài tập huấn luyện.</p>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <h4 className="pm-sub-title">≡ƒôï Hß╗ô s╞í chß║Ñn th╞░╞íng trong sß╗▒ nghiß╗çp</h4>
+                  <h4 className="pm-sub-title">📋 Hồ sơ chấn thương trong sự nghiệp</h4>
                   <div className="pm-table-wrapper">
                     <table className="pm-data-table">
                       <thead>
                         <tr>
-                          <th>Loß║íi chß║Ñn th╞░╞íng</th>
-                          <th>Mß╗⌐c ─æß╗Ö</th>
-                          <th>Sß╗æ ng├áy nghß╗ë</th>
-                          <th>Thß╗¥i gian</th>
-                          <th className="text-right">T├¼nh trß║íng</th>
+                          <th>Loại chấn thương</th>
+                          <th>Mức độ</th>
+                          <th>Số ngày nghỉ</th>
+                          <th>Thời gian</th>
+                          <th className="text-right">Tình trạng</th>
                         </tr>
                       </thead>
                       <tbody>
                         {(!detail?.injuries_tab?.history || detail.injuries_tab.history.length === 0) ? (
                           <tr>
                             <td colSpan={5} style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
-                              Ch╞░a c├│ hß╗ô s╞í chß║Ñn th╞░╞íng n├áo trong c╞í sß╗ƒ dß╗» liß╗çu
+                              Chưa có hồ sơ chấn thương nào trong cơ sở dữ liệu
                             </td>
                           </tr>
                         ) : (detail.injuries_tab.history.map((inj) => (
@@ -66,13 +66,13 @@ export const PlayerInjuriesTab: React.FC<Props> = ({ detail }) => {
                                 }`}
                               >
                                 {inj.severity === 'SEVERE'
-                                  ? 'Nß║╖ng'
+                                  ? 'Nặng'
                                   : inj.severity === 'MODERATE'
-                                  ? 'Trung b├¼nh'
-                                  : 'Nhß║╣'}
+                                  ? 'Trung bình'
+                                  : 'Nhẹ'}
                               </span>
                             </td>
-                            <td>{inj.days_missed} ng├áy</td>
+                            <td>{inj.days_missed} ngày</td>
                             <td>{inj.season}</td>
                             <td className="text-right">
                               <span
@@ -80,7 +80,7 @@ export const PlayerInjuriesTab: React.FC<Props> = ({ detail }) => {
                                   inj.status === 'ACTIVE' ? 'tag-active' : 'tag-recovered'
                                 }`}
                               >
-                                {inj.status === 'ACTIVE' ? '─Éang ─æiß╗üu trß╗ï' : '─É├ú b├¼nh phß╗Ñc'}
+                                {inj.status === 'ACTIVE' ? 'Đang điều trị' : 'Đã bình phục'}
                               </span>
                             </td>
                           </tr>

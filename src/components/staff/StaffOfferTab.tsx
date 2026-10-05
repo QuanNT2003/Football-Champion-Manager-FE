@@ -53,9 +53,9 @@ export const StaffOfferTab: React.FC<Props> = ({
         }}
       >
         <UserCheck size={36} color="#16a34a" style={{ margin: '0 auto 0.5rem' }} />
-        <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: 800 }}>Nhân Sự Này Đang Thuộc CLB Của Bạn</h4>
+        <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: 800 }}>Nh�n Sự N�y Đang Thuộc CLB Của Bạn</h4>
         <p style={{ margin: 0, fontSize: '0.88rem', color: '#15803d' }}>
-          Hợp đồng hiện tại đang có hiệu lực với mức lương <strong>{formatMoney(detail?.currentContract?.salary || 0)} / tuần</strong>.
+          Hợp đồng hiện tại đang c� hiệu lực với mức lương <strong>{formatMoney(detail?.currentContract?.salary || 0)} / tuần</strong>.
         </p>
       </div>
     );
@@ -63,7 +63,7 @@ export const StaffOfferTab: React.FC<Props> = ({
 
   return (
     <div>
-      {/* Đề nghị đang chờ (nếu có) */}
+      {/* Đề nghị đang chờ (nếu c�) */}
       {detail?.existingOffer && (
         <div
           style={{
@@ -76,7 +76,7 @@ export const StaffOfferTab: React.FC<Props> = ({
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, color: '#b45309', fontSize: '0.9rem' }}>
-              <Clock size={16} /> Đang có lời đề nghị chờ phản hồi
+              <Clock size={16} /> Đang c� lời đề nghị chờ phản hồi
             </span>
             <span style={{ fontSize: '0.78rem', background: '#fef3c7', color: '#92400e', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
               {detail.existingOffer.status}
@@ -84,11 +84,11 @@ export const StaffOfferTab: React.FC<Props> = ({
           </div>
 
           <div style={{ fontSize: '0.84rem', color: '#78350f', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem' }}>
-            <div>Vai trò: <strong>{detail.existingOffer.role_offered || 'HLV'}</strong></div>
+            <div>Vai tr�: <strong>{detail.existingOffer.role_offered || 'HLV'}</strong></div>
             <div>Lương đề xuất: <strong>{formatMoney(detail.existingOffer.proposed_wage)} / tuần</strong></div>
             <div>Thời hạn: <strong>{detail.existingOffer.contract_years} năm</strong></div>
             {detail.existingOffer.signing_bonus > 0 && (
-              <div>Lót tay: <strong>{formatMoney(detail.existingOffer.signing_bonus)}</strong></div>
+              <div>L�t tay: <strong>{formatMoney(detail.existingOffer.signing_bonus)}</strong></div>
             )}
           </div>
 
@@ -108,7 +108,7 @@ export const StaffOfferTab: React.FC<Props> = ({
                 cursor: 'pointer',
               }}
             >
-              Hủy Đề Nghị Này
+              Hủy Đề Nghị N�y
             </button>
           </div>
         </div>
@@ -133,10 +133,10 @@ export const StaffOfferTab: React.FC<Props> = ({
         </h4>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-          {/* Vai trò */}
+          {/* Vai tr� */}
           <div>
             <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '0.35rem' }}>
-              Vai trò bổ nhiệm
+              Vai tr� bổ nhiệm
             </label>
             <select
               value={roleOffered}
@@ -146,10 +146,10 @@ export const StaffOfferTab: React.FC<Props> = ({
               <option value="HEAD_COACH">HLV Trưởng</option>
               <option value="ASSISTANT_COACH">Trợ Lý HLV</option>
               <option value="FITNESS_COACH">HLV Thể Lực</option>
-              <option value="GOALKEEPING_COACH">HLV Thủ Môn</option>
-              <option value="SCOUT">Tuyển Trạch Viên</option>
-              <option value="PHYSIO">Bác Sĩ / Trị Liệu</option>
-              <option value="YOUTH_DIRECTOR">GĐ Đào Tạo Trẻ</option>
+              <option value="GOALKEEPING_COACH">HLV Thủ M�n</option>
+              <option value="SCOUT">Tuyển Trạch Vi�n</option>
+              <option value="PHYSIO">B�c Sĩ / Trị Liệu</option>
+              <option value="YOUTH_DIRECTOR">GĐ Đ�o Tạo Trẻ</option>
             </select>
           </div>
 
@@ -166,7 +166,7 @@ export const StaffOfferTab: React.FC<Props> = ({
               style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}
             />
             <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.2rem' }}>
-              Mức lương ước tính: {formatMoney(detail?.estimatedWage || 0)} / tuần
+              Mức lương ước t�nh: {formatMoney(detail?.estimatedWage || 0)} / tuần
             </div>
           </div>
 
@@ -188,10 +188,10 @@ export const StaffOfferTab: React.FC<Props> = ({
             </select>
           </div>
 
-          {/* Phí lót tay */}
+          {/* Ph� l�t tay */}
           <div>
             <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '0.35rem' }}>
-              Phí lót tay ký hợp đồng (€)
+              Ph� l�t tay ký hợp đồng (€)
             </label>
             <input
               type="number"
@@ -203,7 +203,7 @@ export const StaffOfferTab: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Nút gửi */}
+        {/* N�t gửi */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
           <button
             type="button"

@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
+  Briefcase,
 } from 'lucide-react';
 import {
   transfersApi,
@@ -17,6 +18,7 @@ import { LicenseBadge } from '../common/LicenseBadge';
 import { StaffSkillsTab } from './StaffSkillsTab';
 import { StaffHistoryTab } from './StaffHistoryTab';
 import { StaffOfferTab } from './StaffOfferTab';
+import { getFacepackUrl } from '../../utils/formatters';
 
 export interface Props {
   staff: StaffMarketItem;
@@ -171,178 +173,153 @@ export const StaffDetailModal: React.FC<Props> = ({
     }
   };
 
+  const fullPhotoUrl = getFacepackUrl(staff.photoUrl);
+
   return (
-    <div className="player-modal-backdrop" onClick={onClose}>
+    <div className="player-modal-overlay" onClick={onClose}>
       <div
-        className="player-modal-container"
-        style={{ maxWidth: '960px', width: '92%' }}
+        className="player-modal-dialog"
+        style={{ maxWidth: '920px', width: '95%' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* MODAL HEADER */}
-        <div className="pm-header">
-          <div className="pm-header-left">
-            {/* Avatar & Badges */}
-            <div style={{ position: 'relative' }}>
-              {staff.photoUrl ? (
+        {/* Top Control Bar */}
+        <div className="pm-topbar">
+          <div className="pm-topbar-left">
+            <button
+              type="button"
+              className="pm-nav-btn"
+              disabled={!hasPrev}
+              onClick={handlePrev}
+              title="Nhân viên trước"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              type="button"
+              className="pm-nav-btn"
+              disabled={!hasNext}
+              onClick={handleNext}
+              title="Nhân viên tiếp theo"
+            >
+              <ChevronRight size={20} />
+            </button>
+            <h2 className="pm-player-title">{staff.name}</h2>
+            <RoleBadge role={staff.staffType} />
+            <LicenseBadge license={staff.coachingLicense} size="sm" />
+          </div>
+
+          <button
+            type="button"
+            className="pm-close-btn"
+            onClick={onClose}
+            title="Đóng modal"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Staff Profile Header Card */}
+        <div className="pm-header-card">
+          {/* Avatar with Badges */}
+          <div className="pm-avatar-container">
+            <div className="pm-avatar-box">
+              {fullPhotoUrl ? (
                 <img
-                  src={staff.photoUrl}
+                  src={fullPhotoUrl}
                   alt={staff.name}
-                  style={{ width: 64, height: 64, borderRadius: '14px', objectFit: 'cover' }}
+                  className="pm-avatar-img"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                  }}
                 />
               ) : (
-                <div
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: '14px',
-                    background: 'linear-gradient(135deg, #1e293b, #0f172a)',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 900,
-                    fontSize: '1.5rem',
-                  }}
-                >
-                  {staff.name.charAt(0)}
+                <div className="pm-avatar-placeholder">
+                  <span className="pm-placeholder-icon">👤</span>
                 </div>
               )}
-              <div style={{ position: 'absolute', bottom: -6, right: -6 }}>
-                <LicenseBadge license={staff.coachingLicense} size="sm" />
-              </div>
-            </div>
-
-            <div className="pm-name-section">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <h2 className="pm-player-name" style={{ margin: 0 }}>
-                  {staff.name}
-                </h2>
-                <RoleBadge role={staff.staffType} />
-              </div>
-
-              <div className="pm-meta-row" style={{ marginTop: '0.35rem', gap: '0.75rem' }}>
-                <span className="pm-meta-item">
-                  {staff.countryFlag && (
-                    <img src={staff.countryFlag} alt="" style={{ width: 16, height: 11, borderRadius: 2 }} />
-                  )}
-                  <span>{staff.nationality || staff.countryCode}</span>
-                </span>
-                <span className="pm-meta-item">
-                  <span>Triết lý: </span>
-                  <strong style={{ color: '#16a34a' }}>{staff.tacticalStyle || 'BALANCED'}</strong>
-                </span>
-                <span className="pm-meta-item">
-                  <span>Sơ đồ: </span>
-                  <strong>{staff.preferredFormation?.name || '4-3-3'}</strong>
-                </span>
-                <span className="pm-meta-item">
-                  <span>Danh tiếng: </span>
-                  {renderStars(staff.reputation)}
-                </span>
-              </div>
             </div>
           </div>
 
-          <div className="pm-header-right">
-            <div className="pm-header-nav">
-              <button
-                type="button"
-                className="pm-nav-btn"
-                disabled={!hasPrev}
-                onClick={handlePrev}
-                title="Nhân viên trước"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button
-                type="button"
-                className="pm-nav-btn"
-                disabled={!hasNext}
-                onClick={handleNext}
-                title="Nhân viên kế tiếp"
-              >
-                <ChevronRight size={18} />
-              </button>
-              <button
-                type="button"
-                className="pm-close-btn"
-                onClick={onClose}
-                title="Đóng modal"
-              >
-                <X size={20} />
-              </button>
+          {/* Column 1: Nationality, Tactical Style, Preferred Formation */}
+          <div className="pm-info-col">
+            <div className="pm-info-row">
+              <span className="pm-label">Quốc tịch:</span>
+              <span className="pm-value" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {staff.countryFlag && (
+                  <img src={staff.countryFlag} alt="" style={{ width: 16, height: 11, borderRadius: 2 }} />
+                )}
+                <span>{staff.nationality || staff.countryCode || 'Quốc tế'}</span>
+              </span>
             </div>
+            <div className="pm-info-row">
+              <span className="pm-label">Triết lý:</span>
+              <span className="pm-value pm-val-bold" style={{ color: '#16a34a' }}>
+                {staff.tacticalStyle || 'BALANCED'}
+              </span>
+            </div>
+            <div className="pm-info-row">
+              <span className="pm-label">Sơ đồ ưa thích:</span>
+              <span className="pm-value pm-val-bold">
+                {staff.preferredFormation?.name || '4-3-3'}
+              </span>
+            </div>
+          </div>
 
-            <div className="pm-wage-box" style={{ marginTop: '0.4rem', textAlign: 'right' }}>
-              <div style={{ fontSize: '0.72rem', color: '#64748b' }}>Lương tuần hiện tại</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#16a34a' }}>
-                {formatMoney(staff.wage)} / tuần
+          {/* Column 2: Reputation, Current Club, Weekly Wages */}
+          <div className="pm-info-col">
+            <div className="pm-info-row">
+              <span className="pm-label">Danh tiếng:</span>
+              <div className="pm-stars-wrap">
+                {renderStars(staff.reputation)}
               </div>
+            </div>
+            <div className="pm-info-row">
+              <span className="pm-label">CLB hiện tại:</span>
+              <span className="pm-value">
+                {detail?.currentContract?.club?.name || 'Tự do (Free Agent)'}
+              </span>
+            </div>
+            <div className="pm-info-row">
+              <span className="pm-label">Lương hiện tại:</span>
+              <span className="pm-value pm-val-bold" style={{ color: '#047857' }}>
+                {formatMoney(staff.wage)} / tuần
+              </span>
             </div>
           </div>
         </div>
 
-        {/* MODAL TABS NAVIGATION */}
-        <div className="pm-tabs-bar" style={{ padding: '0 1.5rem', background: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
+        {/* Navigation Tabs */}
+        <div className="pm-tabs-bar">
           <button
             type="button"
             className={`pm-tab-btn ${activeTab === 'skills' ? 'active' : ''}`}
-            style={{
-              padding: '0.75rem 1.15rem',
-              fontWeight: 700,
-              fontSize: '0.88rem',
-              border: 'none',
-              background: 'transparent',
-              cursor: 'pointer',
-              borderBottom: activeTab === 'skills' ? '3px solid #16a34a' : '3px solid transparent',
-              color: activeTab === 'skills' ? '#16a34a' : '#64748b',
-            }}
             onClick={() => setActiveTab('skills')}
           >
-            Chỉ Số Kỹ Năng
+            <Star size={15} />
+            <span>Chỉ Số Kỹ Năng</span>
           </button>
           <button
             type="button"
             className={`pm-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-            style={{
-              padding: '0.75rem 1.15rem',
-              fontWeight: 700,
-              fontSize: '0.88rem',
-              border: 'none',
-              background: 'transparent',
-              cursor: 'pointer',
-              borderBottom: activeTab === 'history' ? '3px solid #16a34a' : '3px solid transparent',
-              color: activeTab === 'history' ? '#16a34a' : '#64748b',
-            }}
             onClick={() => setActiveTab('history')}
           >
-            Lịch Sử CLB
+            <Briefcase size={15} />
+            <span>Lịch Sử CLB</span>
           </button>
           <button
             type="button"
             className={`pm-tab-btn ${activeTab === 'offer' ? 'active' : ''}`}
-            style={{
-              padding: '0.75rem 1.15rem',
-              fontWeight: 700,
-              fontSize: '0.88rem',
-              border: 'none',
-              background: 'transparent',
-              cursor: 'pointer',
-              borderBottom: activeTab === 'offer' ? '3px solid #16a34a' : '3px solid transparent',
-              color: activeTab === 'offer' ? '#16a34a' : '#64748b',
-            }}
             onClick={() => setActiveTab('offer')}
           >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-              <Sparkles size={15} /> Đề Nghị Tuyển Mộ
-            </span>
+            <Sparkles size={15} />
+            <span>Đề Nghị Tuyển Mộ</span>
           </button>
         </div>
 
-        {/* MODAL BODY */}
-        <div className="pm-body" style={{ maxHeight: 'calc(85vh - 160px)', overflowY: 'auto', padding: '1.5rem' }}>
+        {/* Modal Body Content */}
+        <div className="pm-body" style={{ maxHeight: 'calc(90vh - 240px)', overflowY: 'auto', padding: '1.25rem' }}>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: '3.5rem', color: '#64748b' }}>
               <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.75rem' }} />
               <div>Đang tải hồ sơ nhân sự...</div>
             </div>

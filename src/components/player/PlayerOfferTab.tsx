@@ -59,7 +59,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
 }) => {
   return (
                 <div style={{ padding: '0.5rem 0.25rem' }}>
-                  {/* Alert th├┤ng b├ío kß║┐t quß║ú */}
+                  {/* Alert thông báo kết quả */}
                   {offerSuccess && (
                     <div
                       style={{
@@ -102,11 +102,11 @@ export const PlayerOfferTab: React.FC<Props> = ({
                     </div>
                   )}
 
-                  {/* Banner tß║úi ─æß╗ü nghß╗ï tr╞░ß╗¢c ─æ├│ */}
+                  {/* Banner tải đề nghị trước đó */}
                   {loadingOffer && (
                     <div style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <div className="spinner" style={{ width: 14, height: 14 }} />
-                      <span>─Éang kiß╗âm tra lß╗¥i ─æß╗ü nghß╗ï tr╞░ß╗¢c ─æ├│ cß╗ºa bß║ín cho cß║ºu thß╗º n├áy...</span>
+                      <span>Đang kiểm tra lời đề nghị trước đó của bạn cho cầu thủ này...</span>
                     </div>
                   )}
 
@@ -126,10 +126,10 @@ export const PlayerOfferTab: React.FC<Props> = ({
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span style={{ fontSize: '1.15rem' }}>
-                            {existingOffer.status === 'PENDING' ? 'ΓÅ│' : existingOffer.status === 'ACCEPTED' ? 'Γ£à' : existingOffer.status === 'REJECTED' ? 'Γ¥î' : 'Γä╣∩╕Å'}
+                            {existingOffer.status === 'PENDING' ? '⏳' : existingOffer.status === 'ACCEPTED' ? '✅' : existingOffer.status === 'REJECTED' ? '❌' : 'ℹ️'}
                           </span>
                           <strong style={{ fontSize: '0.95rem', color: existingOffer.status === 'PENDING' ? '#b45309' : existingOffer.status === 'ACCEPTED' ? '#15803d' : existingOffer.status === 'REJECTED' ? '#b91c1c' : '#475569' }}>
-                            {existingOffer.status === 'PENDING' ? 'Bß║ín ─æang c├│ mß╗Öt lß╗¥i ─æß╗ü nghß╗ï chß╗¥ phß║ún hß╗ôi' : existingOffer.status === 'ACCEPTED' ? 'Lß╗¥i ─æß╗ü nghß╗ï cß╗ºa bß║ín ─æ├ú ─æ╞░ß╗úc chß║Ñp thuß║¡n!' : existingOffer.status === 'REJECTED' ? 'Lß╗¥i ─æß╗ü nghß╗ï tr╞░ß╗¢c ─æ├│ ─æ├ú bß╗ï tß╗½ chß╗æi' : 'Lß╗¥i ─æß╗ü nghß╗ï tr╞░ß╗¢c ─æ├│ ─æ├ú bß╗ï hß╗ºy'}
+                            {existingOffer.status === 'PENDING' ? 'Bạn đang có một lời đề nghị chờ phản hồi' : existingOffer.status === 'ACCEPTED' ? 'Lời đề nghị của bạn đã được chấp thuận!' : existingOffer.status === 'REJECTED' ? 'Lời đề nghị trước đó đã bị từ chối' : 'Lời đề nghị trước đó đã bị hủy'}
                           </strong>
                         </div>
                         <span
@@ -149,10 +149,10 @@ export const PlayerOfferTab: React.FC<Props> = ({
                       </div>
 
                       <div style={{ fontSize: '0.86rem', color: '#1e293b', display: 'flex', gap: '1.5rem', flexWrap: 'wrap', background: 'rgba(255,255,255,0.85)', padding: '0.6rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.06)' }}>
-                        <div>H├¼nh thß╗⌐c: <strong>{existingOffer.is_loan ? 'Cho M╞░ß╗ún' : 'Mua ─Éß╗⌐t'}</strong></div>
-                        <div>Ph├¡ ─æß╗ü nghß╗ï: <strong style={{ color: '#15803d' }}>{existingOffer.is_loan ? 'Γé¼0 (M╞░ß╗ún)' : `Γé¼${Number(existingOffer.offer_amount || 0).toLocaleString()}`}</strong></div>
-                        <div>L╞░╞íng cam kß║┐t: <strong style={{ color: '#d97706' }}>Γé¼{Number(existingOffer.proposed_wage || 0).toLocaleString()} / tuß║ºn</strong></div>
-                        <div>Thß╗¥i hß║ín: <strong>{existingOffer.contract_years || 3} n─âm</strong></div>
+                        <div>Hình thức: <strong>{existingOffer.is_loan ? 'Cho Mượn' : 'Mua Đứt'}</strong></div>
+                        <div>Phí đề nghị: <strong style={{ color: '#15803d' }}>{existingOffer.is_loan ? '€0 (Mượn)' : `€${Number(existingOffer.offer_amount || 0).toLocaleString()}`}</strong></div>
+                        <div>Lương cam kết: <strong style={{ color: '#d97706' }}>€{Number(existingOffer.proposed_wage || 0).toLocaleString()} / tuần</strong></div>
+                        <div>Thời hạn: <strong>{existingOffer.contract_years || 3} năm</strong></div>
                       </div>
 
                       {existingOffer.status === 'PENDING' && (
@@ -164,7 +164,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                             className="btn btn-xs btn-danger flex-center"
                             style={{ gap: '0.35rem', padding: '0.45rem 0.85rem', fontWeight: 700 }}
                           >
-                            {cancellingOffer ? '─Éang hß╗ºy...' : 'Γ£ò Hß╗ªY ─Éß╗Ç NGHß╗è N├ÇY'}
+                            {cancellingOffer ? 'Đang hủy...' : '✕ HỦY ĐỀ NGHỊ NÀY'}
                           </button>
                         </div>
                       )}
@@ -172,7 +172,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                   )}
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }}>
-                    {/* PHß║ªN 1: ─Éß╗Ç NGHß╗è CHO CLB */}
+                    {/* PHẦN 1: ĐỀ NGHỊ CHO CLB */}
                     <div
                       style={{
                         padding: '1.25rem',
@@ -187,17 +187,17 @@ export const PlayerOfferTab: React.FC<Props> = ({
                     >
                       <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
                         <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          ≡ƒÅó Phß║ºn 1: ─Éß╗ü Nghß╗ï Cho CLB Chß╗º Quß║ún
+                          Đề Nghị Cho CLB Chủ Quản
                         </h4>
                         <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
-                          Thß╗Åa thuß║¡n h├¼nh thß╗⌐c chuyß╗ân giao v├á mß╗⌐c ph├¡ chuyß╗ân nh╞░ß╗úng
+                          Thỏa thuận hình thức chuyển giao và mức phí chuyển nhượng
                         </div>
                       </div>
 
-                      {/* Loß║íi chuyß╗ân nh╞░ß╗úng: Mua ─æß╗⌐t / M╞░ß╗ún */}
+                      {/* Loại chuyển nhượng: Mua đứt / Mượn */}
                       <div>
                         <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>
-                          H├¼nh thß╗⌐c chuyß╗ân nh╞░ß╗úng:
+                          Hình thức chuyển nhượng:
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                           <button
@@ -219,7 +219,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                               transition: 'all 0.2s',
                             }}
                           >
-                            ≡ƒö╡ Mua ─Éß╗⌐t (Permanent)
+                            🔵 Mua Đứt (Permanent)
                           </button>
 
                           <button
@@ -241,20 +241,20 @@ export const PlayerOfferTab: React.FC<Props> = ({
                               transition: 'all 0.2s',
                             }}
                           >
-                            ≡ƒƒí M╞░ß╗ún Cß║ºu Thß╗º (Loan)
+                            🟡 Mượn Cầu Thủ (Loan)
                           </button>
                         </div>
                       </div>
 
-                      {/* Nß║┐u l├á MUA ─Éß╗¿T: Hiß╗ân thß╗ï ├┤ nhß║¡p gi├í chuyß╗ân nh╞░ß╗úng */}
+                      {/* Nếu là MUA ĐỨT: Hiển thị ô nhập giá chuyển nhượng */}
                       {!isLoan ? (
                         <div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                             <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
-                              Ph├¡ chuyß╗ân nh╞░ß╗úng ─æß╗ü nghß╗ï (Γé¼):
+                              Phí chuyển nhượng đề nghị (€):
                             </label>
                             <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                              ─Éß╗ïnh gi├í: <strong>Γé¼{Number((player as any).asking_price || player.market_value || 2500000).toLocaleString()}</strong>
+                              Định giá: <strong>€{Number((player as any).asking_price || player.market_value || 2500000).toLocaleString()}</strong>
                             </span>
                           </div>
 
@@ -275,7 +275,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                               }}
                             />
                             <span style={{ position: 'absolute', right: 12, top: 10, fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
-                              Γé¼{(offerAmount / 1000000).toFixed(2)}M
+                              €{(offerAmount / 1000000).toFixed(2)}M
                             </span>
                           </div>
 
@@ -286,40 +286,40 @@ export const PlayerOfferTab: React.FC<Props> = ({
                               className="btn btn-xs btn-outline"
                               onClick={() => setOfferAmount(Number((player as any).asking_price || player.market_value || 2500000))}
                             >
-                              Theo gi├í thß╗ï tr╞░ß╗¥ng
+                              Theo giá thị trường
                             </button>
                             <button
                               type="button"
                               className="btn btn-xs btn-outline"
                               onClick={() => setOfferAmount(Math.max(0, offerAmount - 500000))}
                             >
-                              -Γé¼500K
+                              -€500K
                             </button>
                             <button
                               type="button"
                               className="btn btn-xs btn-outline"
                               onClick={() => setOfferAmount(offerAmount + 500000)}
                             >
-                              +Γé¼500K
+                              +€500K
                             </button>
                             <button
                               type="button"
                               className="btn btn-xs btn-outline"
                               onClick={() => setOfferAmount(offerAmount + 1000000)}
                             >
-                              +Γé¼1.0M
+                              +€1.0M
                             </button>
                             <button
                               type="button"
                               className="btn btn-xs btn-outline"
                               onClick={() => setOfferAmount(offerAmount + 5000000)}
                             >
-                              +Γé¼5.0M
+                              +€5.0M
                             </button>
                           </div>
                         </div>
                       ) : (
-                        /* Nß║┐u l├á M╞»ß╗óN: KH├öNG C├ô ├ö NHß║¼P GI├ü */
+                        /* Nếu là MƯỢN: KHÔNG CÓ Ô NHẬP GIÁ */
                         <div
                           style={{
                             padding: '1rem',
@@ -331,15 +331,15 @@ export const PlayerOfferTab: React.FC<Props> = ({
                             lineHeight: 1.5,
                           }}
                         >
-                          <strong>Γä╣∩╕Å M╞░ß╗ún cß║ºu thß╗º kh├┤ng mß║Ñt ph├¡ chuyß╗ân nh╞░ß╗úng:</strong>
+                          <strong>ℹ️ Mượn cầu thủ không mất phí chuyển nhượng:</strong>
                           <p style={{ margin: '4px 0 0 0', color: '#854d0e' }}>
-                            CLB chß╗º quß║ún ─æß╗ông ├╜ cho m╞░ß╗ún m├á kh├┤ng thu ph├¡ chuyß╗ân nh╞░ß╗úng. Bß║ín chß╗ë cß║ºn thß╗Åa thuß║¡n thß╗¥i hß║ín m╞░ß╗ún v├á chi trß║ú l╞░╞íng cß║ºu thß╗º ß╗ƒ Phß║ºn 2.
+                            CLB chủ quản đồng ý cho mượn mà không thu phí chuyển nhượng. Bạn chỉ cần thỏa thuận thời hạn mượn và chi trả lương cầu thủ ở Phần 2.
                           </p>
                         </div>
                       )}
                     </div>
 
-                    {/* PHß║ªN 2: THß╗ÄA THUß║¼N Hß╗óP ─Éß╗ÆNG Cß║ªU THß╗ª */}
+                    {/* PHẦN 2: THỎA THUẬN HỢP ĐỒNG CẦU THỦ */}
                     <div
                       style={{
                         padding: '1.25rem',
@@ -354,17 +354,17 @@ export const PlayerOfferTab: React.FC<Props> = ({
                     >
                       <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
                         <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          Γ£ì∩╕Å Phß║ºn 2: Thß╗Åa Thuß║¡n Hß╗úp ─Éß╗ông Cß║ºu Thß╗º
+                          Thỏa Thuận Hợp Đồng Cầu Thủ
                         </h4>
                         <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
-                          ─Éiß╗üu khoß║ún ─æ├úi ngß╗Ö v├á cam kß║┐t thß╗¥i gian gß║»n b├│ vß╗¢i CLB
+                          Điều khoản đãi ngộ và cam kết thời gian gắn bó với CLB
                         </div>
                       </div>
 
-                      {/* Thß╗¥i gian hß╗úp ─æß╗ông */}
+                      {/* Thời gian hợp đồng */}
                       <div>
                         <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>
-                          Thß╗¥i gian hß╗úp ─æß╗ông:
+                          Thời gian hợp đồng:
                         </label>
                         {!isLoan ? (
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.35rem' }}>
@@ -386,7 +386,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                                   textAlign: 'center',
                                 }}
                               >
-                                {yr} N─âm
+                                {yr} Năm
                               </button>
                             ))}
                           </div>
@@ -408,7 +408,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                                 textAlign: 'center',
                               }}
                             >
-                              Nß╗¡a M├╣a (20 ng├áy)
+                              Nửa Mùa (20 ngày)
                             </button>
                             <button
                               type="button"
@@ -426,20 +426,20 @@ export const PlayerOfferTab: React.FC<Props> = ({
                                 textAlign: 'center',
                               }}
                             >
-                              Cß║ú M├╣a Giß║úi (40 ng├áy)
+                              Cả Mùa Giải (40 ngày)
                             </button>
                           </div>
                         )}
                       </div>
 
-                      {/* L╞░╞íng cß║ºu thß╗º */}
+                      {/* Lương cầu thủ */}
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                           <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
-                            Mß╗⌐c l╞░╞íng ─æß╗ü nghß╗ï (Γé¼/tuß║ºn):
+                            Mức lương đề nghị (€/tuần):
                           </label>
                           <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                            L╞░╞íng ─æß╗ü xuß║Ñt: <strong>Γé¼{Math.round(Number((player as any).asking_price || player.market_value || 2500000) * 0.005).toLocaleString()}</strong>
+                            Lương đề xuất: <strong>€{Math.round(Number((player as any).asking_price || player.market_value || 2500000) * 0.005).toLocaleString()}</strong>
                           </span>
                         </div>
 
@@ -460,46 +460,46 @@ export const PlayerOfferTab: React.FC<Props> = ({
                             }}
                           />
                           <span style={{ position: 'absolute', right: 12, top: 10, fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
-                            / tuß║ºn
+                            / tuần
                           </span>
                         </div>
 
-                        {/* N├║t chß╗ënh l╞░╞íng nhanh */}
+                        {/* Nút chỉnh lương nhanh */}
                         <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.6rem', flexWrap: 'wrap' }}>
                           <button
                             type="button"
                             className="btn btn-xs btn-outline"
                             onClick={() => setProposedWage(Math.round(Number((player as any).asking_price || player.market_value || 2500000) * 0.005))}
                           >
-                            L╞░╞íng chuß║⌐n
+                            Lương chuẩn
                           </button>
                           <button
                             type="button"
                             className="btn btn-xs btn-outline"
                             onClick={() => setProposedWage(Math.max(500, proposedWage - 1000))}
                           >
-                            -Γé¼1,000
+                            -€1,000
                           </button>
                           <button
                             type="button"
                             className="btn btn-xs btn-outline"
                             onClick={() => setProposedWage(proposedWage + 1000)}
                           >
-                            +Γé¼1,000
+                            +€1,000
                           </button>
                           <button
                             type="button"
                             className="btn btn-xs btn-outline"
                             onClick={() => setProposedWage(proposedWage + 5000)}
                           >
-                            +Γé¼5,000
+                            +€5,000
                           </button>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Tß╗öNG Kß║╛T & X├üC NHß║¼N Gß╗¼I ─ÉI */}
+                  {/* TỔNG KẾT & XÁC NHẬN GỬI ĐI */}
                   <div
                     style={{
                       marginTop: '1.5rem',
@@ -515,32 +515,32 @@ export const PlayerOfferTab: React.FC<Props> = ({
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.82rem', color: '#64748b' }}>T├│m tß║»t chi ph├¡ giao dß╗ïch:</div>
+                      <div style={{ fontSize: '0.82rem', color: '#64748b' }}>Tóm tắt chi phí giao dịch:</div>
                       <div style={{ display: 'flex', gap: '1.25rem', marginTop: '4px', flexWrap: 'wrap' }}>
                         <div>
-                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Ph├¡ chuyß╗ân nh╞░ß╗úng: </span>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Phí chuyển nhượng: </span>
                           <strong style={{ fontSize: '0.95rem', color: isLoan ? '#854d0e' : '#15803d' }}>
-                            {isLoan ? 'Γé¼0 (M╞░ß╗ún)' : `Γé¼${offerAmount.toLocaleString()}`}
+                            {isLoan ? '€0 (Mượn)' : `€${offerAmount.toLocaleString()}`}
                           </strong>
                         </div>
                         <div>
-                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>L╞░╞íng cam kß║┐t: </span>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Lương cam kết: </span>
                           <strong style={{ fontSize: '0.95rem', color: '#d97706' }}>
-                            Γé¼{proposedWage.toLocaleString()} / tuß║ºn
+                            €{proposedWage.toLocaleString()} / tuần
                           </strong>
                         </div>
                         {cashBalance !== undefined && (
                           <div>
-                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Ng├ón s├ích CLB: </span>
+                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Ngân sách CLB: </span>
                             <strong style={{ fontSize: '0.95rem', color: cashBalance >= (isLoan ? 0 : offerAmount) ? '#16a34a' : '#dc2626' }}>
-                              Γé¼{cashBalance.toLocaleString()}
+                              €{cashBalance.toLocaleString()}
                             </strong>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Cß║únh b├ío kh├┤ng ─æß╗º ng├ón s├ích */}
+                    {/* Cảnh báo không đủ ngân sách */}
                     {!isLoan && cashBalance !== undefined && offerAmount > cashBalance && (
                       <div
                         style={{
@@ -559,7 +559,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                       >
                         <AlertCircle size={16} color="#dc2626" />
                         <span>
-                          Ng├ón s├ích CLB (Γé¼{cashBalance.toLocaleString()}) kh├┤ng ─æß╗º ─æß╗â trß║ú ph├¡ chuyß╗ân nh╞░ß╗úng (Γé¼{offerAmount.toLocaleString()})! Vui l├▓ng giß║úm mß╗⌐c gi├í ─æß╗ü nghß╗ï hoß║╖c chß╗ìn h├¼nh thß╗⌐c m╞░ß╗ún.
+                          Ngân sách CLB (€{cashBalance.toLocaleString()}) không đủ để trả phí chuyển nhượng (€{offerAmount.toLocaleString()})! Vui lòng giảm mức giá đề nghị hoặc chọn hình thức mượn.
                         </span>
                       </div>
                     )}
@@ -582,12 +582,12 @@ export const PlayerOfferTab: React.FC<Props> = ({
                       {offerSubmitting ? (
                         <>
                           <div className="spinner" style={{ width: 16, height: 16 }} />
-                          <span>─Éang gß╗¡i ─æß╗ü nghß╗ï...</span>
+                          <span>Đang gửi đề nghị...</span>
                         </>
                       ) : (
                         <>
                           <CheckCircle2 size={18} />
-                          <span>X├íc Nhß║¡n Gß╗¡i Lß╗¥i ─Éß╗ü Nghß╗ï</span>
+                          <span>Xác Nhận Gửi Lời Đề Nghị</span>
                         </>
                       )}
                     </button>

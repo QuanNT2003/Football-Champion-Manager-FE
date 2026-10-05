@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getPosCategory } from './PositionBadge';
+import { getFacepackUrl } from '../../utils/image';
 
 interface PlayerAvatarProps {
   name: string;
@@ -14,15 +15,18 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   photoUrl,
   className = ''
 }) => {
+  const [imgError, setImgError] = useState(false);
   const category = getPosCategory(position);
   const initial = (name || 'P').charAt(0).toUpperCase();
+  const fullPhotoUrl = getFacepackUrl(photoUrl);
 
-  if (photoUrl && photoUrl !== '/assets/players/default.png') {
+  if (fullPhotoUrl && fullPhotoUrl !== '/assets/players/default.png' && !imgError) {
     return (
       <img
-        src={photoUrl}
+        src={fullPhotoUrl}
         alt={name}
         className={`player-avatar-sm avatar-pos-${category} ${className}`}
+        onError={() => setImgError(true)}
       />
     );
   }

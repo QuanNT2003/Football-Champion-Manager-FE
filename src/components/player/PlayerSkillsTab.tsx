@@ -28,46 +28,46 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'KEY' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('KEY')}
-                      title="10 Chß╗ë sß╗æ cß╗æt l├╡i theo vß╗ï tr├¡ thi ─æß║Ñu (Hß╗ç sß╗æ x3 OVR)"
+                      title="10 Chỉ số cốt lõi theo vị trí thi đấu (Hệ số x3 OVR)"
                     >
-                      Γ¡É Cß╗æt l├╡i vß╗ï tr├¡ (10)
+                      ⭐ Cốt lõi vị trí (10)
                     </button>
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'PHYSICAL' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('PHYSICAL')}
-                      title="Chß╗ë sß╗æ thß╗â chß║Ñt & sß╗⌐c mß║ính"
+                      title="Chỉ số thể chất & sức mạnh"
                     >
-                      ≡ƒÅâ Thß╗â chß║Ñt (10)
+                      🏃 Thể chất (10)
                     </button>
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'TECHNICAL' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('TECHNICAL')}
-                      title="Chß╗ë sß╗æ kß╗╣ thuß║¡t xß╗¡ l├╜ b├│ng"
+                      title="Chỉ số kỹ thuật xử lý bóng"
                     >
-                      ΓÜ╜ Kß╗╣ thuß║¡t (10)
+                      ⚽ Kỹ thuật (10)
                     </button>
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'MENTAL' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('MENTAL')}
-                      title="Chß╗ë sß╗æ t├óm l├╜ & nh├ún quan chiß║┐n thuß║¡t"
+                      title="Chỉ số tâm lý & nhãn quan chiến thuật"
                     >
-                      ≡ƒºá T├óm l├╜ (10)
+                      🧠 Tâm lý (10)
                     </button>
                     {(pPosCode === 'GK' || (detail?.skills?.categories?.goalkeeping?.some((g: any) => g.value > 0))) && (
                       <button
                         className={`pm-subnav-btn ${skillCategory === 'GOALKEEPING' ? 'active' : ''}`}
                         onClick={() => setSkillCategory('GOALKEEPING')}
-                        title="Chß╗ë sß╗æ chuy├¬n m├┤n thß╗º m├┤n"
+                        title="Chỉ số chuyên môn thủ môn"
                       >
-                        ≡ƒºñ Thß╗º m├┤n (10)
+                        🧤 Thủ môn (10)
                       </button>
                     )}
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'ALL' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('ALL')}
-                      title="To├án bß╗Ö 40 chß╗ë sß╗æ trong CSDL"
+                      title="Toàn bộ 40 chỉ số trong CSDL"
                     >
-                      ≡ƒôï Tß║Ñt cß║ú (40)
+                      📋 Tất cả (40)
                     </button>
                   </div>
 
@@ -78,7 +78,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                       {displayedSkills.left.map((sk: any) => (
                         <div key={sk.id || sk.code} className="pm-skill-item" title={sk.description || `${sk.name} (${sk.code})`}>
                           <span className="pm-skill-name">
-                            {sk.is_key && <span className="pm-key-star" title="Chß╗ë sß╗æ cß╗æt l├╡i vß╗ï tr├¡">Γ¡É </span>}
+                            {sk.is_key && <span className="pm-key-star" title="Chỉ số cốt lõi vị trí">⭐ </span>}
                             <strong className="pm-skill-code">[{sk.code}]</strong> {sk.name}
                           </span>
                           <div className="pm-skill-bar-wrap">
@@ -105,7 +105,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                       {displayedSkills.right.map((sk: any) => (
                         <div key={sk.id || sk.code} className="pm-skill-item" title={sk.description || `${sk.name} (${sk.code})`}>
                           <span className="pm-skill-name">
-                            {sk.is_key && <span className="pm-key-star" title="Chß╗ë sß╗æ cß╗æt l├╡i vß╗ï tr├¡">Γ¡É </span>}
+                            {sk.is_key && <span className="pm-key-star" title="Chỉ số cốt lõi vị trí">⭐ </span>}
                             <strong className="pm-skill-code">[{sk.code}]</strong> {sk.name}
                           </span>
                           <div className="pm-skill-bar-wrap">
@@ -129,9 +129,9 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                   </div>
 
                   <div className="pm-skills-total-row">
-                    <span className="pm-total-label">Tß╗òng ─æiß╗âm {displayedSkills.label}:</span>
+                    <span className="pm-total-label">Tổng điểm {displayedSkills.label}:</span>
                     <span className="pm-total-val">{displayedSkills.total}</span>
-                    <span className="pm-calc-icon">≡ƒº«</span>
+                    <span className="pm-calc-icon">🧮</span>
                   </div>
 
                   {/* Skills Bottom Row: Progress Chart & Comparison Tool */}
@@ -146,7 +146,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                           if (pts.length < 2) {
                             return (
                               <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.82rem' }}>
-                                Ch╞░a c├│ dß╗» liß╗çu lß╗ïch sß╗¡ t─âng tr╞░ß╗ƒng trong CSDL
+                                Chưa có dữ liệu lịch sử tăng trưởng trong CSDL
                               </div>
                             );
                           }
@@ -230,7 +230,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                         onClick={() => setCompared(!compared)}
                       >
                         <Plus size={16} />
-                        <span>{compared ? '─É├ú th├¬m (1/3)' : 'Add this Player (0/3)'}</span>
+                        <span>{compared ? 'Đã thêm (1/3)' : 'Add this Player (0/3)'}</span>
                       </button>
                     </div>
                   </div>
