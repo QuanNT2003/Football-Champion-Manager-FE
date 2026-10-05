@@ -3,14 +3,14 @@ import { getPosCategory } from './PositionBadge';
 import { getFacepackUrl } from '../../utils/image';
 
 interface PlayerAvatarProps {
-  name: string;
+  name?: string;
   position?: string;
   photoUrl?: string;
   className?: string;
 }
 
 export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
-  name,
+  name = 'P',
   position = 'MID',
   photoUrl,
   className = ''
@@ -32,7 +32,16 @@ export const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   }
 
   return (
-    <div className={`player-avatar-sm avatar-pos-${category} ${className}`}>
+    <div
+      className={`player-avatar-sm avatar-pos-${category} ${className}`}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 700,
+        fontSize: '0.85rem',
+      }}
+    >
       {initial}
     </div>
   );

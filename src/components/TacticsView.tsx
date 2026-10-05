@@ -1,3 +1,5 @@
+import { PlayerAvatar } from './common/PlayerAvatar';
+import { getFacepackUrl } from '../utils/formatters';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Club, Formation, FormationPosition, Player } from '../types';
 import { tacticsApi } from '../services/tactics.service';
@@ -602,6 +604,14 @@ export const TacticsView: React.FC<Props> = ({
                 const isSelected = selectedSlotId === pos.id.toString();
                 const posColor = getPosColorClass(pos.slot_code);
 
+                // Format tên trên sa bàn gọn gàng, không bị lỗi '. John Lee'
+                const displayName = assignedPlayer
+                  ? (assignedPlayer.common_name?.trim() ||
+                     (assignedPlayer.first_name && assignedPlayer.last_name
+                       ? `${assignedPlayer.first_name.charAt(0)}. ${assignedPlayer.last_name}`
+                       : assignedPlayer.name || 'Cầu thủ'))
+                  : pos.slot_code;
+
                 return (
                   <div
                     key={pos.id}
@@ -610,20 +620,47 @@ export const TacticsView: React.FC<Props> = ({
                     onClick={() => handleSlotClick(pos.id.toString())}
                     title={assignedPlayer ? `${assignedPlayer.name} (OVR: ${getPlayerOvr(assignedPlayer)})` : pos.slot_code}
                   >
-                    <div className={`token-circle ${posColor} ${isGK ? 'gk' : ''}`}>
-                      <span className="token-number">
-                        {assignedPlayer?.squad_number || pos.order_no || '•'}
-                      </span>
+                    {/* KHUNG AVATAR + SỐ ÁO + OVR KHÔNG ĐÈ LÊN MẶT */}
+                    <div className="token-avatar-wrap">
+                      <div className={`token-circle ${posColor} ${isGK ? 'gk' : ''}`}>
+                        {assignedPlayer?.photo_url ? (
+                          <img
+                            src={getFacepackUrl(assignedPlayer.photo_url)}
+                            alt=""
+                            className="token-face-img"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <span className="token-empty-initial">
+                            {assignedPlayer?.squad_number || pos.slot_code}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Số áo: Huy hiệu nhỏ góc dưới bên trái, không che mặt */}
+                      {assignedPlayer?.squad_number && (
+                        <span className="token-number-badge" title={`Số áo: ${assignedPlayer.squad_number}`}>
+                          {assignedPlayer.squad_number}
+                        </span>
+                      )}
+
+                      {/* OVR: Huy hiệu nhỏ góc trên bên phải */}
                       {assignedPlayer && (
-                        <span className="token-ovr-badge">{getPlayerOvr(assignedPlayer)}</span>
+                        <span className="token-ovr-badge" title={`OVR: ${getPlayerOvr(assignedPlayer)}`}>
+                          {getPlayerOvr(assignedPlayer)}
+                        </span>
                       )}
                     </div>
-                    <div className="token-label">
-                      {assignedPlayer
-                        ? assignedPlayer.common_name || `${assignedPlayer.first_name?.[0] || ''}. ${assignedPlayer.last_name || assignedPlayer.name}`
-                        : pos.slot_code}
+
+                    {/* THẺ TÊN VÀ VỊ TRÍ GỌN GÀNG LIỀN KHỐI BÊN DƯỚI */}
+                    <div className="token-info-pill">
+                      <span className={`token-pos-tag ${posColor}`}>{pos.slot_code}</span>
+                      <span className="token-player-name" title={assignedPlayer?.name || pos.slot_code}>
+                        {displayName}
+                      </span>
                     </div>
-                    <span className="token-slot-code">{pos.slot_code}</span>
                   </div>
                 );
               })}
@@ -705,6 +742,14 @@ export const TacticsView: React.FC<Props> = ({
                     {slot.slot_code}
                   </span>
 
+                  {player && (
+                    <PlayerAvatar
+                      name={player.name}
+                      position={slot.slot_code}
+                      photoUrl={player.photo_url}
+                    />
+                  )}
+
                   <div className="slot-player-info">
                     {player ? (
                       <>
@@ -781,6 +826,12 @@ export const TacticsView: React.FC<Props> = ({
                     <span className={`slot-code-badge ${posColor}`}>
                       {getPlayerPos(bp) || 'SUB'}
                     </span>
+
+                    <PlayerAvatar
+                      name={bp.name}
+                      position={getPlayerPos(bp) || 'MID'}
+                      photoUrl={bp.photo_url}
+                    />
 
                     <div className="bench-info">
                       <div className="player-main-line">

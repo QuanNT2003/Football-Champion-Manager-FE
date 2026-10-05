@@ -1,3 +1,4 @@
+import { PlayerAvatar } from './common/PlayerAvatar';
 import React, { useState } from 'react';
 import { Player } from '../types';
 import { formatCurrency } from '../utils/formatters';
@@ -145,20 +146,11 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{
-                          width: '34px',
-                          height: '34px',
-                          borderRadius: '50%',
-                          background: '#f0fdf4',
-                          border: '1.5px solid #bbf7d0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '15px',
-                          flexShrink: 0
-                        }}>
-                          ⚽
-                        </div>
+                        <PlayerAvatar
+                          name={playerName}
+                          position={posCode}
+                          photoUrl={player.photo_url}
+                        />
                         <div>
                           <strong style={{ display: 'block', color: '#0f172a', fontSize: '0.95rem' }}>{playerName}</strong>
                           <span style={{ fontSize: '0.75rem', color: '#64748b' }}>

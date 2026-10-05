@@ -211,7 +211,7 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
                         className="player-info-cell cursor-pointer"
                         onClick={() => onSelectPlayer(p)}
                       >
-                        <PlayerAvatar name={playerName} position={pos} />
+                        <PlayerAvatar name={playerName} position={pos} photoUrl={p.photo_url} />
                         <div style={{ minWidth: 0, overflow: 'hidden' }}>
                           <div
                             style={{
