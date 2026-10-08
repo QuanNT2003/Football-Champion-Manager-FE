@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import { PlayerAvatar } from './common/PlayerAvatar';
 import { getFacepackUrl } from '../utils/formatters';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -43,26 +44,27 @@ const getPlayerPos = (p: any): string => {
   return p.position?.code || p.player_positions?.[0]?.position?.code || '';
 };
 
-const formatDateTime = (dateStr?: string) => {
-  if (!dateStr) return 'Chưa lưu';
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return dateStr;
-  return new Intl.DateTimeFormat('vi-VN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    timeZone: 'Asia/Ho_Chi_Minh',
-  }).format(d);
-};
-
 export const TacticsView: React.FC<Props> = ({
+
   club,
   players = [],
   formations: initialFormations,
   onSaveTactics,
 }) => {
+  const { t } = useTranslation();
+  const formatDateTime = (dateStr?: string) => {
+    if (!dateStr) return t('tactics.not_saved', 'Chưa lưu');
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return dateStr;
+    return new Intl.DateTimeFormat('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'Asia/Ho_Chi_Minh',
+    }).format(d);
+  };
   const [formations, setFormations] = useState<Formation[]>(initialFormations || []);
   const [selectedFormationId, setSelectedFormationId] = useState<string>('1');
   const [mentality, setMentality] = useState<string>('BALANCED');
@@ -132,7 +134,7 @@ export const TacticsView: React.FC<Props> = ({
 
           setSavedTacticInfo({
             id: tacticRes.id?.toString(),
-            name: tacticRes.name || 'Đội hình chính',
+            name: tacticRes.name || t('tactics.default_tactic_name', 'Đội hình chính'),
             updatedAt: tacticRes.updated_at,
             formationId: formId,
           });
@@ -413,7 +415,7 @@ export const TacticsView: React.FC<Props> = ({
     setLineupMap(newLineup);
     setSelectedSlotId(null);
     setIsModified(true);
-    setSavedSuccess('Đã tự động tối ưu hóa đội hình theo OVR và vị trí!');
+    setSavedSuccess(t('tactics.auto_optimize_success', 'Đã tự động tối ưu hóa đội hình theo OVR và vị trí!'));
     setTimeout(() => setSavedSuccess(''), 3000);
   };
 
@@ -461,16 +463,16 @@ export const TacticsView: React.FC<Props> = ({
       // Update saved DB status
       setSavedTacticInfo({
         id: res?.tactic?.id?.toString() || savedTacticInfo?.id,
-        name: res?.tactic?.name || 'Đội hình chính',
+        name: res?.tactic?.name || t('tactics.default_tactic_name', 'Đội hình chính'),
         updatedAt: new Date().toISOString(),
         formationId: selectedFormationId,
       });
 
       setIsModified(false);
-      setSavedSuccess('Đã cập nhật chiến thuật và đội hình thành công vào CSDL!');
+      setSavedSuccess(t('tactics.save_success', 'Đã cập nhật chiến thuật và đội hình thành công vào CSDL!'));
       setTimeout(() => setSavedSuccess(''), 3500);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Không thể lưu chiến thuật');
+      alert(err.response?.data?.message || t('tactics.save_failed', 'Không thể lưu chiến thuật'));
     } finally {
       setSaving(false);
     }
@@ -505,34 +507,34 @@ export const TacticsView: React.FC<Props> = ({
 
           <div className="coach-panel-info">
             <div className="coach-title-row">
-              <span className="badge-coach-role">HLV TRƯỞNG (HEAD COACH)</span>
+              <span className="badge-coach-role">{t('tactics.coach_card')}</span>
               <span className="badge-coach-license">
-                <Award size={13} /> BẰNG {headCoach?.coachingLicense || 'PRO'}
+                <Award size={13} /> {t('tactics.license')} {headCoach?.coachingLicense || 'PRO'}
               </span>
             </div>
-            <h3 className="coach-name">{headCoach?.name || 'Huấn luyện viên trưởng'}</h3>
+            <h3 className="coach-name">{headCoach?.name || t('tactics.head_coach_default', 'Huấn luyện viên trưởng')}</h3>
             <div className="coach-meta-row">
               <span className="coach-style">
-                <Flame size={13} /> Triết lý: <strong>{headCoach?.tacticalStyle || 'CÂN BẰNG'}</strong>
+                <Flame size={13} /> {t('tactics.philosophy')}: <strong>{headCoach?.tacticalStyle || 'CÂN BẰNG'}</strong>
               </span>
               <span className="coach-rep">
-                ⭐ Danh tiếng: <strong>{(headCoach?.reputation || 6000).toLocaleString()}</strong>
+                ⭐ {t('tactics.reputation')}: <strong>{(headCoach?.reputation || 6000).toLocaleString()}</strong>
               </span>
             </div>
           </div>
 
           <div className="coach-panel-action">
             <div className="coach-pref-box">
-              <small>Sơ đồ ưa thích của HLV</small>
+              <small>{t('tactics.favorite_formation')}</small>
               <strong>{headCoach?.preferredFormation?.name || '4-4-2 Classic'}</strong>
             </div>
             <button
               type="button"
               className="btn-apply-coach-tactic"
               onClick={handleApplyCoachFormation}
-              title="Áp dụng ngay sơ đồ và triết lý bóng đá của HLV trưởng"
+              title={t('tactics.apply_coach_tooltip', 'Áp dụng ngay sơ đồ và triết lý bóng đá của HLV trưởng')}
             >
-              <Zap size={14} /> Áp Dụng Sơ Đồ HLV
+              <Zap size={14} /> {t('tactics.apply_coach_formation')}
             </button>
           </div>
         </div>
@@ -545,22 +547,22 @@ export const TacticsView: React.FC<Props> = ({
               <div className="db-badge-wrap">
                 {isModified ? (
                   <span className="badge-sync warning">
-                    <AlertCircle size={13} /> CÓ THAY ĐỔI CHƯA LƯU
+                    <AlertCircle size={13} /> {t('tactics.unsaved_changes')}
                   </span>
                 ) : (
                   <span className="badge-sync synced">
-                    <CheckCircle2 size={13} /> ĐÃ ĐỒNG BỘ CSDL
+                    <CheckCircle2 size={13} /> {t('tactics.saved_synced')}
                   </span>
                 )}
               </div>
               <span className="db-info-text">
-                Chiến thuật: <strong>{savedTacticInfo?.name || 'Đội hình chính'}</strong> · Lần lưu cuối: <em>{formatDateTime(savedTacticInfo?.updatedAt)}</em>
+                {t('tactics.tactic_label', 'Chiến thuật:')} <strong>{savedTacticInfo?.name || t('tactics.default_tactic_name', 'Đội hình chính')}</strong> · {t('tactics.last_saved', 'Lần lưu cuối:')} <em>{formatDateTime(savedTacticInfo?.updatedAt)}</em>
               </span>
             </div>
 
             <div className="status-bar-right">
               <span className="tactic-current-tag">
-                Sơ đồ: <strong>{currentFormation?.name}</strong> ({currentFormation?.code})
+                {t('tactics.formation_label', 'Sơ đồ:')} <strong>{currentFormation?.name}</strong> ({currentFormation?.code})
               </span>
             </div>
           </div>
@@ -576,9 +578,9 @@ export const TacticsView: React.FC<Props> = ({
             <div className="tactics-swap-hint">
               <ArrowUpDown size={15} />
               <span>
-                Đang chọn vị trí <strong>{lineupMap[selectedSlotId]?.name || 'Vị trí'}</strong>: Click một cầu thủ khác trên sân để đổi chỗ, hoặc click cầu thủ dự bị bên phải để thay người!
+                {t('tactics.selecting_slot_prompt', 'Đang chọn vị trí {slot}: Click một cầu thủ khác trên sân để đổi chỗ, hoặc click cầu thủ dự bị bên phải để thay người!').replace('{slot}', lineupMap[selectedSlotId]?.name || 'Slot')}
               </span>
-              <button type="button" onClick={() => setSelectedSlotId(null)}>Hủy chọn</button>
+              <button type="button" onClick={() => setSelectedSlotId(null)}>{t('tactics.deselect', 'Hủy chọn')}</button>
             </div>
           )}
 
@@ -593,7 +595,7 @@ export const TacticsView: React.FC<Props> = ({
               <div className="pitch-goal-top" />
               <div className="pitch-penalty-bottom" />
               <div className="pitch-goal-bottom" />
-              <div className="pitch-direction-hint">HƯỚNG TẤN CÔNG ⬆</div>
+              <div className="pitch-direction-hint">{t('tactics.attack_direction')}</div>
 
               {/* Player Tokens on Pitch */}
               {currentFormation?.formation_positions?.map((pos: FormationPosition) => {
@@ -609,7 +611,7 @@ export const TacticsView: React.FC<Props> = ({
                   ? (assignedPlayer.common_name?.trim() ||
                      (assignedPlayer.first_name && assignedPlayer.last_name
                        ? `${assignedPlayer.first_name.charAt(0)}. ${assignedPlayer.last_name}`
-                       : assignedPlayer.name || 'Cầu thủ'))
+                       : assignedPlayer.name || t('common.player', 'Cầu thủ')))
                   : pos.slot_code;
 
                 return (
@@ -641,7 +643,7 @@ export const TacticsView: React.FC<Props> = ({
 
                       {/* Số áo: Huy hiệu nhỏ góc dưới bên trái, không che mặt */}
                       {assignedPlayer?.squad_number && (
-                        <span className="token-number-badge" title={`Số áo: ${assignedPlayer.squad_number}`}>
+                        <span className="token-number-badge" title={t('tactics.shirt_tooltip', 'Số áo: {num}').replace('{num}', String(assignedPlayer.squad_number))}>
                           {assignedPlayer.squad_number}
                         </span>
                       )}
@@ -675,7 +677,7 @@ export const TacticsView: React.FC<Props> = ({
               onClick={() => setShowFormationModal(true)}
             >
               <Compass size={16} />
-              <span>Đổi Sơ Đồ ({currentFormation?.code || 'Sơ đồ'})</span>
+              <span>{t('tactics.change_formation_btn', 'Đổi Sơ Đồ ({code})').replace('{code}', currentFormation?.code || '')}</span>
             </button>
 
             <button
@@ -684,17 +686,17 @@ export const TacticsView: React.FC<Props> = ({
               onClick={() => setShowTacticsModal(true)}
             >
               <Sliders size={16} />
-              <span>Chỉ Đạo Lối Chơi</span>
+              <span>{t('tactics.instructions')}</span>
             </button>
 
             <button
               type="button"
               className="btn-tactic-action btn-outline"
               onClick={handleAutoOptimize}
-              title="Tự động xếp 11 cầu thủ tốt nhất vào đúng vị trí"
+              title={t('tactics.auto_pick_tooltip', 'Tự động xếp 11 cầu thủ tốt nhất vào đúng vị trí')}
             >
               <Sparkles size={16} />
-              <span>Tối Ưu Đội Hình</span>
+              <span>{t('tactics.optimize')}</span>
             </button>
 
             <button
@@ -704,7 +706,7 @@ export const TacticsView: React.FC<Props> = ({
               disabled={saving}
             >
               {saving ? <Loader2 className="spinner-icon" size={16} /> : <Save size={16} />}
-              <span>{saving ? 'Đang lưu vào CSDL...' : 'Lưu Đội Hình & Chiến Thuật'}</span>
+              <span>{saving ? t('tactics.saving') : t('tactics.save_btn')}</span>
             </button>
           </div>
         </section>
@@ -714,8 +716,8 @@ export const TacticsView: React.FC<Props> = ({
       <aside className="tactics-lineup-sidebar glass-panel">
         <div className="sidebar-header">
           <div>
-            <h3>DANH SÁCH RA SÂN & DỰ BỊ</h3>
-            <p>11 Cầu thủ đá chính · {benchPlayers.length} Cầu thủ dự bị</p>
+            <h3>{t('tactics.starting_and_bench')}</h3>
+            <p>{t('tactics.starters_count', '11 Cầu thủ đá chính')} · {t('tactics.subs_count', '{count} Cầu thủ dự bị').replace('{count}', String(benchPlayers.length))}</p>
           </div>
         </div>
 
@@ -723,7 +725,7 @@ export const TacticsView: React.FC<Props> = ({
         <div className="lineup-section">
           <div className="section-title">
             <UserCheck size={16} color="#059669" />
-            <span>ĐỘI HÌNH RA SÂN (STARTING XI - 11 CẦU THỦ)</span>
+            <span>{t('tactics.starting_11')}</span>
           </div>
 
           <div className="lineup-slot-list">
@@ -758,11 +760,11 @@ export const TacticsView: React.FC<Props> = ({
                           <span className="player-num">#{player.squad_number || '•'}</span>
                         </div>
                         <div className="player-sub-line">
-                          <span>Sở trường: {getPlayerPos(player) || slot.slot_code}</span>
+                          <span>{t('tactics.role_pref', 'Sở trường:')} {getPlayerPos(player) || slot.slot_code}</span>
                         </div>
                       </>
                     ) : (
-                      <span className="slot-empty-text">Chưa xếp cầu thủ</span>
+                      <span className="slot-empty-text">{t('tactics.empty_slot')}</span>
                     )}
                   </div>
 
@@ -773,7 +775,7 @@ export const TacticsView: React.FC<Props> = ({
                     <button
                       type="button"
                       className="btn-swap-slot"
-                      title="Chọn vị trí này để đổi người"
+                      title={t('tactics.select_slot_tooltip', 'Chọn vị trí này để đổi người')}
                     >
                       <ArrowUpDown size={14} />
                     </button>
@@ -789,7 +791,7 @@ export const TacticsView: React.FC<Props> = ({
           <div className="section-title-wrap">
             <div className="section-title">
               <UserX size={16} color="#64748b" />
-              <span>GHẾ DỰ BỊ ({benchPlayers.length})</span>
+              <span>{t('tactics.bench_title')} ({benchPlayers.length})</span>
             </div>
 
             <div className="bench-filter-tabs">
@@ -810,7 +812,7 @@ export const TacticsView: React.FC<Props> = ({
             {benchPlayers.length === 0 ? (
               <div className="bench-empty-box">
                 <Info size={18} />
-                <span>Không có cầu thủ dự bị phù hợp bộ lọc</span>
+                <span>{t('tactics.no_subs_filter', 'Không có cầu thủ dự bị phù hợp bộ lọc')}</span>
               </div>
             ) : (
               benchPlayers.map((bp) => {
@@ -838,13 +840,13 @@ export const TacticsView: React.FC<Props> = ({
                         <strong className="player-name">{bp.name}</strong>
                         <span className="player-num">#{bp.squad_number || '•'}</span>
                       </div>
-                      <span className="player-age-foot">{bp.age || 20} tuổi · Chân {(bp as any).preferred_foot === 'LEFT' ? 'Trái' : (bp as any).preferred_foot === 'BOTH' ? '2 chân' : 'Phải'}</span>
+                      <span className="player-age-foot">{t('tactics.age_years', '{age} tuổi').replace('{age}', String(bp.age || 20))} · {(bp as any).preferred_foot === 'LEFT' ? t('tactics.foot_left', 'Trái') : (bp as any).preferred_foot === 'BOTH' ? t('tactics.foot_both', '2 chân') : t('tactics.foot_right', 'Phải')}</span>
                     </div>
 
                     <div className="bench-right">
                       <span className="bench-ovr">{getPlayerOvr(bp)}</span>
                       {selectedSlotId && (
-                        <button type="button" className="btn-sub-in">VÀO SÂN</button>
+                        <button type="button" className="btn-sub-in">{t('tactics.sub_in')}</button>
                       )}
                     </div>
                   </div>
@@ -861,8 +863,8 @@ export const TacticsView: React.FC<Props> = ({
           <div className="tactics-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="tactics-modal-header">
               <div>
-                <h3>CHỌN SƠ ĐỒ ĐỘI HÌNH THI ĐẤU</h3>
-                <p>Khám phá và áp dụng các sơ đồ chiến thuật kinh điển</p>
+                <h3>{t('tactics.modal_formation_title')}</h3>
+                <p>{t('tactics.formation_modal_desc', 'Khám phá và áp dụng các sơ đồ chiến thuật kinh điển')}</p>
               </div>
               <button className="btn-close-modal" onClick={() => setShowFormationModal(false)}>
                 <X size={18} />
@@ -874,7 +876,7 @@ export const TacticsView: React.FC<Props> = ({
                 <div className="coach-pref-text">
                   <Trophy size={18} color="#b45309" />
                   <div>
-                    <strong>Sơ đồ ưa thích của HLV {headCoach.name}</strong>
+                    <strong>{t('tactics.coach_fav_formation', 'Sơ đồ ưa thích của HLV {name}').replace('{name}', headCoach.name)}</strong>
                     <span>{headCoach.preferredFormation.name} ({headCoach.preferredFormation.code})</span>
                   </div>
                 </div>
@@ -883,8 +885,8 @@ export const TacticsView: React.FC<Props> = ({
                   className="btn btn-sm btn-primary"
                   onClick={() => handleFormationChange(headCoach.preferredFormation.id.toString())}
                 >
-                  Áp Dụng Ngay
-                </button>
+                {t('tactics.apply_now', 'Áp Dụng Ngay')}
+              </button>
               </div>
             )}
 
@@ -899,10 +901,10 @@ export const TacticsView: React.FC<Props> = ({
                   >
                     <div className="formation-card-head">
                       <span className="formation-code">{f.code}</span>
-                      {isActive && <span className="badge-active-pill">ĐANG CHỌN</span>}
+                      {isActive && <span className="badge-active-pill">{t('tactics.selected_badge', 'ĐANG CHỌN')}</span>}
                     </div>
                     <strong className="formation-name">{f.name}</strong>
-                    <p className="formation-desc">Sơ đồ chiến thuật hiện đại với tính cơ động cao.</p>
+                    <p className="formation-desc">{t('tactics.formation_desc_modern', 'Sơ đồ chiến thuật hiện đại với tính cơ động cao.')}</p>
                   </div>
                 );
               })}
@@ -917,8 +919,8 @@ export const TacticsView: React.FC<Props> = ({
           <div className="tactics-modal-content tactics-modal-sliders" onClick={(e) => e.stopPropagation()}>
             <div className="tactics-modal-header">
               <div>
-                <h3>CHỈ ĐẠO CHIẾN THUẬT & LỐI CHƠI</h3>
-                <p>Thiết lập phong cách thi đấu tổng thể của toàn đội</p>
+                <h3>{t('tactics.modal_instructions_title')}</h3>
+                <p>{t('tactics.instructions_modal_desc', 'Thiết lập phong cách thi đấu tổng thể của toàn đội')}</p>
               </div>
               <button className="btn-close-modal" onClick={() => setShowTacticsModal(false)}>
                 <X size={18} />
@@ -927,12 +929,12 @@ export const TacticsView: React.FC<Props> = ({
 
             <div className="tactics-sliders-body">
               <div className="slider-group">
-                <label>TƯ DUY CHIẾN THUẬT (MENTALITY)</label>
+                <label>{t('tactics.mentality_label', 'TƯ DUY CHIẾN THUẬT (MENTALITY)')}</label>
                 <div className="mentality-buttons-row">
                   {[
-                    { key: 'DEFENSIVE', label: 'Phòng Ngự', color: 'blue' },
-                    { key: 'BALANCED', label: 'Cân Bằng', color: 'green' },
-                    { key: 'ATTACKING', label: 'Tấn Công', color: 'red' },
+                    { key: 'DEFENSIVE', label: t('tactics.mentality_defensive', 'Phòng Ngự'), color: 'blue' },
+                    { key: 'BALANCED', label: t('tactics.mentality_balanced', 'Cân Bằng'), color: 'green' },
+                    { key: 'ATTACKING', label: t('tactics.mentality_attacking', 'Tấn Công'), color: 'red' },
                   ].map((item) => (
                     <button
                       key={item.key}
@@ -948,7 +950,7 @@ export const TacticsView: React.FC<Props> = ({
 
               <div className="slider-group">
                 <div className="slider-label-row">
-                  <span>NHỊP ĐỘ TRẬN ĐẤU (TEMPO)</span>
+                  <span>{t('tactics.tempo_label', 'NHỊP ĐỘ TRẬN ĐẤU (TEMPO)')}</span>
                   <strong>{tempo} / 100</strong>
                 </div>
                 <input
@@ -960,14 +962,14 @@ export const TacticsView: React.FC<Props> = ({
                   className="range-slider blue"
                 />
                 <div className="slider-hints">
-                  <span>Chậm rãi, kiểm soát</span>
-                  <span>Dồn dập, tốc độ cao</span>
+                  <span>{t('tactics.tempo_slow', 'Chậm rãi, kiểm soát')}</span>
+                  <span>{t('tactics.tempo_fast', 'Dồn dập, tốc độ cao')}</span>
                 </div>
               </div>
 
               <div className="slider-group">
                 <div className="slider-label-row">
-                  <span>CƯỜNG ĐỘ ÁP SÁT (PRESSING INTENSITY)</span>
+                  <span>{t('tactics.pressing_label', 'CƯỜNG ĐỘ ÁP SÁT (PRESSING INTENSITY)')}</span>
                   <strong>{pressing} / 100</strong>
                 </div>
                 <input
@@ -979,14 +981,14 @@ export const TacticsView: React.FC<Props> = ({
                   className="range-slider amber"
                 />
                 <div className="slider-hints">
-                  <span>Lùi sâu phòng ngự</span>
-                  <span>Pressing tầm cao</span>
+                  <span>{t('tactics.pressing_low', 'Lùi sâu phòng ngự')}</span>
+                  <span>{t('tactics.pressing_high', 'Pressing tầm cao')}</span>
                 </div>
               </div>
 
               <div className="slider-group">
                 <div className="slider-label-row">
-                  <span>ĐỘ CAO HÀNG THỦ (DEFENSIVE LINE)</span>
+                  <span>{t('tactics.defline_label', 'ĐỘ CAO HÀNG THỦ (DEFENSIVE LINE)')}</span>
                   <strong>{defensiveLine} / 100</strong>
                 </div>
                 <input
@@ -998,18 +1000,18 @@ export const TacticsView: React.FC<Props> = ({
                   className="range-slider green"
                 />
                 <div className="slider-hints">
-                  <span>Bẫy việt vị thấp</span>
-                  <span>Dâng cao giữa sân</span>
+                  <span>{t('tactics.defline_low', 'Bẫy việt vị thấp')}</span>
+                  <span>{t('tactics.defline_high', 'Dâng cao giữa sân')}</span>
                 </div>
               </div>
 
               <div className="slider-group">
-                <label>PHONG CÁCH CHUYỀN BÓNG</label>
+                <label>{t('tactics.passing_style_label', 'PHONG CÁCH CHUYỀN BÓNG')}</label>
                 <div className="mentality-buttons-row">
                   {[
-                    { key: 'SHORT', label: 'Chuyền Ngắn (Tiki-Taka)' },
-                    { key: 'MIXED', label: 'Hỗn Hợp Linh Hoạt' },
-                    { key: 'DIRECT', label: 'Trực Diện / Phản Công' },
+                    { key: 'SHORT', label: t('tactics.pass_short', 'Chuyền Ngắn (Tiki-Taka)') },
+                    { key: 'MIXED', label: t('tactics.pass_mixed', 'Hỗn Hợp Linh Hoạt') },
+                    { key: 'DIRECT', label: t('tactics.pass_direct', 'Trực Diện / Phản Công') },
                   ].map((item) => (
                     <button
                       key={item.key}
@@ -1030,7 +1032,7 @@ export const TacticsView: React.FC<Props> = ({
                 className="btn btn-primary btn-block"
                 onClick={() => setShowTacticsModal(false)}
               >
-                Xác Nhận Chỉ Đạo
+                {t('tactics.confirm_instructions')}
               </button>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { Trophy } from 'lucide-react';
 import { StandingItem } from '../../types';
@@ -17,6 +18,7 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
   compFormatType,
   groupName,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
       {groupName && (
@@ -29,23 +31,23 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
             fontSize: '1rem',
           }}
         >
-          {groupName} - Bảng Xếp Hạng
+          {t('standings.table_title', '{group} - Bảng Xếp Hạng').replace('{group}', groupName || '')}
         </div>
       )}
       <div style={{ overflowX: 'auto' }}>
         <table className="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #e2e8f0', color: '#475569', fontSize: '0.82rem', textTransform: 'uppercase' }}>
-              <th style={{ width: '55px', textAlign: 'center', padding: '12px 8px' }}>Hạng</th>
-              <th style={{ textAlign: 'left', padding: '12px 14px' }}>Câu Lạc Bộ</th>
-              <th style={{ textAlign: 'center', width: '60px' }}>Trận</th>
-              <th style={{ textAlign: 'center', width: '55px', color: '#059669' }}>Thắng</th>
-              <th style={{ textAlign: 'center', width: '55px', color: '#64748b' }}>Hòa</th>
-              <th style={{ textAlign: 'center', width: '55px', color: '#dc2626' }}>Thua</th>
-              <th style={{ textAlign: 'center', width: '60px' }}>BT</th>
-              <th style={{ textAlign: 'center', width: '60px' }}>BB</th>
-              <th style={{ textAlign: 'center', width: '60px' }}>HS</th>
-              <th style={{ textAlign: 'center', width: '70px', fontWeight: 800, color: '#15803d' }}>ĐIỂM</th>
+              <th style={{ width: '55px', textAlign: 'center', padding: '12px 8px' }}>{t('standings.col_rank')}</th>
+              <th style={{ textAlign: 'left', padding: '12px 14px' }}>{t('standings.col_club')}</th>
+              <th style={{ textAlign: 'center', width: '60px' }}>{t('standings.col_played')}</th>
+              <th style={{ textAlign: 'center', width: '55px', color: '#059669' }}>{t('standings.col_won')}</th>
+              <th style={{ textAlign: 'center', width: '55px', color: '#64748b' }}>{t('standings.col_drawn')}</th>
+              <th style={{ textAlign: 'center', width: '55px', color: '#dc2626' }}>{t('standings.col_lost')}</th>
+              <th style={{ textAlign: 'center', width: '60px' }}>{t('standings.col_gf')}</th>
+              <th style={{ textAlign: 'center', width: '60px' }}>{t('standings.col_ga')}</th>
+              <th style={{ textAlign: 'center', width: '60px' }}>{t('standings.col_gd')}</th>
+              <th style={{ textAlign: 'center', width: '70px', fontWeight: 800, color: '#15803d' }}>{t('standings.col_pts', 'ĐIỂM')}</th>
             </tr>
           </thead>
           <tbody>
@@ -53,7 +55,7 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
               <tr>
                 <td colSpan={10} style={{ textAlign: 'center', padding: '3.5rem', color: '#64748b' }}>
                   <Trophy size={36} color="#cbd5e1" style={{ marginBottom: '8px', display: 'inline-block' }} />
-                  <p style={{ margin: 0, fontSize: '0.95rem' }}>Chưa có dữ liệu bảng xếp hạng cho giải đấu này.</p>
+                  <p style={{ margin: 0, fontSize: '0.95rem' }}>{t('standings.no_data', 'Chưa có dữ liệu bảng xếp hạng cho giải đấu này.')}</p>
                 </td>
               </tr>
             ) : (
@@ -78,51 +80,51 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
                   if (pos <= 2) {
                     posBg = '#dcfce7';
                     posColor = '#15803d';
-                    badgeTooltip = 'Vào Vòng Knockout (Top 2)';
+                    badgeTooltip = t('standings.badge_knockout', 'Vào Vòng Knockout (Top 2)');
                   }
                 } else if (currentTier === 1) {
                   if (pos <= 3) {
                     posBg = '#dbeafe';
                     posColor = '#1e40af';
-                    badgeTooltip = 'Cúp C1 Châu Lục';
+                    badgeTooltip = t('standings.badge_c1', 'Cúp C1 Châu Lục');
                   } else if (pos <= 5) {
                     posBg = '#e0e7ff';
                     posColor = '#4338ca';
-                    badgeTooltip = 'Cúp C2 Châu Lục';
+                    badgeTooltip = t('standings.badge_c2', 'Cúp C2 Châu Lục');
                   } else if (pos <= 7) {
                     posBg = '#fef3c7';
                     posColor = '#92400e';
-                    badgeTooltip = 'Cúp C3 Châu Lục';
+                    badgeTooltip = t('standings.badge_c3', 'Cúp C3 Châu Lục');
                   } else if (pos >= 15) {
                     posBg = '#fee2e2';
                     posColor = '#dc2626';
-                    badgeTooltip = 'Xuống Hạng Nhất (Tier 2)';
+                    badgeTooltip = t('standings.badge_rel_t2', 'Xuống Hạng Nhất (Tier 2)');
                   }
                 } else if (currentTier === 2) {
                   if (pos === 1) {
                     posBg = '#dcfce7';
                     posColor = '#15803d';
-                    badgeTooltip = 'Thăng Hạng Tier 1 (VĐQG)';
+                    badgeTooltip = t('standings.badge_prom_t1', 'Thăng Hạng Tier 1 (VĐQG)');
                   } else if (pos >= 15) {
                     posBg = '#fee2e2';
                     posColor = '#dc2626';
-                    badgeTooltip = 'Xuống Hạng Nhì (Tier 3)';
+                    badgeTooltip = t('standings.badge_rel_t3', 'Xuống Hạng Nhì (Tier 3)');
                   }
                 } else if (currentTier === 3) {
                   if (pos === 1) {
                     posBg = '#dcfce7';
                     posColor = '#15803d';
-                    badgeTooltip = 'Thăng Hạng Tier 2 (Hạng Nhất)';
+                    badgeTooltip = t('standings.badge_prom_t2', 'Thăng Hạng Tier 2 (Hạng Nhất)');
                   } else if (pos >= 15) {
                     posBg = '#fee2e2';
                     posColor = '#dc2626';
-                    badgeTooltip = 'Xuống Hạng Ba (Tier 4)';
+                    badgeTooltip = t('standings.badge_rel_t4', 'Xuống Hạng Ba (Tier 4)');
                   }
                 } else if (currentTier === 4) {
                   if (pos === 1) {
                     posBg = '#dcfce7';
                     posColor = '#15803d';
-                    badgeTooltip = 'Thăng Hạng Tier 3 (Hạng Nhì)';
+                    badgeTooltip = t('standings.badge_prom_t3', 'Thăng Hạng Tier 3 (Hạng Nhì)');
                   }
                 }
 
@@ -200,8 +202,8 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
                                 fontWeight: 700,
                               }}
                             >
-                              BẠN
-                            </span>
+                    {t('knockout.you_badge', 'BẠN')}
+                  </span>
                           )}
                         </div>
                       </div>

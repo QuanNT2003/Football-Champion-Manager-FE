@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import React from 'react';
 import { Club } from '../types';
 import {
@@ -16,12 +17,13 @@ interface Props {
 }
 
 export const FacilitiesView: React.FC<Props> = ({ club, onUpgradeFacility }) => {
+  const { t } = useTranslation();
   if (!club) {
     return (
       <div className="game-empty-state">
         <Building2 size={48} className="empty-icon" />
-        <h3>Chưa có dữ liệu câu lạc bộ</h3>
-        <p>Vui lòng chọn hoặc hoàn tất nhận câu lạc bộ để truy cập cơ sở hạ tầng.</p>
+        <h3>{t('common.no_data')}</h3>
+        <p>{t('facilities.no_club_prompt', 'Vui lòng chọn hoặc hoàn tất nhận câu lạc bộ để truy cập cơ sở hạ tầng.')}</p>
       </div>
     );
   }
@@ -53,18 +55,18 @@ export const FacilitiesView: React.FC<Props> = ({ club, onUpgradeFacility }) => 
     switch (code?.toUpperCase()) {
       case 'TRAINING_GROUND':
       case 'TRAINING':
-        return 'Tăng hiệu quả phát triển chỉ số thuộc tính cầu thủ trong các buổi tập chuyên sâu.';
+        return t('facilities.desc_training', 'Tăng hiệu quả phát triển chỉ số thuộc tính cầu thủ trong các buổi tập chuyên sâu.');
       case 'YOUTH_ACADEMY':
       case 'YOUTH':
-        return 'Sản sinh các tài năng trẻ U19 tiềm năng cao (Wonderkids) mỗi đầu mùa giải.';
+        return t('facilities.desc_youth', 'Sản sinh các tài năng trẻ U19 tiềm năng cao (Wonderkids) mỗi đầu mùa giải.');
       case 'MEDICAL_CENTER':
       case 'MEDICAL':
-        return 'Giảm 50% thời gian điều trị chấn thương và tăng tốc độ hồi phục thể lực thi đấu.';
+        return t('facilities.desc_medical', 'Giảm 50% thời gian điều trị chấn thương và tăng tốc độ hồi phục thể lực thi đấu.');
       case 'SCOUTING_NETWORK':
       case 'SCOUTING':
-        return 'Mở rộng tầm quét trinh sát toàn cầu, báo cáo chính xác tiềm năng cầu thủ đối thủ.';
+        return t('facilities.desc_scouting', 'Mở rộng tầm quét trinh sát toàn cầu, báo cáo chính xác tiềm năng cầu thủ đối thủ.');
       default:
-        return 'Nâng cao danh tiếng quốc tế và quy mô hạ tầng chuyên nghiệp của câu lạc bộ.';
+        return t('facilities.desc_stadium', 'Nâng cao danh tiếng quốc tế và quy mô hạ tầng chuyên nghiệp của câu lạc bộ.');
     }
   };
 
@@ -75,32 +77,32 @@ export const FacilitiesView: React.FC<Props> = ({ club, onUpgradeFacility }) => 
         <div className="stadium-hero-content">
           <div className="hero-badge">
             <ShieldCheck size={16} />
-            <span>ĐẠI BẢN DOANH CHÍNH THỨC</span>
+            <span>{t('facilities.stadium')}</span>
           </div>
           <h2 className="stadium-name">{stadium?.name || `${club.name} Arena`}</h2>
           <p className="stadium-city">
-            {club.city || 'Thành Phố'}, {club.country || 'Quốc Gia'} • Mặt cỏ tự nhiên chuẩn FIFA Pro
+            {club.city || t('facilities.city_default', 'Thành Phố')}, {club.country || t('facilities.country_default', 'Quốc Gia')} • {t('facilities.pitch_standard', 'Mặt cỏ tự nhiên chuẩn FIFA Pro')}
           </p>
 
           <div className="stadium-stats-row">
             <div className="stadium-stat-item">
-              <span className="stat-label">SỨC CHỨA SÂN KHÁCH & NHÀ</span>
+              <span className="stat-label">{t('facilities.capacity')}</span>
               <strong className="stat-value text-cyan">
-                {(stadium?.capacity || 25000).toLocaleString()} <small>CHỖ NGỒI</small>
+                {(stadium?.capacity || 25000).toLocaleString()} <small>{t('facilities.seats')}</small>
               </strong>
             </div>
 
             <div className="stadium-stat-item">
-              <span className="stat-label">NGÂN SÁCH XÂY DỰNG KHẢ DỤNG</span>
+              <span className="stat-label">{t('finances.cash_balance')}</span>
               <strong className="stat-value text-emerald">
                 €{Number(cash).toLocaleString()} <small>CASH</small>
               </strong>
             </div>
 
             <div className="stadium-stat-item">
-              <span className="stat-label">ĐẲNG CẤP KIẾN TRÚC</span>
+              <span className="stat-label">{t('facilities.arch_class', 'ĐẲNG CẤP KIẾN TRÚC')}</span>
               <strong className="stat-value text-amber">
-                HẠNG ĐẲNG CẤP THẾ GIỚI
+                {t('facilities.world_class', 'HẠNG ĐẲNG CẤP THẾ GIỚI')}
               </strong>
             </div>
           </div>
@@ -115,9 +117,9 @@ export const FacilitiesView: React.FC<Props> = ({ club, onUpgradeFacility }) => 
       {/* Facilities Grid */}
       <div className="section-heading-row">
         <div>
-          <h3 className="section-title">HỆ THỐNG CƠ SỞ VẬT CHẤT & TRUNG TÂM PHÁT TRIỂN</h3>
+          <h3 className="section-title">{t('facilities.title')}</h3>
           <p className="section-subtitle">
-            Nâng cấp cấp độ cơ sở hạ tầng để nâng cao chỉ số toàn đội, tăng tốc hồi phục và ươm mầm thế hệ kế cận.
+            {t('facilities.subtitle')}
           </p>
         </div>
       </div>
@@ -139,7 +141,7 @@ export const FacilitiesView: React.FC<Props> = ({ club, onUpgradeFacility }) => 
                   <div className="facility-code-pill">{f.code || 'INFRA'}</div>
                 </div>
                 <div className="facility-level-pill">
-                  <span>CẤP</span>
+                  <span>{t('common.level')}</span>
                   <strong>{currentLvl}/{maxLevel}</strong>
                 </div>
               </div>
@@ -149,7 +151,7 @@ export const FacilitiesView: React.FC<Props> = ({ club, onUpgradeFacility }) => 
               {/* Progress Bar */}
               <div className="facility-progress-section">
                 <div className="progress-labels">
-                  <span>Tiến độ phát triển</span>
+                  <span>{t('training.history_title')}</span>
                   <strong>{progressPercent}%</strong>
                 </div>
                 <div className="hud-progress-track">
@@ -164,7 +166,7 @@ export const FacilitiesView: React.FC<Props> = ({ club, onUpgradeFacility }) => 
               <div className="facility-card-footer">
                 <div className="facility-status-tag">
                   <span className="status-dot-pulse" />
-                  <span>{f.status || 'HOẠT ĐỘNG TỐT'}</span>
+                  <span>{f.status || t('facilities.status_operating', 'HOẠT ĐỘNG TỐT')}</span>
                 </div>
 
                 <button
@@ -174,7 +176,7 @@ export const FacilitiesView: React.FC<Props> = ({ club, onUpgradeFacility }) => 
                   disabled={currentLvl >= maxLevel}
                 >
                   <Hammer size={16} />
-                  <span>{currentLvl >= maxLevel ? 'ĐẠT CẤP TỐI ĐA' : 'NÂNG CẤP (+1 CẤP)'}</span>
+                  <span>{currentLvl >= maxLevel ? t('facilities.max_level') : t('facilities.upgrade_btn')}</span>
                 </button>
               </div>
             </div>

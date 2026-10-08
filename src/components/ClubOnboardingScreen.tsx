@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import React, { useState, useEffect } from 'react';
 import { Club, StarterCountry, StarterTier, User } from '../types';
 import { clubsApi } from '../services/clubs.service';
@@ -31,6 +32,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
   onClubClaimed,
   onLogout,
 }) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [countries, setCountries] = useState<StarterCountry[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -99,11 +101,11 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
       if (result && result.club) {
         setClaimedClub(result.club);
       } else {
-        throw new Error('Không nhận được thông tin CLB');
+        throw new Error(t('onboarding.no_club_info', 'Không nhận được thông tin CLB'));
       }
     } catch (err: any) {
       setClaimError(
-        err?.response?.data?.message || 'Có lỗi xảy ra khi bốc thăm CLB. Vui lòng thử lại.'
+        err?.response?.data?.message || t('onboarding.draw_error', 'Có lỗi xảy ra khi bốc thăm CLB. Vui lòng thử lại.')
       );
     } finally {
       setClaiming(false);
@@ -114,27 +116,27 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
     switch (tierNum) {
       case 3:
         return {
-          title: 'Giải Hạng Nhì (Tier 3)',
-          badge: 'Thử Thách Nâng Cao',
+          title: t('onboarding.tier2_title', 'Giải Hạng Nhì (Tier 3)'),
+          badge: t('onboarding.tier2_badge', 'Thử Thách Nâng Cao'),
           badgeColor: '#00e5ff',
-          desc: 'Các câu lạc bộ có truyền thống, đội hình khá dày dặn, cơ sở vật chất ổn định. Mục tiêu cạnh tranh suất lên hạng Nhất!',
+          desc: t('onboarding.tier2_desc', 'Các câu lạc bộ có truyền thống, đội hình khá dày dặn, cơ sở vật chất ổn định. Mục tiêu cạnh tranh suất lên hạng Nhất!'),
           stars: '⭐⭐⭐',
         };
       case 4:
         return {
-          title: 'Giải Hạng Ba (Tier 4)',
-          badge: 'Thử Thách Tiêu Chuẩn',
+          title: t('onboarding.tier3_title', 'Giải Hạng Ba (Tier 4)'),
+          badge: t('onboarding.tier3_badge', 'Thử Thách Tiêu Chuẩn'),
           badgeColor: '#00ff87',
-          desc: 'Môi trường cân bằng cho các HLV xây dựng lối chơi từ cơ bản, tìm kiếm nhân tài và bứt phá tiềm năng.',
+          desc: t('onboarding.tier3_desc', 'Môi trường cân bằng cho các HLV xây dựng lối chơi từ cơ bản, tìm kiếm nhân tài và bứt phá tiềm năng.'),
           stars: '⭐⭐',
         };
 
       default:
         return {
-          title: `Giải Hạng ${tierNum}`,
-          badge: 'Khởi Nghiệp',
+          title: t('onboarding.tier_generic_title', 'Giải Hạng {tier}').replace('{tier}', String(tierNum)),
+          badge: t('onboarding.tier_generic_badge', 'Khởi Nghiệp'),
           badgeColor: '#00e5ff',
-          desc: 'Câu lạc bộ giàu tiềm năng đang chờ đón bạn dẫn dắt.',
+          desc: t('onboarding.tier_generic_desc', 'Câu lạc bộ giàu tiềm năng đang chờ đón bạn dẫn dắt.'),
           stars: '⭐',
         };
     }
@@ -152,18 +154,18 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
           <span className="brand-icon-hex">⚽</span>
           <div>
             <h2>FOOTBALL CHAMPION MANAGER</h2>
-            <p>HỒ SƠ KHỞI NGHIỆP HUẤN LUYỆN VIÊN TRƯỞNG</p>
+            <p>{t('onboarding.career_profile')}</p>
           </div>
         </div>
 
         <div className="onboarding-user-hud">
           <div className="user-greeting-pill">
             <span className="dot-online" />
-            <span>HLV: <strong>{user?.username || 'TÂN HLV'}</strong></span>
+            <span>{t('onboarding.manager_label', 'HLV')}: <strong>{user?.username || t('onboarding.default_manager', 'TÂN HLV')}</strong></span>
           </div>
-          <button className="btn-logout-hud" onClick={onLogout} title="Đăng xuất">
+          <button className="btn-logout-hud" onClick={onLogout} title={t('onboarding.logout_tooltip', 'Đăng xuất')}>
             <LogOut size={16} />
-            <span>Đổi Tài Khoản</span>
+            <span>{t('onboarding.switch_account')}</span>
           </button>
         </div>
       </header>
@@ -177,8 +179,8 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
               {step > 1 ? <CheckCircle2 size={20} /> : <Globe size={20} />}
             </div>
             <div className="stepper-label-hud">
-              <span>BƯỚC 1</span>
-              <strong>CHỌN QUỐC GIA</strong>
+              <span>{t('onboarding.step_1', 'BƯỚC 1')}</span>
+              <strong>{t('onboarding.step_1_title', 'CHỌN QUỐC GIA')}</strong>
             </div>
           </div>
 
@@ -189,8 +191,8 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
               {step > 2 ? <CheckCircle2 size={20} /> : <Trophy size={20} />}
             </div>
             <div className="stepper-label-hud">
-              <span>BƯỚC 2</span>
-              <strong>CHỌN HẠNG ĐẤU</strong>
+              <span>{t('onboarding.step_2', 'BƯỚC 2')}</span>
+              <strong>{t('onboarding.step_2_title', 'CHỌN HẠNG ĐẤU')}</strong>
             </div>
           </div>
 
@@ -201,8 +203,8 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
               <Dices size={20} />
             </div>
             <div className="stepper-label-hud">
-              <span>BƯỚC 3</span>
-              <strong>BỐC THĂM NHẬN CLB</strong>
+              <span>{t('onboarding.step_3', 'BƯỚC 3')}</span>
+              <strong>{t('onboarding.step_3_title', 'BỐC THĂM NHẬN CLB')}</strong>
             </div>
           </div>
         </div>
@@ -213,18 +215,18 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
             <div className="step-header-hud">
               <div className="step-badge">
                 <Flame size={14} className="text-amber" />
-                <span>LIÊN ĐOÀN THÀNH VIÊN FIFA</span>
+                <span>{t('onboarding.fifa_members', 'LIÊN ĐOÀN THÀNH VIÊN FIFA')}</span>
               </div>
-              <h3>BƯỚC 1: LỰA CHỌN QUỐC GIA ĐỂ BẮT ĐẦU SỰ NGHIỆP</h3>
+              <h3>{t('onboarding.step_1_heading')}</h3>
               <p>
-                Hệ sinh thái hỗ trợ 96 Liên đoàn bóng đá quốc gia. Bạn sẽ khởi nghiệp tại giải đấu quốc nội của đất nước này.
+                {t('onboarding.step_1_desc')}
               </p>
 
               <div className="country-search-bar-hud">
                 <Search size={18} className="search-icon" />
                 <input
                   type="text"
-                  placeholder="Tìm nhanh quốc gia (ví dụ: Vietnam, England, Spain, Brazil, Japan...)"
+                  placeholder={t('onboarding.search_country_placeholder', 'Tìm nhanh quốc gia (ví dụ: Vietnam, England, Spain, Brazil, Japan...)')}
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />
@@ -234,7 +236,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
             {loadingCountries ? (
               <div className="loading-state-hud">
                 <div className="spinner-hud" />
-                <p>Đang tải dữ liệu 96 Liên đoàn Quốc gia và các CLB khả dụng...</p>
+                <p>{t('onboarding.loading_countries', 'Đang tải dữ liệu 96 Liên đoàn Quốc gia và các CLB khả dụng...')}</p>
               </div>
             ) : (
               <>
@@ -254,7 +256,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                         <h4 className="country-name-hud">{c.name}</h4>
                         <div className="country-stats-hud">
                           <span className="unclaimed-tag">
-                            {c.unclaimed_clubs} CLB TRỐNG
+                            {c.unclaimed_clubs} {t('onboarding.vacant_clubs')}
                           </span>
                         </div>
                         {isSelected && <div className="card-selected-glow" />}
@@ -265,7 +267,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
 
                 {filteredCountries.length === 0 && (
                   <div className="empty-search-state-hud">
-                    <p>Không tìm thấy Quốc gia nào khớp với "{searchQuery}"</p>
+                    <p>{t('onboarding.no_country_found', 'Không tìm thấy Quốc gia nào khớp với')} "{searchQuery}"</p>
                   </div>
                 )}
 
@@ -273,10 +275,10 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                   <div className="selected-summary-hud">
                     {selectedCountry ? (
                       <span>
-                        Đã chọn: <strong className="text-cyan">{selectedCountry.name} ({selectedCountry.code})</strong>
+                        {t('onboarding.selected', 'Đã chọn')}: <strong className="text-cyan">{selectedCountry.name} ({selectedCountry.code})</strong>
                       </span>
                     ) : (
-                      <span className="hint-text">Vui lòng nhấp chọn 1 Quốc gia ở trên</span>
+                      <span className="hint-text">{t('onboarding.please_select_country', 'Vui lòng nhấp chọn 1 Quốc gia ở trên')}</span>
                     )}
                   </div>
                   <button
@@ -287,7 +289,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                       if (selectedCountry) handleSelectCountry(selectedCountry);
                     }}
                   >
-                    <span>TIẾP TỤC CHỌN HẠNG ĐẤU</span>
+                    <span>{t('onboarding.continue_tier', 'TIẾP TỤC CHỌN HẠNG ĐẤU')}</span>
                     <ArrowRight size={18} />
                   </button>
                 </div>
@@ -301,26 +303,26 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
           <div className="onboarding-card-hud">
             <div className="step-header-hud">
               <div className="selected-country-banner-hud">
-                <span>Quốc gia đã chọn:</span>
+                <span>{t('onboarding.selected_country_label', 'Quốc gia đã chọn:')}</span>
                 <strong className="text-cyan">{selectedCountry?.name} ({selectedCountry?.code})</strong>
                 <button
                   type="button"
                   className="btn-change-country-hud"
                   onClick={() => setStep(1)}
                 >
-                  Đổi Quốc Gia
+                  {t('onboarding.change_country', 'Đổi Quốc Gia')}
                 </button>
               </div>
-              <h3>BƯỚC 2: CHỌN HẠNG ĐẤU KHỞI NGHIỆP</h3>
+              <h3>{t('onboarding.step_2_heading')}</h3>
               <p>
-                Quy chuẩn công bằng: HLV mới được cấp quyền khởi nghiệp tại <strong>Tier 3 (Giải Hạng Nhì)</strong> hoặc <strong>Tier 4 (Giải Hạng Ba)</strong>.
+                {t('onboarding.fair_rule', 'Quy chuẩn công bằng: HLV mới được cấp quyền khởi nghiệp tại Tier 3 (Giải Hạng Nhì) hoặc Tier 4 (Giải Hạng Ba).')}
               </p>
             </div>
 
             {loadingTiers ? (
               <div className="loading-state-hud">
                 <div className="spinner-hud" />
-                <p>Đang kiểm tra các Hạng đấu tại {selectedCountry?.name}...</p>
+                <p>{t('onboarding.checking_tiers', 'Đang kiểm tra các Hạng đấu tại')} {selectedCountry?.name}...</p>
               </div>
             ) : (
               <div className="tiers-list-hud">
@@ -348,11 +350,11 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                         <div className="starter-perks-row">
                           <div className="perk-item">
                             <DollarSign size={14} className="text-emerald" />
-                            <span>Ngân sách ban đầu: €1,500,000 CASH</span>
+                            <span>{t('onboarding.initial_cash')}</span>
                           </div>
                           <div className="perk-item">
                             <Coins size={14} className="text-amber" />
-                            <span>Thưởng tân thủ: 200 GOLD</span>
+                            <span>{t('onboarding.initial_gold')}</span>
                           </div>
                         </div>
                       </div>
@@ -360,7 +362,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                       <div className="tier-card-right-hud">
                         <div className="unclaimed-badge-hud">
                           <strong>{count}</strong>
-                          <span>CLB CÒN TRỐNG</span>
+                          <span>{t('onboarding.vacant_clubs_label', 'CLB CÒN TRỐNG')}</span>
                         </div>
                         <div className="tier-radio-hud">
                           <div className={`radio-circle-hud ${isSelected ? 'checked' : ''}`} />
@@ -379,7 +381,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                 onClick={() => setStep(1)}
               >
                 <ArrowLeft size={18} />
-                <span>Quay Lại Bước 1</span>
+                <span>{t('onboarding.back_step_1', 'Quay Lại Bước 1')}</span>
               </button>
 
               <button
@@ -388,7 +390,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                 disabled={!selectedTier}
                 onClick={() => setStep(3)}
               >
-                <span>TIẾP TỤC SANG BƯỚC BỐC THĂM</span>
+                <span>{t('onboarding.continue_step_3', 'TIẾP TỤC SANG BƯỚC BỐC THĂM')}</span>
                 <ArrowRight size={18} />
               </button>
             </div>
@@ -403,11 +405,11 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                 <div className="claim-icon-wrapper-hud">
                   <Dices size={56} className={claiming ? 'spin-dice-hud' : 'text-cyan'} />
                 </div>
-                <h3>LỄ BỐC THĂM PHÂN BỔ CÂU LẠC BỘ TRỰC TIẾP</h3>
+                <h3>{t('onboarding.step_3_heading')}</h3>
                 <p className="claim-desc-hud">
-                  HLV đã chọn khởi nghiệp tại <strong className="text-cyan">{selectedCountry?.name}</strong> ở <strong className="text-emerald">{getTierMeta(selectedTier || 3).title}</strong>.
+                  {t('onboarding.selected_summary', 'HLV đã chọn khởi nghiệp tại {country} ở {tier}.').replace('{country}', selectedCountry?.name || '').replace('{tier}', getTierMeta(selectedTier || 3).title)}
                   <br />
-                  Hệ thống Match Server sẽ bốc thăm phân bổ ngẫu nhiên 1 CLB chuyên nghiệp chưa có chủ và trao quyền quản lý tối cao cho bạn!
+                  {t('onboarding.step_3_desc')}
                 </p>
 
                 {claimError && (
@@ -418,16 +420,16 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
 
                 <div className="claim-summary-box-hud">
                   <div className="summary-item-hud">
-                    <span>QUỐC GIA:</span>
+                    <span>{t('onboarding.country_field', 'QUỐC GIA:')}</span>
                     <strong className="text-cyan">{selectedCountry?.name} ({selectedCountry?.code})</strong>
                   </div>
                   <div className="summary-item-hud">
-                    <span>HẠNG ĐẤU:</span>
+                    <span>{t('onboarding.tier_field', 'HẠNG ĐẤU:')}</span>
                     <strong className="text-emerald">Tier {selectedTier} - {getTierMeta(selectedTier || 3).title}</strong>
                   </div>
                   <div className="summary-item-hud">
-                    <span>QUY CHUẨN:</span>
-                    <strong className="text-amber">Bốc thăm ngẫu nhiên CLB trống</strong>
+                    <span>{t('onboarding.rules_field', 'QUY CHUẨN:')}</span>
+                    <strong className="text-amber">{t('onboarding.rules_random', 'Bốc thăm ngẫu nhiên CLB trống')}</strong>
                   </div>
                 </div>
 
@@ -439,7 +441,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                     onClick={() => setStep(2)}
                   >
                     <ArrowLeft size={18} />
-                    <span>Đổi Hạng Đấu</span>
+                    <span>{t('onboarding.change_tier', 'Đổi Hạng Đấu')}</span>
                   </button>
 
                   <button
@@ -451,12 +453,12 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                     {claiming ? (
                       <>
                         <div className="spinner-hud" />
-                        <span>Đang bốc thăm CLB ngẫu nhiên...</span>
+                        <span>{t('onboarding.drawing')}</span>
                       </>
                     ) : (
                       <>
                         <Sparkles size={20} />
-                        <span>BỐC THĂM & KÝ HỢP ĐỒNG QUẢN LÝ</span>
+                        <span>{t('onboarding.draw_and_sign')}</span>
                       </>
                     )}
                   </button>
@@ -467,12 +469,12 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
               <div className="claim-reveal-card-hud">
                 <div className="reveal-badge-hud">
                   <Award size={20} />
-                  <span>KÝ KẾT HỢP ĐỒNG THÀNH CÔNG</span>
+                  <span>{t('onboarding.contract_success', 'KÝ KẾT HỢP ĐỒNG THÀNH CÔNG')}</span>
                 </div>
 
-                <h2 className="reveal-title-hud">🎉 CHÚC MỪNG TÂN HUẤN LUYỆN VIÊN TRƯỞNG! 🎉</h2>
+                <h2 className="reveal-title-hud">{t('onboarding.congrats_title')}</h2>
                 <p className="reveal-subtitle-hud">
-                  Bạn đã chính thức trở thành nhà quản lý tối cao của câu lạc bộ:
+                  {t('onboarding.congrats_desc')}
                 </p>
 
                 <div className="revealed-club-box-hud">
@@ -480,9 +482,9 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                   <div className="club-identity-hud">
                     <h3>{claimedClub.name}</h3>
                     <div className="club-tags-hud">
-                      <span className="tag-item-hud">Quốc gia: {claimedClub.country || selectedCountry?.name}</span>
-                      {claimedClub.city && <span className="tag-item-hud">Thành phố: {claimedClub.city}</span>}
-                      <span className="tag-item-hud">Hạng đấu: Tier {selectedTier}</span>
+                      <span className="tag-item-hud">{t('onboarding.tag_country', 'Quốc gia:')} {claimedClub.country || selectedCountry?.name}</span>
+                      {claimedClub.city && <span className="tag-item-hud">{t('onboarding.tag_city', 'Thành phố:')} {claimedClub.city}</span>}
+                      <span className="tag-item-hud">{t('onboarding.tag_tier', 'Hạng đấu:')} Tier {selectedTier}</span>
                     </div>
                   </div>
                 </div>
@@ -491,40 +493,40 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                   <div className="reveal-detail-item-hud">
                     <Building2 size={22} className="text-cyan" />
                     <div>
-                      <span>SÂN VẬN ĐỘNG</span>
-                      <strong>{claimedClub.stadium?.name || 'Sân Vận Động Trung Tâm'}</strong>
-                      <small>Sức chứa: {(claimedClub.stadium?.capacity || 5000).toLocaleString()} chỗ</small>
+                      <span>{t('onboarding.stadium_label', 'SÂN VẬN ĐỘNG')}</span>
+                      <strong>{claimedClub.stadium?.name || t('onboarding.default_stadium', 'Sân Vận Động Trung Tâm')}</strong>
+                      <small>{t('onboarding.capacity_label', 'Sức chứa:')} {(claimedClub.stadium?.capacity || 5000).toLocaleString()} {t('onboarding.seats', 'chỗ')}</small>
                     </div>
                   </div>
 
                   <div className="reveal-detail-item-hud">
                     <Users size={22} className="text-cyan" />
                     <div>
-                      <span>ĐỘI HÌNH KHỞI ĐẦU</span>
-                      <strong>{claimedClub.squadCount || 16} Cầu Thủ Sẵn Sàng</strong>
-                      <small>Đã ký hợp đồng chuyên nghiệp</small>
+                      <span>{t('onboarding.starting_squad')}</span>
+                      <strong>{claimedClub.squadCount || 16} {t('onboarding.ready_players')}</strong>
+                      <small>{t('onboarding.pro_contract_signed', 'Đã ký hợp đồng chuyên nghiệp')}</small>
                     </div>
                   </div>
 
                   <div className="reveal-detail-item-hud">
                     <DollarSign size={22} className="text-emerald" />
                     <div>
-                      <span>NGÂN SÁCH TIỀN MẶT</span>
+                      <span>{t('onboarding.cash_budget_label', 'NGÂN SÁCH TIỀN MẶT')}</span>
                       <strong className="text-emerald">
                         €{(claimedClub.finances?.cash || 1500000).toLocaleString()} CASH
                       </strong>
-                      <small>Dành cho chuyển nhượng & nâng cấp</small>
+                      <small>{t('onboarding.cash_budget_desc', 'Dành cho chuyển nhượng & nâng cấp')}</small>
                     </div>
                   </div>
 
                   <div className="reveal-detail-item-hud">
                     <Coins size={22} className="text-amber" />
                     <div>
-                      <span>VÀNG KHỞI NGHIỆP</span>
+                      <span>{t('onboarding.gold_starter_label', 'VÀNG KHỞI NGHIỆP')}</span>
                       <strong className="text-amber">
                         {(claimedClub.finances?.gold || 200).toLocaleString()} GOLD
                       </strong>
-                      <small>Đổi tài nguyên đặc biệt</small>
+                      <small>{t('onboarding.gold_starter_desc', 'Đổi tài nguyên đặc biệt')}</small>
                     </div>
                   </div>
                 </div>
@@ -536,7 +538,7 @@ export const ClubOnboardingScreen: React.FC<Props> = ({
                     onClick={() => onClubClaimed(claimedClub)}
                   >
                     <ShieldCheck size={22} />
-                    <span>BẮT ĐẦU SỰ NGHIỆP QUẢN LÝ CLB NGAY ⚽</span>
+                    <span>{t('onboarding.start_career_btn')}</span>
                   </button>
                 </div>
               </div>

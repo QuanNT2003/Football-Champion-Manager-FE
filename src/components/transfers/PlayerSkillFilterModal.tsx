@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React, { useState, useMemo } from 'react';
 import { X, SlidersHorizontal, RotateCcw, Check, Search, Shield, Zap, Target, Brain, Activity } from 'lucide-react';
 import { FilterOptionsResponse } from '../../services/transfers.service';
@@ -22,51 +23,52 @@ interface PlayerSkillFilterModalProps {
   onReset: () => void;
 }
 
-const ATTRIBUTE_VN_NAMES: Record<string, string> = {
+
+const ATTRIBUTE_EN_NAMES: Record<string, string> = {
   // PHYSICAL
-  PAC: 'Tốc độ',
-  ACC: 'Tăng tốc',
-  STA: 'Thể lực',
-  STR: 'Sức mạnh',
-  AGI: 'Khéo léo',
-  BAL: 'Thăng bằng',
-  JUM: 'Bật nhảy',
-  NAT: 'Thể chất tự nhiên',
-  PWR: 'Lực sút',
-  RES: 'Sức chịu đựng',
+  PAC: 'Pace',
+  ACC: 'Acceleration',
+  STA: 'Stamina',
+  STR: 'Strength',
+  AGI: 'Agility',
+  BAL: 'Balance',
+  JUM: 'Jumping Reach',
+  NAT: 'Natural Fitness',
+  PWR: 'Shot Power',
+  RES: 'Endurance',
   // TECHNICAL
-  FIN: 'Dứt điểm',
-  DRI: 'Rê bóng',
-  PAS: 'Chuyền bóng',
-  TEC: 'Kỹ thuật',
-  FIR: 'Chạm bước một',
-  HEA: 'Đánh đầu',
-  TAC: 'Tắc bóng',
-  MAR: 'Kèm người',
-  CRO: 'Tạt bóng',
-  LSH: 'Sút xa',
+  FIN: 'Finishing',
+  DRI: 'Dribbling',
+  PAS: 'Passing',
+  TEC: 'Technique',
+  FIR: 'First Touch',
+  HEA: 'Heading',
+  TAC: 'Tackling',
+  MAR: 'Marking',
+  CRO: 'Crossing',
+  LSH: 'Long Shots',
   // MENTAL
-  DEC: 'Ra quyết định',
-  VIS: 'Tầm nhìn',
-  CMP: 'Điềm tĩnh',
-  ANT: 'Phán đoán',
-  OTB: 'Chạy chỗ không bóng',
-  POS: 'Chọn vị trí',
-  WOR: 'Tinh thần thi đấu',
-  DET: 'Quyết tâm',
-  CON: 'Tập trung',
-  LEA: 'Lãnh đạo',
+  DEC: 'Decisions',
+  VIS: 'Vision',
+  COM: 'Composure',
+  POS: 'Positioning',
+  ANT: 'Anticipation',
+  BRA: 'Bravery',
+  DET: 'Determination',
+  FLA: 'Flair',
+  LEA: 'Leadership',
+  TEA: 'Teamwork',
   // GOALKEEPING
-  REF: 'Phản xạ',
-  HAN: 'Bắt bóng',
-  AER: 'Không chiến GK',
-  CMD: 'Chỉ huy vòng cấm',
-  OOO: 'Đối mặt 1v1',
-  KIC: 'Phát bóng',
-  THR: 'Ném bóng',
-  PUN: 'Đấm bóng',
-  RUS: 'Lao ra cản phá',
-  COM: 'Giao tiếp GK',
+  REF: 'Reflexes',
+  HAN: 'Handling',
+  ONE: 'One on Ones',
+  AER: 'Aerial Reach',
+  COM_GK: 'Command of Area',
+  KIC: 'Kicking',
+  THR: 'Throwing',
+  COM_BOX: 'Box Command',
+  ECC: 'Eccentricity',
+  PUN: 'Punching',
 };
 
 // Danh mục kỹ năng mặc định nếu API chưa kịp load
@@ -121,6 +123,8 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
   onApply,
   onReset,
 }) => {
+  const { t, language } = useTranslation();
+  const getAttrName = (code: string): string => t(`skill.${code}`, (ATTRIBUTE_EN_NAMES as any)[code] || code);
   const [activeTab, setActiveTab] = useState<'general' | 'PHYSICAL' | 'TECHNICAL' | 'MENTAL' | 'GOALKEEPING'>('general');
   const [minAge, setMinAge] = useState<number | undefined>(currentValues.minAge);
   const [maxAge, setMaxAge] = useState<number | undefined>(currentValues.maxAge);
@@ -206,7 +210,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
   const currentCategoryAttributes = allAttributes.filter((a) => {
     if (searchSkillQuery.trim()) {
       const q = searchSkillQuery.toLowerCase();
-      const vnName = (ATTRIBUTE_VN_NAMES[a.code] || '').toLowerCase();
+      const vnName = (getAttrName(a.code) || '').toLowerCase();
       return a.name.toLowerCase().includes(q) || a.code.toLowerCase().includes(q) || vnName.includes(q);
     }
     return a.category === activeTab;
@@ -279,7 +283,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
             </div>
             <div>
               <div style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                Bộ Lọc Nâng Cao & Kỹ Năng
+                {t('skill_modal.title', 'Bộ Lọc Nâng Cao & Kỹ Năng')}
                 {activeCount > 0 && (
                   <span
                     style={{
@@ -291,12 +295,12 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                       fontWeight: 700,
                     }}
                   >
-                    {activeCount} đang chọn
+                    {t('skill_modal.active_count', '{count} đang chọn').replace('{count}', String(activeCount))}
                   </span>
                 )}
               </div>
               <div style={{ fontSize: '0.8rem', color: '#bbf7d0', marginTop: '2px' }}>
-                Thiết lập tiêu chuẩn tuyển trạch chi tiết theo 40 chỉ số FM, tuổi, giá và quốc tịch
+                {t('skill_modal.subtitle', 'Thiết lập tiêu chuẩn tuyển trạch chi tiết theo 40 chỉ số FM, tuổi, giá và quốc tịch')}
               </div>
             </div>
           </div>
@@ -354,7 +358,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               }}
             >
               <Activity size={15} />
-              Cơ Bản & Giá
+              {t('skill_modal.tab_basic', 'Cơ Bản & Giá')}
             </button>
 
             <button
@@ -375,7 +379,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               }}
             >
               <Zap size={15} />
-              Thể Chất (Physical)
+              {t('skill_modal.tab_physical', 'Thể Chất (Physical)')}
             </button>
 
             <button
@@ -396,7 +400,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               }}
             >
               <Target size={15} />
-              Kỹ Thuật (Technical)
+              {t('skill_modal.tab_tech', 'Kỹ Thuật (Technical)')}
             </button>
 
             <button
@@ -417,7 +421,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               }}
             >
               <Brain size={15} />
-              Tinh Thần (Mental)
+              {t('skill_modal.tab_mental', 'Tinh Thần (Mental)')}
             </button>
 
             <button
@@ -438,7 +442,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               }}
             >
               <Shield size={15} />
-              Thủ Môn (GK)
+              {t('skill_modal.tab_gk', 'Thủ Môn (GK)')}
             </button>
           </div>
 
@@ -448,7 +452,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               <Search size={14} style={{ position: 'absolute', left: 10, top: 10, color: '#94a3b8' }} />
               <input
                 type="text"
-                placeholder="Tìm kỹ năng..."
+                placeholder={t('skill_modal.search_skill_placeholder', 'Tìm kỹ năng...')}
                 value={searchSkillQuery}
                 onChange={(e) => setSearchSkillQuery(e.target.value)}
                 style={{
@@ -481,25 +485,25 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                   <label style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1e293b' }}>
-                    📅 Độ Tuổi Cầu Thủ
+                    {t('skill_modal.age_title', '📅 Độ Tuổi Cầu Thủ')}
                   </label>
                   {(minAge || maxAge) && (
                     <button
                       onClick={() => { setMinAge(undefined); setMaxAge(undefined); }}
                       style={{ fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
                     >
-                      Xóa
-                    </button>
+                    {t('skill_modal.clear_btn', 'Xóa')}
+                  </button>
                   )}
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Từ (tuổi)</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{t('skill_modal.age_from', 'Từ (tuổi)')}</span>
                     <input
                       type="number"
                       min={15}
                       max={45}
-                      placeholder="Tối thiểu (15)"
+                      placeholder={t('skill_modal.age_from_placeholder', 'Tối thiểu (15)')}
                       value={minAge ?? ''}
                       onChange={(e) => setMinAge(e.target.value ? Number(e.target.value) : undefined)}
                       className="input-text"
@@ -508,12 +512,12 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                   </div>
                   <span style={{ marginTop: '1rem', color: '#94a3b8' }}>-</span>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Đến (tuổi)</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{t('skill_modal.age_to', 'Đến (tuổi)')}</span>
                     <input
                       type="number"
                       min={15}
                       max={45}
-                      placeholder="Tối đa (45)"
+                      placeholder={t('skill_modal.age_to_placeholder', 'Tối đa (45)')}
                       value={maxAge ?? ''}
                       onChange={(e) => setMaxAge(e.target.value ? Number(e.target.value) : undefined)}
                       className="input-text"
@@ -536,21 +540,21 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                     className="btn btn-xs btn-outline"
                     onClick={() => { setMinAge(22); setMaxAge(25); }}
                   >
-                    Đang chín (22-25)
+                    {t('skill_modal.age_prime', 'Đang chín (22-25)')}
                   </button>
                   <button
                     type="button"
                     className="btn btn-xs btn-outline"
                     onClick={() => { setMinAge(26); setMaxAge(30); }}
                   >
-                    Đỉnh cao (26-30)
+                    {t('skill_modal.age_peak', 'Đỉnh cao (26-30)')}
                   </button>
                   <button
                     type="button"
                     className="btn btn-xs btn-outline"
                     onClick={() => { setMinAge(31); setMaxAge(40); }}
                   >
-                    Kinh nghiệm (31+)
+                    {t('skill_modal.age_veteran', 'Kinh nghiệm (31+)')}
                   </button>
                 </div>
               </div>
@@ -567,20 +571,20 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                   <label style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1e293b' }}>
-                    💰 Giá Thị Trường (€)
+                    {t('skill_modal.price_title', '💰 Giá Thị Trường (€)')}
                   </label>
                   {(minPrice || maxPrice) && (
                     <button
                       onClick={() => { setMinPrice(undefined); setMaxPrice(undefined); }}
                       style={{ fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
                     >
-                      Xóa
-                    </button>
+                    {t('skill_modal.clear_btn', 'Xóa')}
+                  </button>
                   )}
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Giá từ (€)</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{t('skill_modal.price_from', 'Giá từ (€)')}</span>
                     <input
                       type="number"
                       min={0}
@@ -594,12 +598,12 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                   </div>
                   <span style={{ marginTop: '1rem', color: '#94a3b8' }}>-</span>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Giá đến (€)</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{t('skill_modal.price_to', 'Giá đến (€)')}</span>
                     <input
                       type="number"
                       min={0}
                       step={1000000}
-                      placeholder="Không giới hạn"
+                      placeholder={t('skill_modal.price_unlimited', 'Không giới hạn')}
                       value={maxPrice ?? ''}
                       onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : undefined)}
                       className="input-text"
@@ -615,7 +619,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                     className="btn btn-xs btn-outline"
                     onClick={() => { setMinPrice(0); setMaxPrice(1000000); }}
                   >
-                    Dưới €1M
+                    {t('skill_modal.price_under_1m', 'Dưới €1M')}
                   </button>
                   <button
                     type="button"
@@ -636,7 +640,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                     className="btn btn-xs btn-outline"
                     onClick={() => { setMinPrice(50000000); setMaxPrice(undefined); }}
                   >
-                    Bom tấn &gt; €50M
+                    {t('skill_modal.price_blockbuster', 'Bom tấn > €50M')}
                   </button>
                 </div>
               </div>
@@ -653,15 +657,15 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                   <label style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1e293b' }}>
-                    🌍 Quốc Tịch Cầu Thủ
+                    {t('skill_modal.nat_title', '🌍 Quốc Tịch Cầu Thủ')}
                   </label>
                   {nationalityId && (
                     <button
                       onClick={() => setNationalityId('')}
                       style={{ fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
                     >
-                      Xóa
-                    </button>
+                    {t('skill_modal.clear_btn', 'Xóa')}
+                  </button>
                   )}
                 </div>
                 <select
@@ -670,7 +674,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                   className="input-select"
                   style={{ width: '100%' }}
                 >
-                  <option value="">Tất cả các quốc gia ({countries.length > 0 ? countries.length : '96'} quốc gia)</option>
+                  <option value="">{t('skill_modal.all_countries', 'Tất cả các quốc gia ({count} quốc gia)').replace('{count}', String(countries.length > 0 ? countries.length : '96'))}</option>
                   {countries.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name} ({c.code})
@@ -678,7 +682,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                   ))}
                 </select>
                 <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.5rem' }}>
-                  Lọc chính xác các cầu thủ mang quốc tịch đã chọn trong hệ thống.
+                  {t('skill_modal.nat_hint', 'Lọc chính xác các cầu thủ mang quốc tịch đã chọn trong hệ thống.')}
                 </div>
               </div>
 
@@ -694,20 +698,20 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                   <label style={{ fontWeight: 700, fontSize: '0.92rem', color: '#1e293b' }}>
-                    ⭐ Điểm Tổng Quát (OVR)
+                    {t('skill_modal.ovr_title', '⭐ Điểm Tổng Quát (OVR)')}
                   </label>
                   {(minOvr || maxOvr) && (
                     <button
                       onClick={() => { setMinOvr(undefined); setMaxOvr(undefined); }}
                       style={{ fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
                     >
-                      Xóa
-                    </button>
+                    {t('skill_modal.clear_btn', 'Xóa')}
+                  </button>
                   )}
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>OVR từ</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{t('skill_modal.ovr_from', 'OVR từ')}</span>
                     <input
                       type="number"
                       min={50}
@@ -721,7 +725,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                   </div>
                   <span style={{ marginTop: '1rem', color: '#94a3b8' }}>-</span>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>OVR đến</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{t('skill_modal.ovr_to', 'OVR đến')}</span>
                     <input
                       type="number"
                       min={50}
@@ -742,28 +746,28 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                     className="btn btn-xs btn-outline"
                     onClick={() => { setMinOvr(70); setMaxOvr(undefined); }}
                   >
-                    70+ (Khá)
+                    {t('skill_modal.ovr_70', '70+ (Khá)')}
                   </button>
                   <button
                     type="button"
                     className="btn btn-xs btn-outline"
                     onClick={() => { setMinOvr(75); setMaxOvr(undefined); }}
                   >
-                    75+ (Tốt)
+                    {t('skill_modal.ovr_75', '75+ (Tốt)')}
                   </button>
                   <button
                     type="button"
                     className="btn btn-xs btn-outline"
                     onClick={() => { setMinOvr(80); setMaxOvr(undefined); }}
                   >
-                    80+ (Xuất sắc)
+                    {t('skill_modal.ovr_80', '80+ (Xuất sắc)')}
                   </button>
                   <button
                     type="button"
                     className="btn btn-xs btn-outline"
                     onClick={() => { setMinOvr(85); setMaxOvr(undefined); }}
                   >
-                    85+ (Siêu sao)
+                    {t('skill_modal.ovr_85', '85+ (Siêu sao)')}
                   </button>
                 </div>
               </div>
@@ -783,7 +787,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                 {currentCategoryAttributes.map((attr) => {
                   const val = attributes[attr.id] || 0;
                   const isActive = val > 0;
-                  const vnName = ATTRIBUTE_VN_NAMES[attr.code] || attr.name;
+                  const vnName = getAttrName(attr.code) || attr.name;
 
                   return (
                     <div
@@ -833,13 +837,13 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
                                 color: '#94a3b8',
                                 padding: '2px',
                               }}
-                              title="Xóa chỉ số này"
+                              title={t('skill_modal.remove_skill_tooltip', 'Xóa chỉ số này')}
                             >
                               <X size={14} />
                             </button>
                           </div>
                         ) : (
-                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Bất kỳ</span>
+                          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{t('skill_modal.any_level', 'Bất kỳ')}</span>
                         )}
                       </div>
 
@@ -905,7 +909,7 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
 
               {currentCategoryAttributes.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-                  Không tìm thấy kỹ năng nào khớp với từ khóa "{searchSkillQuery}"
+                  {t('skill_modal.no_skills_found', 'Không tìm thấy kỹ năng nào khớp với từ khóa')} "{searchSkillQuery}"
                 </div>
               )}
             </div>
@@ -930,22 +934,22 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
               style={{ gap: '0.35rem', color: '#64748b' }}
             >
               <RotateCcw size={15} />
-              Xóa bộ lọc
+              {t('skill_modal.clear_all_filters', 'Xóa bộ lọc')}
             </button>
             {activeCount > 0 && (
               <span style={{ fontSize: '0.82rem', color: '#16a34a', fontWeight: 600 }}>
-                ✓ Đang chọn {activeCount} tiêu chí lọc
+                {t('skill_modal.selecting_criteria', '✓ Đang chọn {count} tiêu chí lọc').replace('{count}', String(activeCount))}
               </span>
             )}
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button onClick={onClose} className="btn btn-sm btn-outline">
-              Hủy
-            </button>
+            {t('common.cancel', 'Hủy')}
+          </button>
             <button onClick={handleApply} className="btn btn-sm btn-primary flex-center" style={{ gap: '0.35rem' }}>
               <Check size={16} />
-              Áp Dụng Bộ Lọc
+              {t('skill_modal.apply_filters_btn', 'Áp Dụng Bộ Lọc')}
             </button>
           </div>
         </div>

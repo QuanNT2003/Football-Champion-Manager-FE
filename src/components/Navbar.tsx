@@ -1,119 +1,340 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Club, TimelineData, User } from '../types';
-import { Trophy, Calendar, Coins, DollarSign, UserCheck, Shield, LogOut, Radio } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import {
+  Trophy,
+  ShoppingCart,
+  Globe,
+  Handshake,
+  MessageSquare,
+  Search,
+  Bell,
+  CheckSquare,
+  Mail,
+  UserCheck,
+  LogOut,
+  Clock,
+  Shield,
+  Plus,
+  DollarSign,
+  Coins,
+  Check,
+} from 'lucide-react';
+import { User, Club, TimelineData } from '../types';
+import { useTranslation } from '../i18n';
 
-interface Props {
-  club: Club | null;
-  timeline: TimelineData | null;
+interface NavbarProps {
   user: User | null;
-  onOpenLogin: () => void;
+  club: Club | null;
+  timeline?: TimelineData | null;
+  seasonNum?: number;
+  currentDay?: number;
+  totalDays?: number;
   onLogout?: () => void;
+  onOpenLogin?: () => void;
 }
 
-export const Navbar: React.FC<Props> = ({
+export const Navbar: React.FC<NavbarProps> = ({
+  user,
   club,
   timeline,
-  user,
-  onOpenLogin,
+  seasonNum: seasonNumProp,
+  currentDay: currentDayProp,
+  totalDays: totalDaysProp,
   onLogout,
+  onOpenLogin,
 }) => {
-  const cash = club?.financial_accounts?.[0]?.cash_balance ?? club?.finances?.cash ?? 1500000;
-  const gold = club?.financial_accounts?.[0]?.gold_balance ?? club?.finances?.gold ?? 200;
-  const currentDay = timeline?.season?.current_day || 1;
-  const totalDays = timeline?.season?.total_days || 40;
+  const navigate = useNavigate();
+  const { t, language, setLanguage, languages, currentLanguageOption } = useTranslation();
+
+  const [currentTime, setCurrentTime] = useState<string>('');
+  const [showWorldModal, setShowWorldModal] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+
+  // Live ticking clock (Kickoff Boss style)
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      setCurrentTime(`${hours}:${minutes}:${seconds}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const seasonNum = timeline?.season?.season_number || seasonNumProp || 1;
+  const currentDay = timeline?.season?.current_day || currentDayProp || 8;
+  const totalDays = timeline?.season?.total_days || totalDaysProp || 34;
+
+  const cash = club?.financial_accounts?.[0]?.cash_balance ?? club?.finances?.cash ?? 1980000;
+  const gold = club?.financial_accounts?.[0]?.gold_balance ?? club?.finances?.gold ?? 4010;
+
+  const formatCompactCash = (val: number) => {
+    if (val >= 1_000_000) return `${(val / 1_000_000).toFixed(2)}M`;
+    if (val >= 1_000) return `${(val / 1_000).toFixed(1)}K`;
+    return String(val);
+  };
 
   return (
-    <header className="top-header-hud">
-      {/* Brand & Season Badge */}
-      <Link to="/dashboard" className="brand-area-hud">
-        <div className="brand-logo-hud">⚽</div>
-        <div className="brand-text-hud">
-          <h1>FOOTBALL CHAMPION</h1>
-          <div className="brand-badge-hud">
-            <Trophy size={12} className="text-amber" />
-            <span>MÙA {timeline?.season?.season_number || 1} • MULTIPLAYER MATCH ENGINE</span>
-          </div>
-        </div>
-      </Link>
+    <header className="cockpit-header">
+      {/* =========================================================================
+          TIER 1: COCKPIT QUICKBAR (Search, Clock, Currency, Alerts, Profile)
+          ========================================================================= */}
+      <div className="cockpit-top-bar">
+        {/* Left Section: Search & Live Clock */}
+        <div className="cockpit-left-group">
+          {/* Brand Title */}
+          <Link to="/dashboard" className="cockpit-brand-pill">
+            <span className="brand-dot-pulse" />
+            <span className="cockpit-brand-name">FOOTBALL CHAMPION</span>
+          </Link>
 
-      {/* Center & Right Telemetry Stats */}
-      <div className="header-stats-hud">
-        {/* Real-time Server Live Indicator */}
-        <div className="stat-pill-hud server-live">
-          <div className="radar-ping">
-            <Radio size={14} className="radar-icon" />
+          {/* Quick Search Box */}
+          <div className="cockpit-search-box">
+            <Search size={14} className="search-icon" />
+            <input
+              type="text"
+              placeholder={t('cockpit.search_placeholder')}
+              className="cockpit-search-input"
+            />
+            <kbd className="search-shortcut-kbd">Ctrl K</kbd>
           </div>
-          <div>
-            <span className="pill-sub">MÁY CHỦ REAL-TIME</span>
-            <strong className="pill-val text-emerald">
-              LIVE (ĐỒNG BỘ)
-            </strong>
-          </div>
-        </div>
 
-        {/* Season & Matchday Progress */}
-        <div className="stat-pill-hud matchday">
-          <Calendar size={16} className="text-cyan" />
-          <div>
-            <span className="pill-sub">TIẾN ĐỘ MÙA GIẢI</span>
-            <strong className="pill-val text-cyan">
-              DAY {currentDay} / {totalDays}
-            </strong>
+          {/* Live Real-time Clock */}
+          <div className="cockpit-live-clock" title={t('navbar.clock_tooltip', 'Thời gian thực hệ thống (UTC+7)')}>
+            <Clock size={13} className="text-emerald" />
+            <span className="clock-digits">{currentTime || '09:26:36'}</span>
+          </div>
+
+          {/* Season & Day Indicator */}
+          <div className="cockpit-season-badge">
+            <span>{t('cockpit.season')} {seasonNum} • {t('cockpit.day')} {currentDay}/{totalDays}</span>
           </div>
         </div>
 
-        {/* Club Finances */}
-        {club && (
-          <>
-            <div className="stat-pill-hud cash-pill">
-              <DollarSign size={16} className="text-emerald" />
-              <div>
-                <span className="pill-sub">NGÂN SÁCH TIỀN MẶT</span>
-                <strong className="pill-val text-emerald">€{Number(cash).toLocaleString()}</strong>
-              </div>
-            </div>
+        {/* Right Section: Currencies, Notifications, Language, User */}
+        <div className="cockpit-right-group">
+          {/* Income Pill */}
+          <Link to="/finances" className="cockpit-income-pill" title={t('navbar.income_tooltip', 'Doanh thu & Báo cáo tài chính')}>
+            <span className="income-dot" />
+            <span>{t('cockpit.income')}</span>
+          </Link>
 
-            <div className="stat-pill-hud gold-pill">
-              <Coins size={16} className="text-amber" />
-              <div>
-                <span className="pill-sub">VÀNG BULLION</span>
-                <strong className="pill-val text-amber">{Number(gold).toLocaleString()} GOLD</strong>
-              </div>
-            </div>
-          </>
-        )}
+          {/* Cash Balance */}
+          <div className="cockpit-currency-pill cash">
+            <DollarSign size={14} className="text-emerald" />
+            <span className="curr-val">€{formatCompactCash(Number(cash))}</span>
+            <Link to="/finances" className="curr-add-btn" title={t('navbar.cash_add_tooltip', 'Nạp / Quản lý ngân sách')}>
+              <Plus size={11} />
+            </Link>
+          </div>
 
-        {/* User / Logout */}
-        {user ? (
-          <div className="user-profile-hud-wrap">
-            <div className="user-pill-hud">
-              <div className="user-avatar-mini">
-                <UserCheck size={16} className="text-cyan" />
+          {/* Gold Balance */}
+          <div className="cockpit-currency-pill gold">
+            <Coins size={14} className="text-amber" />
+            <span className="curr-val">{Number(gold).toLocaleString()}</span>
+            <Link to="/finances" className="curr-add-btn gold" title={t('navbar.gold_shop_tooltip', 'Đổi vàng / Shop')}>
+              <Plus size={11} />
+            </Link>
+          </div>
+
+          {/* Language Switcher */}
+          <div className="language-switcher-wrap">
+            <button
+              type="button"
+              className="lang-toggle-btn"
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              title={t('cockpit.switch_lang')}
+            >
+              <span className="text-sm leading-none">{currentLanguageOption.flag}</span>
+              <span className="text-xs font-bold text-slate-700 uppercase">{language}</span>
+              <Globe size={12} className="text-slate-400" />
+            </button>
+
+            {showLangMenu && (
+              <div className="lang-dropdown-menu">
+                {languages.map((langOpt) => (
+                  <button
+                    key={langOpt.code}
+                    type="button"
+                    className={`lang-menu-item ${language === langOpt.code ? 'active' : ''}`}
+                    onClick={() => {
+                      setLanguage(langOpt.code);
+                      setShowLangMenu(false);
+                    }}
+                  >
+                    <span className="text-base">{langOpt.flag}</span>
+                    <span className="text-xs font-semibold">{langOpt.name}</span>
+                    {language === langOpt.code && <Check size={13} className="text-emerald ml-auto" />}
+                  </button>
+                ))}
               </div>
-              <div className="user-text-box">
-                <span className="pill-sub">HLV TRƯỞNG</span>
-                <span className="user-name-text">{user.username}</span>
-              </div>
-            </div>
-            {onLogout && (
-              <button
-                className="btn-hud-logout"
-                onClick={onLogout}
-                title="Đăng xuất khỏi tài khoản HLV"
-              >
-                <LogOut size={15} />
-                <span>Thoát</span>
-              </button>
             )}
           </div>
-        ) : (
-          <button className="btn-hud-login" onClick={onOpenLogin}>
-            <Shield size={16} />
-            <span>ĐĂNG NHẬP HLV</span>
+
+          {/* Notifications / Alerts Button */}
+          <button
+            className="cockpit-icon-btn alert-btn"
+            onClick={() => setShowAlertModal(!showAlertModal)}
+            title={t('navbar.alerts_tooltip', 'Thông báo mới (Alerts)')}
+          >
+            <Bell size={15} />
+            <span className="btn-label-text">{t('cockpit.alerts')}</span>
+            <span className="alert-count-badge">1</span>
           </button>
-        )}
+
+          {/* Tasks Button */}
+          <Link to="/facilities" className="cockpit-icon-btn" title={t('navbar.missions_tooltip', 'Nhiệm vụ & Mục tiêu CLB')}>
+            <CheckSquare size={15} />
+            <span className="btn-label-text">{t('cockpit.tasks')}</span>
+          </Link>
+
+          {/* Messages Button */}
+          <button className="cockpit-icon-btn" title={t('navbar.inbox_tooltip', 'Hộp thư HLV')}>
+            <Mail size={15} />
+            <span className="btn-label-text">{t('cockpit.messages')}</span>
+            <span className="subtle-zero-badge">0</span>
+          </button>
+
+          {/* User Profile / Logout */}
+          {user ? (
+            <div className="cockpit-user-card">
+              <div className="user-avatar-circle">
+                <UserCheck size={14} className="text-emerald" />
+              </div>
+              <div className="user-info-text">
+                <span className="user-title-sub">HLV</span>
+                <span className="user-name-bold">{user.username}</span>
+              </div>
+              {onLogout && (
+                <button
+                  className="cockpit-logout-btn"
+                  onClick={onLogout}
+                  title={t('cockpit.logout')}
+                >
+                  <LogOut size={13} />
+                </button>
+              )}
+            </div>
+          ) : (
+            <button className="btn-cockpit-login" onClick={onOpenLogin}>
+              <Shield size={14} />
+              <span>{t('navbar.login', 'ĐĂNG NHẬP')}</span>
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* =========================================================================
+          TIER 2: EXTERNAL NAV MENU
+          ========================================================================= */}
+      <nav className="external-nav-bar">
+        <div className="external-nav-container">
+          <NavLink
+            to="/standings"
+            className={({ isActive }) => `ext-nav-link ${isActive ? 'active' : ''}`}
+          >
+            <Trophy size={15} className="ext-icon" />
+            <span>{t('nav.ext.federation')}</span>
+            <span className="dropdown-caret">▾</span>
+          </NavLink>
+
+          <NavLink
+            to="/transfers"
+            className={({ isActive }) => `ext-nav-link ${isActive ? 'active' : ''}`}
+          >
+            <ShoppingCart size={15} className="ext-icon" />
+            <span>{t('nav.ext.markets')}</span>
+            <span className="dropdown-caret">▾</span>
+          </NavLink>
+
+          {/* THẾ GIỚI (WORLD) - Tạm ẩn theo yêu cầu */}
+
+          {/* BẢNG XẾP HẠNG (RANKINGS) - Tạm ẩn theo yêu cầu */}
+
+          <NavLink
+            to="/finances"
+            className="ext-nav-link"
+          >
+            <Handshake size={15} className="ext-icon" />
+            <span>{t('nav.ext.partners')}</span>
+            <span className="dropdown-caret">▾</span>
+          </NavLink>
+
+          <div className="ext-nav-link community-link">
+            <MessageSquare size={15} className="ext-icon" />
+            <span>{t('nav.ext.community')}</span>
+            <span className="dropdown-caret">▾</span>
+          </div>
+        </div>
+      </nav>
+
+      {/* Quick World Modal Preview */}
+      {showWorldModal && (
+        <div className="modal-overlay" onClick={() => setShowWorldModal(false)}>
+          <div className="modal-container-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-row">
+              <div className="flex items-center gap-2">
+                <Globe className="text-emerald" size={20} />
+                <h3 className="text-lg font-bold">{t('navbar.world_leagues_title', 'HỆ THỐNG THẾ GIỚI 96 QUỐC GIA (WORLD LEAGUES)')}</h3>
+              </div>
+              <button className="btn-close-modal" onClick={() => setShowWorldModal(false)}>✕</button>
+            </div>
+            <div className="p-4 space-y-3">
+              <p className="text-sm text-slate-600">
+                {t('navbar.world_leagues_desc', 'Football Champion quy tụ 96 quốc gia trải khắp 5 châu lục, mỗi quốc gia gồm 4 hạng đấu (Tier 1-4) cùng Cúp Quốc Gia và Cúp Châu Lục (C1, C2, C3).')}
+              </p>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                  <strong className="block text-emerald-700">{t('navbar.confed_uefa', 'Châu Âu (UEFA)')}</strong>
+                  <span>{t('navbar.confed_uefa_sample', 'Anh, Pháp, Đức, Tây Ban Nha, Ý, Bồ Đào Nha...')}</span>
+                </div>
+                <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                  <strong className="block text-emerald-700">{t('navbar.confed_americas', 'Châu Mỹ (CONMEBOL/CONCACAF)')}</strong>
+                  <span>Brazil, Argentina, Colombia, Uruguay, Mexico...</span>
+                </div>
+                <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+                  <strong className="block text-emerald-700">{t('navbar.confed_afc', 'Châu Á (AFC)')}</strong>
+                  <span>{t('navbar.confed_afc_sample', 'Việt Nam, Nhật Bản, Hàn Quốc, Ả Rập Xê Út...')}</span>
+                </div>
+              </div>
+              <div className="pt-2 flex justify-end">
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    setShowWorldModal(false);
+                    navigate('/standings');
+                  }}
+                >
+                  {t('navbar.go_standings', 'Đến Bảng Xếp Hạng Giải Đấu →')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Alerts Notification Dropdown/Popup */}
+      {showAlertModal && (
+        <div className="alerts-dropdown-box">
+          <div className="alerts-dropdown-header">
+            <strong>{t('navbar.notif_title', 'Thông báo trận đấu & Chuyển nhượng')}</strong>
+            <button onClick={() => setShowAlertModal(false)}>✕</button>
+          </div>
+          <div className="alerts-dropdown-body">
+            <div className="alert-item unread">
+              <span className="alert-dot" />
+              <div>
+                <p className="font-semibold text-xs text-slate-800">{t('navbar.market_open_title', 'Thị trường chuyển nhượng Mùa {season} đang mở').replace('{season}', String(seasonNum))}</p>
+                <span className="text-[11px] text-slate-500">{t('navbar.market_open_desc', 'Hàng ngàn cầu thủ và ban huấn luyện đã sẵn sàng đàm phán hợp đồng.')}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

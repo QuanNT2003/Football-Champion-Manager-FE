@@ -1,20 +1,9 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Club, Player, TimelineData, User } from '../types';
 import { Navbar } from '../components/Navbar';
+import { LeftDockRail } from '../components/LeftDockRail';
 import { PlayerDetailModal } from '../components/PlayerDetailModal';
-import {
-  Briefcase,
-  LayoutDashboard,
-  Users,
-  Compass,
-  Swords,
-  ShoppingCart,
-  Building2,
-  Trophy,
-  Dumbbell,
-  BarChart3,
-} from 'lucide-react';
 
 interface Props {
   club: Club | null;
@@ -46,121 +35,46 @@ export const GameLayout: React.FC<Props> = ({
   setSelectedPlayer,
 }) => {
   return (
-    <div className="app-container">
-      {globalNotification && (
-        <div className="notification-banner">
-          <span className="notification-icon">⚡</span>
-          <span>{globalNotification}</span>
-        </div>
-      )}
+    <div className="app-container master-cockpit-layout">
+      {/* 1. Left Vertical Dock Rail (Menu những phần thuộc về Câu Lạc Bộ của mình) */}
+      <LeftDockRail squadCount={players.length} />
 
-      {/* Main Gaming Navbar */}
-      <Navbar
-        club={club}
-        timeline={timeline}
-        user={user}
-        onOpenLogin={() => {}}
-        onLogout={onLogout}
-      />
+      {/* Main Right Area (Header + Centered 60-70% Content) */}
+      <div className="cockpit-viewport">
+        {/* Global Notification Banner */}
+        {globalNotification && (
+          <div className="notification-banner">
+            <span className="notification-icon">⚽</span>
+            <span>{globalNotification}</span>
+          </div>
+        )}
 
-      {/* Navigation Sub-bar with React Router NavLinks */}
-      <nav className="sub-nav">
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <LayoutDashboard size={18} />
-          <span>Tổng Quan</span>
-        </NavLink>
-
-        <NavLink
-          to="/squad"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <Users size={18} />
-          <span>Đội Hình ({players.length})</span>
-        </NavLink>
-        <NavLink
-          to="/staff"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <Briefcase size={18} />
-          <span>Ban Huấn Luyện</span>
-        </NavLink>
-
-        <NavLink
-          to="/tactics"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <Compass size={18} />
-          <span>Chiến Thuật</span>
-        </NavLink>
-
-        <NavLink
-          to="/matches"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <Swords size={18} />
-          <span>Lịch Thi Đấu</span>
-        </NavLink>
-
-        <NavLink
-          to="/transfers"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <ShoppingCart size={18} />
-          <span>Chuyển Nhượng</span>
-        </NavLink>
-
-        <NavLink
-          to="/facilities"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <Building2 size={18} />
-          <span>Cơ Sở Vật Chất</span>
-        </NavLink>
-
-        <NavLink
-          to="/finances"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <Trophy size={18} />
-          <span>Tài Chính & Shop</span>
-        </NavLink>
-
-        <NavLink
-          to="/training"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <Dumbbell size={18} />
-          <span>Huấn Luyện</span>
-        </NavLink>
-
-        <NavLink
-          to="/standings"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <BarChart3 size={18} />
-          <span>Bảng Xếp Hạng</span>
-        </NavLink>
-      </nav>
-
-      {/* Main Routed Content Area */}
-      <main className="main-content">
-        <Outlet
-          context={{
-            club,
-            user,
-            timeline,
-            players,
-            onUpgradeFacility,
-            onUpdateTransferListing,
-            refreshClubData,
-            loadClubSquad,
-            setSelectedPlayer,
-          }}
+        {/* 2. Top Header HUD (Thanh Header thuộc về những gì BÊN NGOÀI câu lạc bộ) */}
+        <Navbar
+          club={club}
+          timeline={timeline}
+          user={user}
+          onOpenLogin={() => {}}
+          onLogout={onLogout}
         />
-      </main>
+
+        {/* 3. Center Content Area (Chiếm khoảng 60-70% màn hình nằm ở giữa) */}
+        <main className="main-content center-content-wrapper">
+          <Outlet
+            context={{
+              club,
+              user,
+              timeline,
+              players,
+              onUpgradeFacility,
+              onUpdateTransferListing,
+              refreshClubData,
+              loadClubSquad,
+              setSelectedPlayer,
+            }}
+          />
+        </main>
+      </div>
 
       {/* Modals */}
       {selectedPlayer && (

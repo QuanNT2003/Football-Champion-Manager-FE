@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { PlayerDetailData } from '../../types';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export const PlayerSkillsTab: React.FC<Props> = ({
+
   detail,
   pPosCode,
   skillCategory,
@@ -21,6 +23,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
   setCompared,
   displayedSkills,
 }) => {
+  const { t } = useTranslation();
   return (
                 <div className="pm-skills-view">
                   {/* Category Filter Sub-nav */}
@@ -28,46 +31,46 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'KEY' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('KEY')}
-                      title="10 Chỉ số cốt lõi theo vị trí thi đấu (Hệ số x3 OVR)"
+                      title={t('skills.core_tooltip', '10 Chỉ số cốt lõi theo vị trí thi đấu (Hệ số x3 OVR)')}
                     >
-                      ⭐ Cốt lõi vị trí (10)
+                      {t('player.core_skills')}
                     </button>
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'PHYSICAL' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('PHYSICAL')}
-                      title="Chỉ số thể chất & sức mạnh"
+                      title="{t('player.physical_skills')}"
                     >
-                      🏃 Thể chất (10)
+                      {t('skills.tab_physical', '🏃 Thể chất (10)')}
                     </button>
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'TECHNICAL' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('TECHNICAL')}
-                      title="Chỉ số kỹ thuật xử lý bóng"
+                      title={t('skills.tech_tooltip', 'Chỉ số kỹ thuật xử lý bóng')}
                     >
-                      ⚽ Kỹ thuật (10)
+                      {t('skills.tab_tech', '⚽ Kỹ thuật (10)')}
                     </button>
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'MENTAL' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('MENTAL')}
-                      title="Chỉ số tâm lý & nhãn quan chiến thuật"
+                      title={t('skills.mental_tooltip', 'Chỉ số tâm lý & nhãn quan chiến thuật')}
                     >
-                      🧠 Tâm lý (10)
+                      {t('skills.tab_mental', '🧠 Tâm lý (10)')}
                     </button>
                     {(pPosCode === 'GK' || (detail?.skills?.categories?.goalkeeping?.some((g: any) => g.value > 0))) && (
                       <button
                         className={`pm-subnav-btn ${skillCategory === 'GOALKEEPING' ? 'active' : ''}`}
                         onClick={() => setSkillCategory('GOALKEEPING')}
-                        title="Chỉ số chuyên môn thủ môn"
+                        title={t('skills.gk_tooltip', 'Chỉ số chuyên môn thủ môn')}
                       >
-                        🧤 Thủ môn (10)
+                        {t('skills.tab_gk', '🧤 Thủ môn (10)')}
                       </button>
                     )}
                     <button
                       className={`pm-subnav-btn ${skillCategory === 'ALL' ? 'active' : ''}`}
                       onClick={() => setSkillCategory('ALL')}
-                      title="Toàn bộ 40 chỉ số trong CSDL"
+                      title={t('skills.all_tooltip', 'Toàn bộ 40 chỉ số trong CSDL')}
                     >
-                      📋 Tất cả (40)
+                      {t('skills.tab_all', '📋 Tất cả (40)')}
                     </button>
                   </div>
 
@@ -78,7 +81,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                       {displayedSkills.left.map((sk: any) => (
                         <div key={sk.id || sk.code} className="pm-skill-item" title={sk.description || `${sk.name} (${sk.code})`}>
                           <span className="pm-skill-name">
-                            {sk.is_key && <span className="pm-key-star" title="Chỉ số cốt lõi vị trí">⭐ </span>}
+                            {sk.is_key && <span className="pm-key-star" title={t('skills.key_star_tooltip', 'Chỉ số cốt lõi vị trí')}>⭐ </span>}
                             <strong className="pm-skill-code">[{sk.code}]</strong> {sk.name}
                           </span>
                           <div className="pm-skill-bar-wrap">
@@ -105,7 +108,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                       {displayedSkills.right.map((sk: any) => (
                         <div key={sk.id || sk.code} className="pm-skill-item" title={sk.description || `${sk.name} (${sk.code})`}>
                           <span className="pm-skill-name">
-                            {sk.is_key && <span className="pm-key-star" title="Chỉ số cốt lõi vị trí">⭐ </span>}
+                            {sk.is_key && <span className="pm-key-star" title={t('skills.key_star_tooltip', 'Chỉ số cốt lõi vị trí')}>⭐ </span>}
                             <strong className="pm-skill-code">[{sk.code}]</strong> {sk.name}
                           </span>
                           <div className="pm-skill-bar-wrap">
@@ -129,7 +132,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                   </div>
 
                   <div className="pm-skills-total-row">
-                    <span className="pm-total-label">Tổng điểm {displayedSkills.label}:</span>
+                    <span className="pm-total-label">{t('skills.total_points', 'Tổng điểm {label}:').replace('{label}', displayedSkills.label)}</span>
                     <span className="pm-total-val">{displayedSkills.total}</span>
                     <span className="pm-calc-icon">🧮</span>
                   </div>
@@ -146,7 +149,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                           if (pts.length < 2) {
                             return (
                               <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.82rem' }}>
-                                Chưa có dữ liệu lịch sử tăng trưởng trong CSDL
+                                {t('skills.no_growth_history', 'Chưa có dữ liệu lịch sử tăng trưởng trong CSDL')}
                               </div>
                             );
                           }
@@ -230,7 +233,7 @@ export const PlayerSkillsTab: React.FC<Props> = ({
                         onClick={() => setCompared(!compared)}
                       >
                         <Plus size={16} />
-                        <span>{compared ? 'Đã thêm (1/3)' : 'Add this Player (0/3)'}</span>
+                        <span>{compared ? t('skills.compare_added', 'Đã thêm (1/3)') : 'Add this Player (0/3)'}</span>
                       </button>
                     </div>
                   </div>

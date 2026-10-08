@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { HelpCircle } from 'lucide-react';
 import { PlayerDetailData } from '../../types';
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export const PlayerMatchesTab: React.FC<Props> = ({ detail }) => {
+  const { t } = useTranslation();
   return (
               
                 <div className="pm-matches-view">
@@ -36,7 +38,7 @@ export const PlayerMatchesTab: React.FC<Props> = ({ detail }) => {
                         {(!detail?.matches?.list || detail.matches.list.length === 0) ? (
                           <tr>
                             <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
-                              Chưa có trận đấu nào được ghi nhận trong cơ sở dữ liệu
+                              {t('player.no_matches')}
                             </td>
                           </tr>
                         ) : (detail.matches.list.map((m, idx) => (

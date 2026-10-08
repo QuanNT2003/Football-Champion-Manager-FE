@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 
 interface TeamItem {
@@ -16,17 +17,18 @@ interface TeamsListViewProps {
 }
 
 export const TeamsListView: React.FC<TeamsListViewProps> = ({ teams, currentClubId }) => {
+  const { t } = useTranslation();
   return (
     <div className="card" style={{ padding: '1.5rem' }}>
       <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', color: '#0f172a' }}>
-        Danh Sách Câu Lạc Bộ Tham Gia ({teams.length} Đội)
+        {t('standings.teams_participating')} ({teams.length} Đội)
       </h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
-        {teams.map((t) => {
-          const isCurrent = t.id.toString() === currentClubId?.toString();
+        {teams.map((team) => {
+          const isCurrent = team.id.toString() === currentClubId?.toString();
           return (
             <div
-              key={t.id}
+              key={team.id}
               style={{
                 padding: '12px 14px',
                 borderRadius: '12px',
@@ -49,8 +51,8 @@ export const TeamsListView: React.FC<TeamsListViewProps> = ({ teams, currentClub
                   fontSize: '1.3rem',
                 }}
               >
-                {t.logo_url ? (
-                  <img src={t.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                {team.logo_url ? (
+                  <img src={team.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 ) : (
                   '⚽'
                 )}
@@ -66,7 +68,7 @@ export const TeamsListView: React.FC<TeamsListViewProps> = ({ teams, currentClub
                     textOverflow: 'ellipsis',
                   }}
                 >
-                  {t.name}
+                  {team.name}
                 </div>
                 <div
                   style={{
@@ -78,9 +80,9 @@ export const TeamsListView: React.FC<TeamsListViewProps> = ({ teams, currentClub
                     marginTop: '2px',
                   }}
                 >
-                  <span>Sân: {t.stadium?.name || 'Sân Vận Động'}</span>
+                  <span>{t('teams.stadium_prefix', 'Sân:')} {team.stadium?.name || t('teams.stadium_default', 'Sân Vận Động')}</span>
                   <span>•</span>
-                  <span>Sức chứa: {(t.stadium?.capacity || 5000).toLocaleString()}</span>
+                  <span>{t('standings.capacity_label')}: {(team.stadium?.capacity || 5000).toLocaleString()}</span>
                 </div>
               </div>
             </div>

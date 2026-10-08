@@ -20,8 +20,10 @@ import { TrainingView } from './components/TrainingView';
 import { StandingsView } from './components/StandingsView';
 import { ClubStaffView } from './components/ClubStaffView';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from './i18n/I18nContext';
 
 export function App() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -123,11 +125,11 @@ export function App() {
     if (!club) return;
     try {
       await clubsApi.upgradeFacility(club.id, facilityId);
-      setGlobalNotification('Cơ sở vật chất đã bắt đầu nâng cấp thành công!');
+      setGlobalNotification(t('app.upgrade_success', 'Cơ sở vật chất đã bắt đầu nâng cấp thành công!'));
       refreshClubData();
       setTimeout(() => setGlobalNotification(null), 3500);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Nâng cấp thất bại, kiểm tra số dư');
+      alert(err.response?.data?.message || t('app.upgrade_failed', 'Nâng cấp thất bại, kiểm tra số dư'));
     }
   };
 
@@ -139,11 +141,11 @@ export function App() {
   ) => {
     try {
       await playersApi.updateTransferListing(playerId, isTransfer, isLoan, price);
-      setGlobalNotification('Cập nhật trạng thái thị trường chuyển nhượng thành công!');
+      setGlobalNotification(t('app.market_status_updated', 'Cập nhật trạng thái thị trường chuyển nhượng thành công!'));
       if (club) loadClubSquad(club.id);
       setTimeout(() => setGlobalNotification(null), 3500);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Không thể cập nhật danh sách chuyển nhượng');
+      alert(err.response?.data?.message || t('app.market_update_failed', 'Không thể cập nhật danh sách chuyển nhượng'));
     }
   };
 
@@ -156,7 +158,7 @@ export function App() {
           <h2>FOOTBALL CHAMPION MANAGER</h2>
           <div className="loading-spinner-row">
             <Loader2 className="spinner-icon-hud" size={24} />
-            <span>Đang đồng bộ dữ liệu Match Engine & HLV...</span>
+            <span>{t('app.syncing_data', 'Đang đồng bộ dữ liệu Match Engine & HLV...')}</span>
           </div>
         </div>
       </div>

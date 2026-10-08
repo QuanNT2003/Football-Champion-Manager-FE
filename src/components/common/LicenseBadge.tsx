@@ -1,4 +1,6 @@
 import React from 'react';
+import { useTranslation } from '../../i18n/I18nContext';
+
 
 interface Props {
   license: string;
@@ -6,16 +8,17 @@ interface Props {
 }
 
 export const LicenseBadge: React.FC<Props> = ({ license, size = 'md' }) => {
+  const { t } = useTranslation();
   const getBadgeStyle = (lic: string) => {
     switch (lic) {
       case 'PRO':
         return { text: 'UEFA PRO', bg: 'linear-gradient(135deg, #f59e0b, #d97706)' };
       case 'A':
-        return { text: 'BẰNG A', bg: 'linear-gradient(135deg, #10b981, #059669)' };
+        return { text: t('license.a', 'BẰNG A'), bg: 'linear-gradient(135deg, #10b981, #059669)' };
       case 'B':
-        return { text: 'BẰNG B', bg: 'linear-gradient(135deg, #3b82f6, #2563eb)' };
+        return { text: t('license.b', 'BẰNG B'), bg: 'linear-gradient(135deg, #3b82f6, #2563eb)' };
       case 'C':
-        return { text: 'BẰNG C', bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' };
+        return { text: t('license.c', 'BẰNG C'), bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' };
       default:
         return { text: lic, bg: '#94a3b8' };
     }

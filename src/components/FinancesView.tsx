@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import React, { useState, useEffect } from 'react';
 import { financesApi } from '../services/finances.service';
 import { FinancialAccount, LedgerTransaction, ShopItem } from '../types';
@@ -9,6 +10,7 @@ interface FinancesViewProps {
 }
 
 export const FinancesView: React.FC<FinancesViewProps> = ({ currentClubId, onRefreshBalance }) => {
+  const { t } = useTranslation();
   const [balance, setBalance] = useState<FinancialAccount | null>(null);
   const [transactions, setTransactions] = useState<LedgerTransaction[]>([]);
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
@@ -72,13 +74,13 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ currentClubId, onRef
         <div>
           <h1 className="view-title flex-center" style={{ gap: '0.75rem' }}>
             <CreditCard className="text-warning" size={28} />
-            Club Treasury & Gold Exchange
+            {t('finances.title')}
           </h1>
-          <p className="view-subtitle">Track ledger cashflows, matchday income, and convert Gold currency</p>
+          <p className="view-subtitle">{t('finances.subtitle')}</p>
         </div>
 
         <button className="btn btn-outline btn-sm flex-center" style={{ gap: '0.4rem' }} onClick={loadFinances}>
-          <RefreshCw size={15} /> Refresh Ledgers
+          <RefreshCw size={15} /> {t('common.refresh')}
         </button>
       </div>
 
@@ -92,7 +94,7 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ currentClubId, onRef
       <div className="grid-3 mb-4">
         <div className="stat-card" style={{ borderLeft: '4px solid var(--neon-green)' }}>
           <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-            <span className="text-muted" style={{ fontSize: '0.875rem' }}>Liquid Cash Reserves</span>
+            <span className="text-muted" style={{ fontSize: '0.875rem' }}>{t('finances.cash_balance')}</span>
             <DollarSign className="text-success" size={24} />
           </div>
           <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-bright)' }}>
@@ -105,7 +107,7 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ currentClubId, onRef
 
         <div className="stat-card" style={{ borderLeft: '4px solid var(--accent-gold)' }}>
           <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-            <span className="text-muted" style={{ fontSize: '0.875rem' }}>Gold Bullion (Premium)</span>
+            <span className="text-muted" style={{ fontSize: '0.875rem' }}>{t('finances.gold_balance')}</span>
             <Coins className="text-warning" size={24} />
           </div>
           <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--accent-gold)' }}>
@@ -135,11 +137,11 @@ export const FinancesView: React.FC<FinancesViewProps> = ({ currentClubId, onRef
         <div className="card">
           <h3 className="card-title flex-center" style={{ justifyContent: 'flex-start', gap: '0.5rem', marginBottom: '1.25rem' }}>
             <TrendingUp className="text-primary" size={20} />
-            Ledger Audit Log
+            {t('finances.tab_transactions')}
           </h3>
 
           {transactions.length === 0 ? (
-            <p className="text-muted text-center" style={{ padding: '2rem 0' }}>No ledger transactions recorded yet.</p>
+            <p className="text-muted text-center" style={{ padding: '2rem 0' }}>{t('finances.no_transactions')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: 420, overflowY: 'auto' }}>
               {transactions.slice(0, 15).map((tx) => {

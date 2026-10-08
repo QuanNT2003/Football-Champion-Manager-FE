@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   competitionsApi,
@@ -35,6 +36,7 @@ interface StandingsViewProps {
 }
 
 export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubId }) => {
+  const { t } = useTranslation();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [selectedCompId, setSelectedCompId] = useState<string>('');
   const [standings, setStandings] = useState<StandingItem[]>([]);
@@ -44,7 +46,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
   const [knockoutBracket, setKnockoutBracket] = useState<KnockoutBracketResponse | null>(null);
   const [selectedRoundName, setSelectedRoundName] = useState<string>('all');
   const [compFormatType, setCompFormatType] = useState<'LEAGUE' | 'KNOCKOUT' | 'GROUP_KNOCKOUT'>('LEAGUE');
-  const [compFormatLabel, setCompFormatLabel] = useState<string>('Vòng tròn tính điểm');
+  const [compFormatLabel, setCompFormatLabel] = useState<string>('Round-robin');
   const [subTab, setSubTab] = useState<'groups' | 'knockout'>('groups');
 
   const [teams, setTeams] = useState<CompetitionTeam[]>([]);
@@ -58,7 +60,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
   const userClubCountryName =
     club?.country_detail?.name ||
     (typeof club?.country === 'string' ? club?.country : (club?.country as any)?.name) ||
-    'Việt Nam';
+    t('common.vietnam', 'Việt Nam');
   const userClubConfedCode =
     club?.confederation?.code ||
     club?.country_detail?.confederation?.code ||
@@ -140,7 +142,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
         setGroups(fetchedGroups);
         const format = tableData.formatType || foundComp?.formatType || 'LEAGUE';
         setCompFormatType(format);
-        setCompFormatLabel(tableData.formatLabel || foundComp?.formatLabel || 'Vòng tròn tính điểm');
+        setCompFormatLabel(tableData.formatLabel || foundComp?.formatLabel || t('standings.format_round_robin', t('standings.format_round_robin', 'Vòng tròn tính điểm')));
 
         // Tự động tìm và chọn thẳng bảng đấu mà CLB của ta đang thuộc về (ví dụ Tier 4 Bảng C)
         let myGroupIdx = 0;
@@ -167,7 +169,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
         setSelectedGroupIdx(0);
         const format = foundComp?.formatType || 'LEAGUE';
         setCompFormatType(format);
-        setCompFormatLabel(foundComp?.formatLabel || 'Vòng tròn tính điểm');
+        setCompFormatLabel(foundComp?.formatLabel || t('standings.format_round_robin', 'Vòng tròn tính điểm'));
       }
 
       setKnockoutBracket(bracketData || null);
@@ -297,15 +299,15 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
           </div>
           <div>
             <div style={{ fontSize: '0.78rem', opacity: 0.9, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Câu Lạc Bộ Của Bạn: <strong>{club?.name || 'Can Tho Gold Tigers'}</strong>
+              {t('standings.your_club_label', 'Câu Lạc Bộ Của Bạn:')} <strong>{club?.name || 'Can Tho Gold Tigers'}</strong>
             </div>
             <div style={{ fontSize: '1.12rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>Đang Theo Dõi:</span>
+              <span>{t('standings.viewing_label', 'Đang Theo Dõi:')}</span>
               <span style={{ color: '#fef08a' }}>{viewingCountryName}</span>
               {viewingCountryId !== userClubCountryId && (
                 <span style={{ fontSize: '0.72rem', background: '#f59e0b', color: '#ffffff', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
-                  Quốc Gia Khác
-                </span>
+            {t('standings.other_countries', 'Quốc Gia Khác')}
+          </span>
               )}
             </div>
           </div>
@@ -314,7 +316,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', background: 'rgba(255, 255, 255, 0.15)', padding: '6px 12px', borderRadius: '10px' }}>
             <Globe2 size={16} />
-            <span>Liên Đoàn: <strong>{viewingConfedCode}</strong></span>
+            <span>{t('standings.confed_label', 'Liên Đoàn:')} <strong>{viewingConfedCode}</strong></span>
           </div>
 
           {/* Button to Open Country Selector */}
@@ -338,7 +340,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
             }}
           >
             <Flag size={15} />
-            <span>Chọn Quốc Gia Khác (96 Nước)</span>
+            <span>{t('standings.select_country')} (96)</span>
           </button>
 
           {/* Button to Return to User Club's Home Country */}
@@ -360,10 +362,10 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
               }}
-              title="Quay lại hệ thống giải đấu quốc gia của câu lạc bộ bạn"
+              title={t('standings.back_my_league_tooltip', 'Quay lại hệ thống giải đấu quốc gia của câu lạc bộ bạn')}
             >
               <RotateCcw size={14} />
-              <span>Về Giải Của Tôi ({userClubCountryName})</span>
+              <span>{t('standings.back_my_league', 'Về Giải Của Tôi ({country})').replace('{country}', userClubCountryName)}</span>
             </button>
           )}
         </div>
@@ -376,7 +378,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
                 <Trophy size={24} color="#15803d" />
-                <span>{currentComp?.displayName || currentComp?.name || 'Hệ Thống Giải Đấu'}</span>
+                <span>{currentComp?.displayName || currentComp?.name || t('standings.comp_system_default', 'Hệ Thống Giải Đấu')}</span>
               </h2>
 
               {/* Format Badge */}
@@ -423,10 +425,10 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
 
             <p style={{ color: '#64748b', fontSize: '0.88rem', margin: '4px 0 0' }}>
               {compFormatType === 'KNOCKOUT'
-                ? 'Đấu loại trực tiếp qua các vòng đấu phân cặp'
+                ? t('standings.format_knockout', 'Đấu loại trực tiếp qua các vòng đấu phân cặp')
                 : compFormatType === 'GROUP_KNOCKOUT'
-                ? 'Giai đoạn 1: Vòng Bảng -> Giai đoạn 2: Vòng Đấu Loại Trực Tiếp (Knockout)'
-                : `Giải đấu đường trường tính điểm ${currentTier ? `(Tier ${currentTier})` : ''}`}
+                ? t('standings.format_group_plus_ko', 'Giai đoạn 1: Vòng Bảng -> Giai đoạn 2: Vòng Đấu Loại Trực Tiếp (Knockout)')
+                : t('standings.format_league_long', 'Giải đấu đường trường tính điểm {tier}').replace('{tier}', currentTier ? `(Tier ${currentTier})` : '')}
             </p>
           </div>
 
@@ -446,7 +448,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
               }}
             >
               {domesticComps.length > 0 && (
-                <optgroup label={`Hệ Thống Giải Quốc Nội (${viewingCountryName})`}>
+                <optgroup label={t('standings.national_system_optgroup', 'Hệ Thống Giải Quốc Nội ({country})').replace('{country}', viewingCountryName)}>
                   {domesticComps.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.tier ? `[Tier ${c.tier}] ` : ''}{c.displayName || c.name}
@@ -456,7 +458,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
               )}
 
               {continentalComps.length > 0 && (
-                <optgroup label={`Cúp Châu Lục (${viewingConfedCode})`}>
+                <optgroup label={t('standings.continental_optgroup', 'Cúp Châu Lục ({confed})').replace('{confed}', viewingConfedCode)}>
                   {continentalComps.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.displayName || c.name}
@@ -466,7 +468,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
               )}
 
               {internationalComps.length > 0 && (
-                <optgroup label="Giải Đấu Thế Giới">
+                <optgroup label={t('standings.world_optgroup', 'Giải Đấu Thế Giới')}>
                   {internationalComps.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.displayName || c.name}
@@ -492,7 +494,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                 }}
                 onClick={() => setActiveTab('table')}
               >
-                {compFormatType === 'KNOCKOUT' ? 'Sơ Đồ Thi Đấu' : 'Bảng Xếp Hạng'}
+                {compFormatType === 'KNOCKOUT' ? t('standings.bracket') : t('standings.tab_table')}
               </button>
 
               <button
@@ -509,7 +511,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                 }}
                 onClick={() => setActiveTab('teams')}
               >
-                Đội Bóng ({teams.length})
+                {t('standings.tab_teams')} ({teams.length})
               </button>
 
               <button
@@ -526,8 +528,8 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                 }}
                 onClick={() => setActiveTab('stats')}
               >
-                Thống Kê Cá Nhân
-              </button>
+            {t('standings.player_stats_tab', 'Thống Kê Cá Nhân')}
+          </button>
             </div>
           </div>
         </div>
@@ -549,7 +551,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
       {loading ? (
         <div className="card text-center" style={{ padding: '3.5rem' }}>
           <div className="spinner" style={{ margin: '0 auto 1rem auto' }}></div>
-          <p style={{ color: '#64748b', fontWeight: 600 }}>Đang tải dữ liệu giải đấu...</p>
+          <p style={{ color: '#64748b', fontWeight: 600 }}>{t('standings.loading_comp', 'Đang tải dữ liệu giải đấu...')}</p>
         </div>
       ) : activeTab === 'table' ? (
         /* TAB 1: HIỂN THỊ THEO THỂ THỨC */
@@ -585,7 +587,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                   }}
                 >
                   <Layers size={16} />
-                  <span>Vòng Bảng ({groups.length} Bảng)</span>
+                  <span>{t('standings.group_stage_tab', 'Vòng Bảng ({count} Bảng)').replace('{count}', String(groups.length))}</span>
                 </button>
 
                 <button
@@ -606,7 +608,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                   }}
                 >
                   <Swords size={16} />
-                  <span>Vòng Loại Trực Tiếp (Knockout)</span>
+                  <span>{t('standings.knockout_stage_tab', 'Vòng Loại Trực Tiếp (Knockout)')}</span>
                 </button>
               </div>
 
@@ -616,7 +618,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                   currentClubId={currentClubId}
                   currentTier={currentTier}
                   compFormatType={compFormatType}
-                  groupName={activeGroup ? activeGroup.name || `Bảng ${String.fromCharCode(65 + selectedGroupIdx)}` : undefined}
+                  groupName={activeGroup ? activeGroup.name || t('tier.group_n', 'Bảng {n}').replace('{n}', String.fromCharCode(65 + selectedGroupIdx)) : undefined}
                 />
               ) : (
                 <KnockoutBracketSection
@@ -650,7 +652,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
               currentClubId={currentClubId}
               currentTier={currentTier}
               compFormatType={compFormatType}
-              groupName={activeGroup ? activeGroup.name || `Bảng ${String.fromCharCode(65 + selectedGroupIdx)}` : undefined}
+              groupName={activeGroup ? activeGroup.name || t('tier.group_n', 'Bảng {n}').replace('{n}', String.fromCharCode(65 + selectedGroupIdx)) : undefined}
             />
           )}
         </div>

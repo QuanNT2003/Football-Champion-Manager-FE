@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React, { useState, useEffect } from 'react';
 import {
   X,
@@ -40,6 +41,7 @@ export const StaffDetailModal: React.FC<Props> = ({
   onSelectStaff,
   onOfferSuccess,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'skills' | 'history' | 'offer'>(initialTab);
   const [detail, setDetail] = useState<StaffDetailResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -132,7 +134,7 @@ export const StaffDetailModal: React.FC<Props> = ({
 
   const handleSubmitOffer = async () => {
     if (!currentClubId) {
-      setOfferError('Bạn cần quản lý một CLB để gửi đề nghị tuyển mộ');
+      setOfferError(t('staff.need_club_to_hire', 'Bạn cần quản lý một CLB để gửi đề nghị tuyển mộ'));
       return;
     }
     try {
@@ -147,11 +149,11 @@ export const StaffDetailModal: React.FC<Props> = ({
         contract_years: contractYears,
         signing_bonus: signingBonus,
       });
-      setOfferSuccess('Gửi lời đề nghị tuyển mộ thành công!');
+      setOfferSuccess(t('staff.offer_success', 'Gửi lời đề nghị tuyển mộ thành công!'));
       loadDetail(staff.id);
       if (onOfferSuccess) onOfferSuccess();
     } catch (err: any) {
-      setOfferError(err.response?.data?.message || 'Không thể gửi lời đề nghị, vui lòng thử lại');
+      setOfferError(err.response?.data?.message || t('staff.offer_failed', 'Không thể gửi lời đề nghị, vui lòng thử lại'));
     } finally {
       setSubmittingOffer(false);
     }
@@ -163,7 +165,7 @@ export const StaffDetailModal: React.FC<Props> = ({
       setCancellingOffer(true);
       await transfersApi.cancelStaffOffer(detail.existingOffer.id, currentClubId);
       setShowCancelConfirm(false);
-      setOfferSuccess('Đã hủy lời đề nghị tuyển mộ!');
+      setOfferSuccess(t('staff.cancel_offer_success', 'Đã hủy lời đề nghị tuyển mộ!'));
       loadDetail(staff.id);
       if (onOfferSuccess) onOfferSuccess();
     } catch (err: any) {
@@ -190,7 +192,7 @@ export const StaffDetailModal: React.FC<Props> = ({
               className="pm-nav-btn"
               disabled={!hasPrev}
               onClick={handlePrev}
-              title="Nhân viên trước"
+              title={t('staff.prev_tooltip', 'Nhân viên trước')}
             >
               <ChevronLeft size={20} />
             </button>
@@ -199,7 +201,7 @@ export const StaffDetailModal: React.FC<Props> = ({
               className="pm-nav-btn"
               disabled={!hasNext}
               onClick={handleNext}
-              title="Nhân viên tiếp theo"
+              title={t('staff.next_tooltip', 'Nhân viên tiếp theo')}
             >
               <ChevronRight size={20} />
             </button>
@@ -212,7 +214,7 @@ export const StaffDetailModal: React.FC<Props> = ({
             type="button"
             className="pm-close-btn"
             onClick={onClose}
-            title="Đóng modal"
+            title={t('staff.close_modal_tooltip', 'Đóng modal')}
           >
             <X size={20} />
           </button>
@@ -243,22 +245,22 @@ export const StaffDetailModal: React.FC<Props> = ({
           {/* Column 1: Nationality, Tactical Style, Preferred Formation */}
           <div className="pm-info-col">
             <div className="pm-info-row">
-              <span className="pm-label">Quốc tịch:</span>
+              <span className="pm-label">{t('staff.nationality_label', 'Quốc tịch:')}</span>
               <span className="pm-value" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 {staff.countryFlag && (
                   <img src={staff.countryFlag} alt="" style={{ width: 16, height: 11, borderRadius: 2 }} />
                 )}
-                <span>{staff.nationality || staff.countryCode || 'Quốc tế'}</span>
+                <span>{staff.nationality || staff.countryCode || t('common.international', 'Quốc tế')}</span>
               </span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Triết lý:</span>
+              <span className="pm-label">{t('staff.philosophy_label', 'Triết lý:')}</span>
               <span className="pm-value pm-val-bold" style={{ color: '#16a34a' }}>
                 {staff.tacticalStyle || 'BALANCED'}
               </span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Sơ đồ ưa thích:</span>
+              <span className="pm-label">{t('staff.fav_formation_label', 'Sơ đồ ưa thích:')}</span>
               <span className="pm-value pm-val-bold">
                 {staff.preferredFormation?.name || '4-3-3'}
               </span>
@@ -268,21 +270,21 @@ export const StaffDetailModal: React.FC<Props> = ({
           {/* Column 2: Reputation, Current Club, Weekly Wages */}
           <div className="pm-info-col">
             <div className="pm-info-row">
-              <span className="pm-label">Danh tiếng:</span>
+              <span className="pm-label">{t('staff.reputation_label', 'Danh tiếng:')}</span>
               <div className="pm-stars-wrap">
                 {renderStars(staff.reputation)}
               </div>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">CLB hiện tại:</span>
+              <span className="pm-label">{t('staff.current_club_label', 'CLB hiện tại:')}</span>
               <span className="pm-value">
-                {detail?.currentContract?.club?.name || 'Tự do (Free Agent)'}
+                {detail?.currentContract?.club?.name || t('staff.free_agent', 'Tự do (Free Agent)')}
               </span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Lương hiện tại:</span>
+              <span className="pm-label">{t('staff.current_wage_label', 'Lương hiện tại:')}</span>
               <span className="pm-value pm-val-bold" style={{ color: '#047857' }}>
-                {formatMoney(staff.wage)} / tuần
+                {formatMoney(staff.wage)} {t('staff.per_week', '/ tuần')}
               </span>
             </div>
           </div>
@@ -296,7 +298,7 @@ export const StaffDetailModal: React.FC<Props> = ({
             onClick={() => setActiveTab('skills')}
           >
             <Star size={15} />
-            <span>Chỉ Số Kỹ Năng</span>
+            <span>{t('staff.tab_skills')}</span>
           </button>
           <button
             type="button"
@@ -304,7 +306,7 @@ export const StaffDetailModal: React.FC<Props> = ({
             onClick={() => setActiveTab('history')}
           >
             <Briefcase size={15} />
-            <span>Lịch Sử CLB</span>
+            <span>{t('staff.tab_history')}</span>
           </button>
           <button
             type="button"
@@ -312,7 +314,7 @@ export const StaffDetailModal: React.FC<Props> = ({
             onClick={() => setActiveTab('offer')}
           >
             <Sparkles size={15} />
-            <span>Đề Nghị Tuyển Mộ</span>
+            <span>{t('staff.tab_offer')}</span>
           </button>
         </div>
 
@@ -321,7 +323,7 @@ export const StaffDetailModal: React.FC<Props> = ({
           {loading ? (
             <div style={{ textAlign: 'center', padding: '3.5rem', color: '#64748b' }}>
               <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.75rem' }} />
-              <div>Đang tải hồ sơ nhân sự...</div>
+              <div>{t('staff.loading_profile', 'Đang tải hồ sơ nhân sự...')}</div>
             </div>
           ) : (
             <>
@@ -355,10 +357,10 @@ export const StaffDetailModal: React.FC<Props> = ({
         {/* CANCEL CONFIRM MODAL */}
         <ConfirmModal
           isOpen={showCancelConfirm}
-          title="Xác Nhận Hủy Đề Nghị Tuyển Mộ"
-          message={`Bạn có chắc chắn muốn hủy lời đề nghị tuyển mộ nhân sự "${staff.name}" không? Hành động này sẽ rút lại toàn bộ đề xuất đãi ngộ.`}
-          confirmText={cancellingOffer ? 'Đang hủy...' : 'Đồng Ý Hủy Đề Nghị'}
-          cancelText="Giữ Lại Đề Nghị"
+          title={t('staff.confirm_cancel_title', 'Xác Nhận Hủy Đề Nghị Tuyển Mộ')}
+          message={t('staff.confirm_cancel_msg', 'Bạn có chắc chắn muốn hủy lời đề nghị tuyển mộ nhân sự "{name}" không? Hành động này sẽ rút lại toàn bộ đề xuất đãi ngộ.').replace('{name}', staff.name)}
+          confirmText={cancellingOffer ? t('staff.cancelling', 'Đang hủy...') : t('staff.confirm_cancel_btn', 'Đồng Ý Hủy Đề Nghị')}
+          cancelText={t('staff.keep_offer_btn', 'Giữ Lại Đề Nghị')}
           variant="danger"
           onConfirm={handleCancelOffer}
           onClose={() => setShowCancelConfirm(false)}

@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { Player } from '../../types';
 import { Search, Filter, SlidersHorizontal } from 'lucide-react';
@@ -49,6 +50,7 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
     return `€${val.toLocaleString()}`;
   };
 
+  const { t } = useTranslation();
   return (
     <>
       {/* Search & Filter Bar */}
@@ -59,7 +61,7 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
             <Search size={18} className="search-icon" />
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên cầu thủ hoặc quốc tịch..."
+              placeholder={t('transfers.search_placeholder_player')}
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               className="search-input"
@@ -73,12 +75,12 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
               value={statusFilter}
               onChange={(e) => onStatusFilterChange(e.target.value as any)}
               style={{ minWidth: '160px', fontWeight: 600 }}
-              title="Tình trạng cầu thủ trên thị trường"
+              title={t('market.status_filter_tooltip', 'Tình trạng cầu thủ trên thị trường')}
             >
-              <option value="ALL">📋 Tất cả tình trạng</option>
-              <option value="FREE">🟢 Cầu thủ tự do</option>
-              <option value="LOAN">🟡 Cho mượn (Loan)</option>
-              <option value="TRANSFER">🔵 Niêm yết bán (Transfer)</option>
+              <option value="ALL">{t('common.all_statuses')}</option>
+              <option value="FREE">🟢 {t('transfers.status_free')}</option>
+              <option value="LOAN">🟡 {t('transfers.status_loan')} (Loan)</option>
+              <option value="TRANSFER">{t('market.status_transfer', '🔵 Niêm yết bán (Transfer)')}</option>
             </select>
           </div>
 
@@ -90,25 +92,25 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
               onChange={(e) => onPositionFilterChange(e.target.value)}
               style={{ minWidth: '150px' }}
             >
-              <option value="">Tất cả vị trí</option>
-              <optgroup label="Tuyến thi đấu">
-                <option value="GK">Thủ môn (GK)</option>
-                <option value="DEF">Hậu vệ (DEF)</option>
-                <option value="MID">Tiền vệ (MID)</option>
-                <option value="ATT">Tiền đạo (FWD)</option>
+              <option value="">{t('common.all_positions')}</option>
+              <optgroup label={t('market.optgroup_lines', 'Tuyến thi đấu')}>
+                <option value="GK">{t('pos.gk')}</option>
+                <option value="DEF">{t('pos.def')}</option>
+                <option value="MID">{t('pos.mid')}</option>
+                <option value="ATT">{t('pos.fwd')}</option>
               </optgroup>
-              <optgroup label="Vị trí cụ thể">
-                <option value="CB">Trung vệ (CB)</option>
-                <option value="LB">Hậu vệ trái (LB)</option>
-                <option value="RB">Hậu vệ phải (RB)</option>
-                <option value="CDM">Tiền vệ phòng ngự (CDM)</option>
-                <option value="CM">Tiền vệ trung tâm (CM)</option>
-                <option value="CAM">Tiền vệ tấn công (CAM)</option>
-                <option value="LM">Tiền vệ cánh trái (LM)</option>
-                <option value="RM">Tiền vệ cánh phải (RM)</option>
-                <option value="LW">Tiền đạo cánh trái (LW)</option>
-                <option value="RW">Tiền đạo cánh phải (RW)</option>
-                <option value="ST">Tiền đạo cắm (ST)</option>
+              <optgroup label={t('market.optgroup_positions', 'Vị trí cụ thể')}>
+                <option value="CB">{t('pos.cb')}</option>
+                <option value="LB">{t('pos.lb')}</option>
+                <option value="RB">{t('pos.rb')}</option>
+                <option value="CDM">{t('pos.cdm')}</option>
+                <option value="CM">{t('pos.cm')}</option>
+                <option value="CAM">{t('pos.cam')}</option>
+                <option value="LM">{t('pos.lm')}</option>
+                <option value="RM">{t('pos.rm')}</option>
+                <option value="LW">{t('pos.lw')}</option>
+                <option value="RW">{t('pos.rw')}</option>
+                <option value="ST">{t('pos.st')}</option>
               </optgroup>
             </select>
           </div>
@@ -124,10 +126,10 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
               position: 'relative',
               borderColor: activeFilterCount > 0 ? '#16a34a' : '#cbd5e1',
             }}
-            title="Mở bộ lọc chi tiết theo 40 chỉ số FM, tuổi, giá, quốc tịch..."
+            title={t('market.skill_filter_tooltip', 'Mở bộ lọc chi tiết theo 40 chỉ số FM, tuổi, giá, quốc tịch...')}
           >
             <SlidersHorizontal size={15} />
-            <span>Kỹ Năng & Lọc Chi Tiết</span>
+            <span>{t('market.skill_filter_btn', 'Kỹ Năng & Lọc Chi Tiết')}</span>
             {activeFilterCount > 0 && (
               <span
                 style={{
@@ -147,7 +149,7 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
 
           {/* 5. Nút Lọc Submit */}
           <button type="submit" className="btn btn-primary btn-sm flex-center" style={{ gap: '0.4rem' }}>
-            <Filter size={16} /> Lọc
+            <Filter size={16} /> {t('common.filter', 'Lọc')}
           </button>
         </form>
       </div>
@@ -157,14 +159,14 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
         <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr>
-              <th className="th-left" style={{ width: '25%' }}>Cầu Thủ</th>
-              <th className="th-center" style={{ width: '8%' }}>Vị Trí</th>
-              <th className="th-center" style={{ width: '7%' }}>Tuổi</th>
+              <th className="th-left" style={{ width: '25%' }}>{t('market.th_player', 'Cầu Thủ')}</th>
+              <th className="th-center" style={{ width: '8%' }}>{t('market.th_pos', 'Vị Trí')}</th>
+              <th className="th-center" style={{ width: '7%' }}>{t('market.th_age', 'Tuổi')}</th>
               <th className="th-center" style={{ width: '7%' }}>OVR</th>
               <th className="th-center" style={{ width: '7%' }}>POT</th>
-              <th className="th-left" style={{ width: '24%' }}>CLB Hiện Tại</th>
-              <th className="th-right" style={{ width: '11%' }}>Giá Thị Trường</th>
-              <th className="th-center" style={{ width: '11%' }}>Thao Tác</th>
+              <th className="th-left" style={{ width: '24%' }}>{t('market.th_club', 'CLB Hiện Tại')}</th>
+              <th className="th-right" style={{ width: '11%' }}>{t('market.th_price', 'Giá Thị Trường')}</th>
+              <th className="th-center" style={{ width: '11%' }}>{t('market.th_actions', 'Thao Tác')}</th>
             </tr>
           </thead>
           <tbody>
@@ -172,13 +174,13 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
               <tr>
                 <td colSpan={8} className="text-center text-muted" style={{ padding: '3rem' }}>
                   <div className="spinner" style={{ margin: '0 auto 1rem auto' }}></div>
-                  Đang tìm kiếm cơ sở dữ liệu chuyển nhượng...
+                  {t('market.searching', 'Đang tìm kiếm cơ sở dữ liệu chuyển nhượng...')}
                 </td>
               </tr>
             ) : players.length === 0 ? (
               <tr>
                 <td colSpan={8} className="text-center text-muted" style={{ padding: '3rem' }}>
-                  Không tìm thấy cầu thủ nào phù hợp với điều kiện tìm kiếm.
+                  {t('market.no_results', 'Không tìm thấy cầu thủ nào phù hợp với điều kiện tìm kiếm.')}
                 </td>
               </tr>
             ) : (
@@ -197,11 +199,11 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
                 );
                 const ovr = (p as any).ovr || p.overall_rating || 75;
                 const pot = (p as any).potential || p.potential_rating || 82;
-                const clubName = p.club?.name || (p as any).currentClub?.name || 'Cầu thủ Tự do';
+                const clubName = p.club?.name || (p as any).currentClub?.name || t('player_modal.free_agent', 'Cầu thủ Tự do');
                 const nationName =
                   typeof p.nationality === 'object'
-                    ? (p.nationality as any)?.name || 'Quốc tế'
-                    : (p.nationality || 'Quốc tế');
+                    ? (p.nationality as any)?.name || t('common.international', 'Quốc tế')
+                    : (p.nationality || t('common.international', 'Quốc tế'));
 
                 return (
                   <tr key={p.id}>
@@ -257,7 +259,7 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
                       <div
                         style={{
                           fontWeight: 600,
-                          color: clubName === 'Cầu thủ Tự do' ? 'var(--text-muted)' : 'var(--text-bright)',
+                          color: clubName === t('player_modal.free_agent', 'Cầu thủ Tự do') ? 'var(--text-muted)' : 'var(--text-bright)',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis'
@@ -268,11 +270,11 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
                       </div>
                       <div style={{ marginTop: '3px', display: 'flex', gap: '4px' }}>
                         {(p as any).is_free_agent ? (
-                          <span className="badge badge-outline" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>Tự Do</span>
+                          <span className="badge badge-outline" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>{t('market.badge_free', 'Tự Do')}</span>
                         ) : (p as any).is_loan_listed ? (
-                          <span className="badge badge-warning" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>Cho Mượn</span>
+                          <span className="badge badge-warning" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>{t('market.badge_loan', 'Cho Mượn')}</span>
                         ) : (
-                          <span className="badge badge-success" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>Niêm Yết Bán</span>
+                          <span className="badge badge-success" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>{t('market.badge_listed', 'Niêm Yết Bán')}</span>
                         )}
                       </div>
                     </td>
@@ -285,14 +287,14 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
                     {/* Cột 8: Thao Tác */}
                     <td className="td-center">
                       {isOwnClub ? (
-                        <span className="badge badge-outline" style={{ fontSize: '0.75rem' }}>Đội Nhà</span>
+                        <span className="badge badge-outline" style={{ fontSize: '0.75rem' }}>{t('market.badge_home_club', 'Đội Nhà')}</span>
                       ) : (
                         <button
                           className="btn btn-sm btn-primary"
                           style={{ margin: '0 auto', minWidth: '76px' }}
                           onClick={() => onOpenOfferModal(p)}
                         >
-                          Hỏi Mua
+                          {t('bids.inquiry_buy')}
                         </button>
                       )}
                     </td>
@@ -312,14 +314,14 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
               disabled={page <= 1}
               onClick={() => onPageChange(Math.max(1, page - 1))}
             >
-              Trang trước
+              {t('common.prev_page')}
             </button>
             <button
               className="btn btn-xs btn-outline"
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
             >
-              Trang sau
+              {t('common.next_page')}
             </button>
           </div>
         </div>

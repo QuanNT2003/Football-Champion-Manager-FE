@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { ArrowUp, ArrowDown, Layers } from 'lucide-react';
 import { Competition } from '../../types';
@@ -27,6 +28,7 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
   currentClubId,
   activeTab,
 }) => {
+  const { t } = useTranslation();
   return (
     <>
       {/* TIER STEPPER CONTROLS (HẠ CẤP / LÊN CẤP CHO GIẢI ĐẤU LEAGUE QUỐC NỘI) */}
@@ -34,17 +36,17 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
         <div className="standings-tier-bar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Điều Hướng Cấp Độ:
+              {t('standings.tier_nav')}
             </span>
             <button
               type="button"
               className="tier-step-btn"
               disabled={currentTier <= 1}
               onClick={() => onSwitchTier(currentTier - 1)}
-              title="Xem giải đấu hạng cao hơn"
+              title={t('standings.tier_higher')}
             >
               <ArrowUp size={16} />
-              <span>Lên Cấp {currentTier > 1 ? `(Tier ${currentTier - 1})` : ''}</span>
+              <span>{t('tier.prom_to', 'Lên Cấp {tier}').replace('{tier}', currentTier > 1 ? `(Tier ${currentTier - 1})` : '')}</span>
             </button>
           </div>
 
@@ -54,12 +56,12 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
               const isAct = currentTier === tNum;
               const label =
                 tNum === 1
-                  ? 'Tier 1 - VĐQG'
+                  ? t('tier.t1_name', 'Tier 1 - VĐQG')
                   : tNum === 2
-                  ? 'Tier 2 - Hạng Nhất (2 Bảng)'
+                  ? t('tier.t2_name', 'Tier 2 - Hạng Nhất (2 Bảng)')
                   : tNum === 3
-                  ? 'Tier 3 - Hạng Nhì (4 Bảng)'
-                  : 'Tier 4 - Hạng Ba (8 Bảng)';
+                  ? t('tier.t3_name', 'Tier 3 - Hạng Nhì (4 Bảng)')
+                  : t('tier.t4_name', 'Tier 4 - Hạng Ba (8 Bảng)');
               return (
                 <button
                   key={tNum}
@@ -80,9 +82,9 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
               className="tier-step-btn"
               disabled={currentTier >= 4}
               onClick={() => onSwitchTier(currentTier + 1)}
-              title="Xem giải đấu hạng thấp hơn"
+              title={t('standings.tier_lower')}
             >
-              <span>Hạ Cấp {currentTier < 4 ? `(Tier ${currentTier + 1})` : ''}</span>
+              <span>{t('tier.rel_to', 'Hạ Cấp {tier}').replace('{tier}', currentTier < 4 ? `(Tier ${currentTier + 1})` : '')}</span>
               <ArrowDown size={16} />
             </button>
           </div>
@@ -94,7 +96,7 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
         <div className="group-tabs-container">
           <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#166534', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Layers size={16} />
-            <span>Chọn Bảng Đấu:</span>
+            <span>{t('standings.group')}:</span>
           </span>
           {groups.map((grp, idx) => {
             const hasMyClub = grp.standings?.some((s: any) => {
@@ -109,7 +111,7 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
                 onClick={() => onSelectGroupIdx(idx)}
                 style={hasMyClub && selectedGroupIdx !== idx ? { borderColor: '#15803d', color: '#15803d', fontWeight: 800 } : {}}
               >
-                {grp.name || `Bảng ${String.fromCharCode(65 + idx)}`}
+                {grp.name || t('tier.group_n', 'Bảng {n}').replace('{n}', String.fromCharCode(65 + idx))}
                 {hasMyClub && <span style={{ marginLeft: '4px', fontSize: '0.75rem' }}>★</span>}
               </button>
             );

@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import { StaffDetailModal } from './StaffDetailModal';
 import React, { useState, useEffect, useMemo } from 'react';
 import { transfersApi, StaffMarketItem, FilterOptionsResponse } from '../services/transfers.service';
@@ -25,6 +26,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   onRefreshFinance,
   onSelectPlayer
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'market' | 'staff' | 'offers'>('market');
 
   // Player Market States
@@ -76,7 +78,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
         setFilterOptions(res);
       })
       .catch((err) => {
-        console.error('Không thể tải tùy chọn lọc chuyển nhượng:', err);
+        // console.error(err);
       });
   }, []);
 
@@ -239,7 +241,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   const handleHireStaff = async () => {
     if (!selectedStaffForHire) return;
     if (selectedStaffForHire.signingFee > cashBalance) {
-      setHireError('Ngân sách CLB không đủ chi trả phí ký hợp đồng này!');
+      setHireError(t('transfers.hire_insufficient_budget', 'Ngân sách CLB không đủ chi trả phí ký hợp đồng này!'));
       return;
     }
     try {
@@ -249,7 +251,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
         clubId: currentClubId,
         staffId: selectedStaffForHire.id
       });
-      setHireSuccess(`Tuyển dụng thành công ${selectedStaffForHire.name}!`);
+      setHireSuccess(t('transfers.hire_success_msg', 'Tuyển dụng thành công {name}!').replace('{name}', selectedStaffForHire.name));
       onRefreshFinance();
       setTimeout(() => {
         setSelectedStaffForHire(null);
@@ -257,7 +259,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
         loadStaff();
       }, 1500);
     } catch (err: any) {
-      setHireError(err.response?.data?.message || err.message || 'Tuyển dụng nhân viên thất bại.');
+      setHireError(err.response?.data?.message || err.message || t('transfers.hire_failed_msg', 'Tuyển dụng nhân viên thất bại.'));
     } finally {
       setHiringStaff(false);
     }
@@ -276,10 +278,10 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
         <div>
           <h1 className="view-title flex-center" style={{ gap: '0.75rem' }}>
             <ShoppingCart className="text-primary" size={28} />
-            Thị Trường Chuyển Nhượng & Nhân Sự
+            {t('transfers.title')}
           </h1>
           <p className="view-subtitle">
-            Tìm kiếm tài năng cầu thủ, đàm phán hợp đồng chuyển nhượng và chiêu mộ ban huấn luyện chất lượng cao
+            {t('transfers.subtitle', 'Tìm kiếm tài năng cầu thủ, đàm phán hợp đồng chuyển nhượng và chiêu mộ ban huấn luyện chất lượng cao')}
           </p>
         </div>
 
@@ -294,7 +296,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
             }}
           >
             <DollarSign size={16} className="text-success" />
-            <span>Ngân sách: <strong className="text-success">{formatMoney(cashBalance)}</strong></span>
+            <span>{t('finances.cash_balance')}: <strong className="text-success">{formatMoney(cashBalance)}</strong></span>
           </div>
 
           <div className="btn-group">
@@ -303,21 +305,21 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
               onClick={() => setActiveTab('market')}
             >
               <ShoppingCart size={15} style={{ marginRight: '0.35rem' }} />
-              Cầu Thủ
+              {t('transfers.tab_players', 'Cầu Thủ')}
             </button>
             <button
               className={`btn btn-sm ${activeTab === 'staff' ? 'btn-primary' : 'btn-outline'}`}
               onClick={() => setActiveTab('staff')}
             >
               <Users size={15} style={{ marginRight: '0.35rem' }} />
-              Nhân Viên ({staffList.length > 0 ? staffTotalPages * 15 : 'Staff'})
+              {t('transfers.tab_staff', 'Nhân Viên ({count})').replace('{count}', String(staffList.length > 0 ? staffTotalPages * 15 : 'Staff'))}
             </button>
             <button
               className={`btn btn-sm ${activeTab === 'offers' ? 'btn-primary' : 'btn-outline'}`}
               onClick={() => setActiveTab('offers')}
             >
               <ArrowRightLeft size={15} style={{ marginRight: '0.35rem' }} />
-              Đề Nghị ({incomingOffers.length + outgoingOffers.length})
+              {t('transfers.tab_bids', 'Đề Nghị ({count})').replace('{count}', String(incomingOffers.length + outgoingOffers.length))}
             </button>
           </div>
         </div>
@@ -373,7 +375,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
                 boxShadow: staffSubTab === 'market' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
               }}
             >
-              🌐 Thị Trường Tuyển Mộ
+              {t('transfers.staff_market_subnav', '🌐 Thị Trường Tuyển Mộ')}
             </button>
             <button
               type="button"
@@ -391,7 +393,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
                 boxShadow: staffSubTab === 'my_club' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
               }}
             >
-              🏢 Ban Huấn Luyện Của Bạn
+              {t('transfers.staff_club_subnav', '🏢 Ban Huấn Luyện Của Bạn')}
             </button>
           </div>
 

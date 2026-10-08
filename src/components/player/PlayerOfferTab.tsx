@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import {
   Coins,
@@ -36,6 +37,7 @@ interface Props {
 }
 
 export const PlayerOfferTab: React.FC<Props> = ({
+
   player,
   detail,
   currentClubId,
@@ -57,6 +59,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
   handleOpenCancelConfirm,
   cancellingOffer,
 }) => {
+  const { t } = useTranslation();
   return (
                 <div style={{ padding: '0.5rem 0.25rem' }}>
                   {/* Alert thông báo kết quả */}
@@ -106,7 +109,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                   {loadingOffer && (
                     <div style={{ padding: '0.75rem 1rem', marginBottom: '1.25rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <div className="spinner" style={{ width: 14, height: 14 }} />
-                      <span>Đang kiểm tra lời đề nghị trước đó của bạn cho cầu thủ này...</span>
+                      <span>{t('player_offer.checking_prev', 'Đang kiểm tra lời đề nghị trước đó của bạn cho cầu thủ này...')}</span>
                     </div>
                   )}
 
@@ -129,7 +132,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                             {existingOffer.status === 'PENDING' ? '⏳' : existingOffer.status === 'ACCEPTED' ? '✅' : existingOffer.status === 'REJECTED' ? '❌' : 'ℹ️'}
                           </span>
                           <strong style={{ fontSize: '0.95rem', color: existingOffer.status === 'PENDING' ? '#b45309' : existingOffer.status === 'ACCEPTED' ? '#15803d' : existingOffer.status === 'REJECTED' ? '#b91c1c' : '#475569' }}>
-                            {existingOffer.status === 'PENDING' ? 'Bạn đang có một lời đề nghị chờ phản hồi' : existingOffer.status === 'ACCEPTED' ? 'Lời đề nghị của bạn đã được chấp thuận!' : existingOffer.status === 'REJECTED' ? 'Lời đề nghị trước đó đã bị từ chối' : 'Lời đề nghị trước đó đã bị hủy'}
+                            {existingOffer.status === 'PENDING' ? t('player_offer.pending_msg', 'Bạn đang có một lời đề nghị chờ phản hồi') : existingOffer.status === 'ACCEPTED' ? t('player_offer.accepted_msg', 'Lời đề nghị của bạn đã được chấp thuận!') : existingOffer.status === 'REJECTED' ? t('player_offer.rejected_msg', 'Lời đề nghị trước đó đã bị từ chối') : t('player_offer.cancelled_msg', 'Lời đề nghị trước đó đã bị hủy')}
                           </strong>
                         </div>
                         <span
@@ -149,10 +152,10 @@ export const PlayerOfferTab: React.FC<Props> = ({
                       </div>
 
                       <div style={{ fontSize: '0.86rem', color: '#1e293b', display: 'flex', gap: '1.5rem', flexWrap: 'wrap', background: 'rgba(255,255,255,0.85)', padding: '0.6rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.06)' }}>
-                        <div>Hình thức: <strong>{existingOffer.is_loan ? 'Cho Mượn' : 'Mua Đứt'}</strong></div>
-                        <div>Phí đề nghị: <strong style={{ color: '#15803d' }}>{existingOffer.is_loan ? '€0 (Mượn)' : `€${Number(existingOffer.offer_amount || 0).toLocaleString()}`}</strong></div>
-                        <div>Lương cam kết: <strong style={{ color: '#d97706' }}>€{Number(existingOffer.proposed_wage || 0).toLocaleString()} / tuần</strong></div>
-                        <div>Thời hạn: <strong>{existingOffer.contract_years || 3} năm</strong></div>
+                        <div>{t('player_modal.type_label', 'Hình thức:')} <strong>{existingOffer.is_loan ? t('player_modal.type_loan', 'Cho Mượn') : t('player_modal.type_buy', 'Mua Đứt')}</strong></div>
+                        <div>{t('player_offer.offer_fee_label', 'Phí đề nghị:')} <strong style={{ color: '#15803d' }}>{existingOffer.is_loan ? t('player_offer.loan_zero', '€0 (Mượn)') : `€${Number(existingOffer.offer_amount || 0).toLocaleString()}`}</strong></div>
+                        <div>{t('player_offer.committed_wage_label', 'Lương cam kết:')} <strong style={{ color: '#d97706' }}>€{Number(existingOffer.proposed_wage || 0).toLocaleString()} {t('player_modal.per_week', '/ tuần')}</strong></div>
+                        <div>{t('staff.duration_label', 'Thời hạn:')} <strong>{t('staff.years_count', '{count} năm').replace('{count}', String(existingOffer.contract_years || 3))}</strong></div>
                       </div>
 
                       {existingOffer.status === 'PENDING' && (
@@ -164,7 +167,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                             className="btn btn-xs btn-danger flex-center"
                             style={{ gap: '0.35rem', padding: '0.45rem 0.85rem', fontWeight: 700 }}
                           >
-                            {cancellingOffer ? 'Đang hủy...' : '✕ HỦY ĐỀ NGHỊ NÀY'}
+                            {cancellingOffer ? t('player_offer.cancelling', 'Đang hủy...') : t('player_offer.cancel_btn', '✕ HỦY ĐỀ NGHỊ NÀY')}
                           </button>
                         </div>
                       )}
@@ -187,17 +190,17 @@ export const PlayerOfferTab: React.FC<Props> = ({
                     >
                       <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
                         <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          Đề Nghị Cho CLB Chủ Quản
+                          {t('player_offer.to_club_section', 'Đề Nghị Cho CLB Chủ Quản')}
                         </h4>
                         <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
-                          Thỏa thuận hình thức chuyển giao và mức phí chuyển nhượng
+                          {t('player_offer.to_club_desc', 'Thỏa thuận hình thức chuyển giao và mức phí chuyển nhượng')}
                         </div>
                       </div>
 
                       {/* Loại chuyển nhượng: Mua đứt / Mượn */}
                       <div>
                         <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>
-                          Hình thức chuyển nhượng:
+                          {t('player_offer.method_label', 'Hình thức chuyển nhượng:')}
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                           <button
@@ -219,7 +222,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                               transition: 'all 0.2s',
                             }}
                           >
-                            🔵 Mua Đứt (Permanent)
+                            {t('player_offer.method_buy', '🔵 Mua Đứt (Permanent)')}
                           </button>
 
                           <button
@@ -241,7 +244,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                               transition: 'all 0.2s',
                             }}
                           >
-                            🟡 Mượn Cầu Thủ (Loan)
+                            {t('player_offer.method_loan', '🟡 Mượn Cầu Thủ (Loan)')}
                           </button>
                         </div>
                       </div>
@@ -251,10 +254,10 @@ export const PlayerOfferTab: React.FC<Props> = ({
                         <div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                             <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
-                              Phí chuyển nhượng đề nghị (€):
+                              {t('player_offer.fee_label', 'Phí chuyển nhượng đề nghị (€):')}
                             </label>
                             <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                              Định giá: <strong>€{Number((player as any).asking_price || player.market_value || 2500000).toLocaleString()}</strong>
+                              {t('player_offer.valuation_label', 'Định giá:')} <strong>€{Number((player as any).asking_price || player.market_value || 2500000).toLocaleString()}</strong>
                             </span>
                           </div>
 
@@ -286,7 +289,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                               className="btn btn-xs btn-outline"
                               onClick={() => setOfferAmount(Number((player as any).asking_price || player.market_value || 2500000))}
                             >
-                              Theo giá thị trường
+                              {t('player_offer.market_price_btn', 'Theo giá thị trường')}
                             </button>
                             <button
                               type="button"
@@ -331,9 +334,9 @@ export const PlayerOfferTab: React.FC<Props> = ({
                             lineHeight: 1.5,
                           }}
                         >
-                          <strong>ℹ️ Mượn cầu thủ không mất phí chuyển nhượng:</strong>
+                          <strong>{t('player_offer.loan_free_notice', 'ℹ️ Mượn cầu thủ không mất phí chuyển nhượng:')}</strong>
                           <p style={{ margin: '4px 0 0 0', color: '#854d0e' }}>
-                            CLB chủ quản đồng ý cho mượn mà không thu phí chuyển nhượng. Bạn chỉ cần thỏa thuận thời hạn mượn và chi trả lương cầu thủ ở Phần 2.
+                            {t('player_offer.loan_free_desc', 'CLB chủ quản đồng ý cho mượn mà không thu phí chuyển nhượng. Bạn chỉ cần thỏa thuận thời hạn mượn và chi trả lương cầu thủ ở Phần 2.')}
                           </p>
                         </div>
                       )}
@@ -354,17 +357,17 @@ export const PlayerOfferTab: React.FC<Props> = ({
                     >
                       <div style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '0.6rem' }}>
                         <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#15803d', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          Thỏa Thuận Hợp Đồng Cầu Thủ
+                          {t('player_offer.contract_section', 'Thỏa Thuận Hợp Đồng Cầu Thủ')}
                         </h4>
                         <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '2px' }}>
-                          Điều khoản đãi ngộ và cam kết thời gian gắn bó với CLB
+                          {t('player_offer.contract_desc', 'Điều khoản đãi ngộ và cam kết thời gian gắn bó với CLB')}
                         </div>
                       </div>
 
                       {/* Thời gian hợp đồng */}
                       <div>
                         <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: '6px', display: 'block' }}>
-                          Thời gian hợp đồng:
+                          {t('player_offer.duration_label', 'Thời gian hợp đồng:')}
                         </label>
                         {!isLoan ? (
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.35rem' }}>
@@ -386,7 +389,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                                   textAlign: 'center',
                                 }}
                               >
-                                {yr} Năm
+                                {t('staff.year_n', '{n} Năm').replace('{n}', String(yr))}
                               </button>
                             ))}
                           </div>
@@ -408,7 +411,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                                 textAlign: 'center',
                               }}
                             >
-                              Nửa Mùa (20 ngày)
+                              {t('player_offer.duration_half_season', 'Nửa Mùa (20 ngày)')}
                             </button>
                             <button
                               type="button"
@@ -426,7 +429,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                                 textAlign: 'center',
                               }}
                             >
-                              Cả Mùa Giải (40 ngày)
+                              {t('player_offer.duration_full_season', 'Cả Mùa Giải (40 ngày)')}
                             </button>
                           </div>
                         )}
@@ -436,10 +439,10 @@ export const PlayerOfferTab: React.FC<Props> = ({
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                           <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
-                            Mức lương đề nghị (€/tuần):
+                            {t('player_offer.wage_label', 'Mức lương đề nghị (€/tuần):')}
                           </label>
                           <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                            Lương đề xuất: <strong>€{Math.round(Number((player as any).asking_price || player.market_value || 2500000) * 0.005).toLocaleString()}</strong>
+                            {t('player_offer.suggested_wage', 'Lương đề xuất:')} <strong>€{Math.round(Number((player as any).asking_price || player.market_value || 2500000) * 0.005).toLocaleString()}</strong>
                           </span>
                         </div>
 
@@ -460,7 +463,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                             }}
                           />
                           <span style={{ position: 'absolute', right: 12, top: 10, fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
-                            / tuần
+                            {t('player_modal.per_week', '/ tuần')}
                           </span>
                         </div>
 
@@ -471,7 +474,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                             className="btn btn-xs btn-outline"
                             onClick={() => setProposedWage(Math.round(Number((player as any).asking_price || player.market_value || 2500000) * 0.005))}
                           >
-                            Lương chuẩn
+                            {t('player_offer.standard_wage_btn', 'Lương chuẩn')}
                           </button>
                           <button
                             type="button"
@@ -515,23 +518,23 @@ export const PlayerOfferTab: React.FC<Props> = ({
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.82rem', color: '#64748b' }}>Tóm tắt chi phí giao dịch:</div>
+                      <div style={{ fontSize: '0.82rem', color: '#64748b' }}>{t('player_offer.summary_cost', 'Tóm tắt chi phí giao dịch:')}</div>
                       <div style={{ display: 'flex', gap: '1.25rem', marginTop: '4px', flexWrap: 'wrap' }}>
                         <div>
-                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Phí chuyển nhượng: </span>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>{t('bids.fee', 'Phí chuyển nhượng:')} </span>
                           <strong style={{ fontSize: '0.95rem', color: isLoan ? '#854d0e' : '#15803d' }}>
-                            {isLoan ? '€0 (Mượn)' : `€${offerAmount.toLocaleString()}`}
+                            {isLoan ? t('player_offer.loan_zero', '€0 (Mượn)') : `€${offerAmount.toLocaleString()}`}
                           </strong>
                         </div>
                         <div>
-                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Lương cam kết: </span>
+                          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>{t('player_offer.committed_wage_label', 'Lương cam kết:')} </span>
                           <strong style={{ fontSize: '0.95rem', color: '#d97706' }}>
-                            €{proposedWage.toLocaleString()} / tuần
+                            €{proposedWage.toLocaleString()} {t('player_modal.per_week', '/ tuần')}
                           </strong>
                         </div>
                         {cashBalance !== undefined && (
                           <div>
-                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Ngân sách CLB: </span>
+                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>{t('player_offer.budget_label', 'Ngân sách CLB:')} </span>
                             <strong style={{ fontSize: '0.95rem', color: cashBalance >= (isLoan ? 0 : offerAmount) ? '#16a34a' : '#dc2626' }}>
                               €{cashBalance.toLocaleString()}
                             </strong>
@@ -559,7 +562,7 @@ export const PlayerOfferTab: React.FC<Props> = ({
                       >
                         <AlertCircle size={16} color="#dc2626" />
                         <span>
-                          Ngân sách CLB (€{cashBalance.toLocaleString()}) không đủ để trả phí chuyển nhượng (€{offerAmount.toLocaleString()})! Vui lòng giảm mức giá đề nghị hoặc chọn hình thức mượn.
+                          {t('player_offer.budget_error', 'Ngân sách CLB (€{cash}) không đủ để trả phí chuyển nhượng (€{fee})! Vui lòng giảm mức giá đề nghị hoặc chọn hình thức mượn.').replace('{cash}', cashBalance.toLocaleString()).replace('{fee}', offerAmount.toLocaleString())}
                         </span>
                       </div>
                     )}
@@ -582,12 +585,12 @@ export const PlayerOfferTab: React.FC<Props> = ({
                       {offerSubmitting ? (
                         <>
                           <div className="spinner" style={{ width: 16, height: 16 }} />
-                          <span>Đang gửi đề nghị...</span>
+                          <span>{t('player_offer.sending', 'Đang gửi đề nghị...')}</span>
                         </>
                       ) : (
                         <>
                           <CheckCircle2 size={18} />
-                          <span>Xác Nhận Gửi Lời Đề Nghị</span>
+                          <span>{t('player_offer.confirm_send_btn', 'Xác Nhận Gửi Lời Đề Nghị')}</span>
                         </>
                       )}
                     </button>

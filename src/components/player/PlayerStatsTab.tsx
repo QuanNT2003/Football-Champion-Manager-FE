@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { PlayerDetailData } from '../../types';
 
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export const PlayerStatsTab: React.FC<Props> = ({ detail }) => {
+  const { t } = useTranslation();
   return (
                 <div className="pm-stats-view">
                   {/* Career Totals Bar */}
@@ -66,7 +68,7 @@ export const PlayerStatsTab: React.FC<Props> = ({ detail }) => {
                         {(!detail?.statistics?.seasons || detail.statistics.seasons.length === 0) ? (
                           <tr>
                             <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: '#94a3b8' }}>
-                              Chưa có thống kê mùa giải nào trong cơ sở dữ liệu
+                              {t('player.no_stats')}
                             </td>
                           </tr>
                         ) : (detail.statistics.seasons.map((s, idx) => (

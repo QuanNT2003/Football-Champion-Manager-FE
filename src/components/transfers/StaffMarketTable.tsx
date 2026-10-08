@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import { getFacepackUrl } from '../../utils/formatters';
 import React from 'react';
 import { StaffMarketItem } from '../../services/transfers.service';
@@ -19,6 +20,7 @@ interface StaffMarketTableProps {
 }
 
 export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
+
   staffList,
   loading,
   currentClubId,
@@ -32,6 +34,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
   onPageChange,
   onOpenHireModal,
 }) => {
+  const { t } = useTranslation();
   const formatMoney = (val: number) => {
     if (val >= 1000000) return `€${(val / 1000000).toFixed(1)}M`;
     if (val >= 1000) return `€${(val / 1000).toFixed(0)}K`;
@@ -41,15 +44,15 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
   const getStaffRoleLabel = (role: string) => {
     switch (role) {
       case 'HEAD_COACH':
-        return { label: 'HLV Trưởng', class: 'badge-role-head' };
+        return { label: t('staff.manager'), class: 'badge-role-head' };
       case 'ASSISTANT_COACH':
-        return { label: 'Trợ lý HLV', class: 'badge-role-assistant' };
+        return { label: t('staff.assistant'), class: 'badge-role-assistant' };
       case 'FITNESS_COACH':
-        return { label: 'HLV Thể lực', class: 'badge-role-fitness' };
+        return { label: t('staff.fitness_coach', 'HLV Thể lực'), class: 'badge-role-fitness' };
       case 'SCOUT':
-        return { label: 'Tuyển trạch viên', class: 'badge-role-scout' };
+        return { label: t('staff.scout'), class: 'badge-role-scout' };
       case 'PHYSIO':
-        return { label: 'Bác sĩ / Y tế', class: 'badge-role-physio' };
+        return { label: t('staff.physio'), class: 'badge-role-physio' };
       default:
         return { label: role, class: 'badge-outline' };
     }
@@ -79,7 +82,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
             <Search size={18} className="search-icon" />
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên nhân viên, HLV..."
+              placeholder={t('staff_market.searching', 'Tìm kiếm theo tên nhân viên, HLV...')}
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               className="search-input"
@@ -92,16 +95,16 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
             onChange={(e) => onRoleFilterChange(e.target.value)}
             style={{ width: '180px' }}
           >
-            <option value="">Tất cả vai trò</option>
-            <option value="HEAD_COACH">HLV Trưởng</option>
-            <option value="ASSISTANT_COACH">Trợ lý HLV</option>
-            <option value="FITNESS_COACH">HLV Thể lực</option>
-            <option value="SCOUT">Tuyển trạch viên</option>
-            <option value="PHYSIO">Bác sĩ / Y tế</option>
+            <option value="">{t('staff.role_all', 'Tất cả vai trò')}</option>
+            <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
+            <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ lý HLV')}</option>
+            <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể lực')}</option>
+            <option value="SCOUT">{t('staff.scout', 'Tuyển trạch viên')}</option>
+            <option value="PHYSIO">{t('staff.physio', 'Bác sĩ / Y tế')}</option>
           </select>
 
           <button type="submit" className="btn btn-primary btn-sm flex-center" style={{ gap: '0.4rem' }}>
-            <Filter size={16} /> Lọc
+            <Filter size={16} /> {t('common.filter', 'Lọc')}
           </button>
         </form>
       </div>
@@ -111,14 +114,14 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
         <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr>
-              <th className="th-left" style={{ width: '23%' }}>Nhân Viên</th>
-              <th className="th-center" style={{ width: '12%' }}>Vai Trò</th>
-              <th className="th-center" style={{ width: '8%' }}>Bằng Cấp</th>
-              <th className="th-left" style={{ width: '13%' }}>Triết Lý</th>
-              <th className="th-left" style={{ width: '13%' }}>Sơ Đồ Sở Trường</th>
-              <th className="th-center" style={{ width: '8%' }}>Danh Tiếng</th>
-              <th className="th-right" style={{ width: '12%' }}>Lương / Phí Tuyển</th>
-              <th className="th-center" style={{ width: '11%' }}>Thao Tác</th>
+              <th className="th-left" style={{ width: '23%' }}>{t('staff_market.th_staff', 'Nhân Viên')}</th>
+              <th className="th-center" style={{ width: '12%' }}>{t('staff_market.th_role', 'Vai Trò')}</th>
+              <th className="th-center" style={{ width: '8%' }}>{t('staff_market.th_license', 'Bằng Cấp')}</th>
+              <th className="th-left" style={{ width: '13%' }}>{t('staff_market.th_philosophy', 'Triết Lý')}</th>
+              <th className="th-left" style={{ width: '13%' }}>{t('staff_market.th_formation', 'Sơ Đồ Sở Trường')}</th>
+              <th className="th-center" style={{ width: '8%' }}>{t('staff_market.th_reputation', 'Danh Tiếng')}</th>
+              <th className="th-right" style={{ width: '12%' }}>{t('staff_market.th_wage_fee', 'Lương / Phí Tuyển')}</th>
+              <th className="th-center" style={{ width: '11%' }}>{t('staff_market.th_actions', 'Thao Tác')}</th>
             </tr>
           </thead>
           <tbody>
@@ -126,13 +129,13 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
               <tr>
                 <td colSpan={8} className="text-center text-muted" style={{ padding: '3rem' }}>
                   <div className="spinner" style={{ margin: '0 auto 1rem auto' }}></div>
-                  Đang tìm kiếm danh sách ban huấn luyện và nhân sự...
+                  {t('staff_market.searching', 'Đang tìm kiếm danh sách ban huấn luyện và nhân sự...')}
                 </td>
               </tr>
             ) : staffList.length === 0 ? (
               <tr>
                 <td colSpan={8} className="text-center text-muted" style={{ padding: '3rem' }}>
-                  Không tìm thấy nhân sự phù hợp với tiêu chí tìm kiếm.
+                  {t('staff_market.no_results', 'Không tìm thấy nhân sự phù hợp với tiêu chí tìm kiếm.')}
                 </td>
               </tr>
             ) : (
@@ -169,7 +172,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                             {st.name}
                           </div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            {st.nationality || 'Quốc tế'} {st.countryCode ? `(${st.countryCode})` : ''}
+                            {st.nationality || t('common.international', 'Quốc tế')} {st.countryCode ? `(${st.countryCode})` : ''}
                           </div>
                         </div>
                       </div>
@@ -201,7 +204,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                           {st.preferredFormation.name}
                         </span>
                       ) : (
-                        <span className="text-muted" style={{ fontSize: '0.8rem' }}>Mặc định</span>
+                        <span className="text-muted" style={{ fontSize: '0.8rem' }}>{t('staff_market.default_formation', 'Mặc định')}</span>
                       )}
                     </td>
 
@@ -215,10 +218,10 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                     {/* Lương / Phí */}
                     <td className="td-right">
                       <div style={{ fontWeight: 700, color: '#059669' }}>
-                        {formatMoney(st.wage)}/tuần
+                        {formatMoney(st.wage)} {t('staff.per_week', '/ tuần')}
                       </div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                        Phí: {formatMoney(st.signingFee)}
+                        {t('staff_market.fee_prefix', 'Phí:')} {formatMoney(st.signingFee)}
                       </div>
                     </td>
 
@@ -226,7 +229,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                     <td className="td-center">
                       {isOwnClub ? (
                         <span className="badge badge-success flex-center" style={{ gap: '0.25rem', margin: '0 auto' }}>
-                          <UserCheck size={12} /> Đang phục vụ
+                          <UserCheck size={12} /> {t('staff_market.serving_badge', 'Đang phục vụ')}
                         </span>
                       ) : (
                         <button
@@ -234,7 +237,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                           style={{ gap: '0.35rem', margin: '0 auto' }}
                           onClick={() => onOpenHireModal(st)}
                         >
-                          <Briefcase size={14} /> Tuyển Mộ
+                          <Briefcase size={14} /> {t('staff_market.hire_btn', 'Tuyển Mộ')}
                         </button>
                       )}
                     </td>
@@ -254,7 +257,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
               disabled={page <= 1}
               onClick={() => onPageChange(Math.max(1, page - 1))}
             >
-              Trang trước
+              {t('staff_market.prev_page', 'Trang trước')}
             </button>
             <button
               className="btn btn-xs btn-outline"

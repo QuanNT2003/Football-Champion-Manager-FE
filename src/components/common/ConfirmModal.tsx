@@ -7,6 +7,7 @@ import {
   HelpCircle,
   X,
 } from 'lucide-react';
+import { useTranslation } from '../../i18n/I18nContext';
 
 export interface ConfirmModalProps {
   isOpen: boolean;
@@ -25,14 +26,16 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,
   title,
   message,
-  confirmText = 'Xác Nhận',
-  cancelText = 'Hủy Bỏ',
+  confirmText,
+  cancelText,
   variant = 'primary',
   icon,
   isLoading = false,
   onConfirm,
   onClose,
 }) => {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   const getVariantStyles = () => {
@@ -170,7 +173,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               color: '#64748b',
               transition: 'all 0.15s',
             }}
-            title="Đóng"
+            title={t('common.close', 'Đóng')}
           >
             <X size={16} />
           </button>
@@ -214,7 +217,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               color: '#475569',
             }}
           >
-            {cancelText}
+            {cancelText || t('common.cancel', 'Hủy Bỏ')}
           </button>
 
           <button
@@ -237,7 +240,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             {isLoading ? (
               <>
                 <div className="spinner" style={{ width: 14, height: 14 }} />
-                <span>Đang xử lý...</span>
+                <span>{t('common.processing', 'Đang xử lý...')}</span>
               </>
             ) : (
               <span>{confirmText}</span>

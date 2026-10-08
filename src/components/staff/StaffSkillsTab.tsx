@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { Dumbbell, Brain, Compass, HeartPulse } from 'lucide-react';
 import { StaffDetailResponse, StaffAttributeItem } from '../../services/transfers.service';
@@ -8,12 +9,13 @@ interface Props {
 }
 
 export const StaffSkillsTab: React.FC<Props> = ({ detail }) => {
+  const { t } = useTranslation();
   const renderAttributeGroup = (
     title: string,
     icon: React.ReactNode,
     color: string,
     attributes?: StaffAttributeItem[],
-    emptyText: string = 'Chưa có dữ liệu chỉ số'
+    emptyText: string = t('staff.no_skills')
   ) => (
     <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.15rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem', color, fontWeight: 800 }}>
@@ -42,38 +44,38 @@ export const StaffSkillsTab: React.FC<Props> = ({ detail }) => {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.25rem' }}>
       {/* 1. Coaching */}
       {renderAttributeGroup(
-        'Huấn Luyện (Coaching)',
+        t('staff.skills_coaching', 'Huấn Luyện (Coaching)'),
         <Dumbbell size={18} />,
         '#16a34a',
         detail?.groupedAttributes.coaching,
-        'Chưa có dữ liệu chỉ số huấn luyện'
+        t('staff.no_coaching_skills', 'Chưa có dữ liệu chỉ số huấn luyện')
       )}
 
       {/* 2. Mental */}
       {renderAttributeGroup(
-        'Tác Phong & Tinh Thần (Mental)',
+        t('staff.skills_mental', 'Tác Phong & Tinh Thần (Mental)'),
         <Brain size={18} />,
         '#0284c7',
         detail?.groupedAttributes.mental,
-        'Chưa có dữ liệu chỉ số tinh thần'
+        t('staff.no_mental_skills', 'Chưa có dữ liệu chỉ số tinh thần')
       )}
 
       {/* 3. Scouting */}
       {renderAttributeGroup(
-        'Tuyển Trạch & Đánh Giá (Scouting)',
+        t('staff.skills_scouting', 'Tuyển Trạch & Đánh Giá (Scouting)'),
         <Compass size={18} />,
         '#7c3aed',
         detail?.groupedAttributes.scouting,
-        'Chưa có dữ liệu chỉ số tuyển trạch'
+        t('staff.no_scouting_skills', 'Chưa có dữ liệu chỉ số tuyển trạch')
       )}
 
       {/* 4. Medical */}
       {renderAttributeGroup(
-        'Y Tế & Thể Lực (Medical)',
+        t('staff.skills_medical', 'Y Tế & Thể Lực (Medical)'),
         <HeartPulse size={18} />,
         '#db2777',
         detail?.groupedAttributes.medical,
-        'Chưa có dữ liệu chỉ số y tế'
+        t('staff.no_medical_skills', 'Chưa có dữ liệu chỉ số y tế')
       )}
     </div>
   );

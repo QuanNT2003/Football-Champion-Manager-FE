@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n/I18nContext';
 import React, { useState } from 'react';
 import { TransferOffer } from '../../types';
 import {
@@ -35,6 +36,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
   onCancelOffer,
   onSelectPlayer,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'all' | 'outgoing' | 'incoming'>('all');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
@@ -118,7 +120,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
             style={{ gap: '0.3rem', padding: '0.3rem 0.65rem', fontSize: '0.76rem', fontWeight: 800 }}
           >
             <Clock size={12} />
-            ĐANG CHỜ
+            {t('bids.status_pending', 'ĐANG CHỜ')}
           </span>
         );
       case 'ACCEPTED':
@@ -128,7 +130,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
             style={{ gap: '0.3rem', padding: '0.3rem 0.65rem', fontSize: '0.76rem', fontWeight: 800 }}
           >
             <CheckCircle2 size={12} />
-            CHẤP THUẬN
+            {t('bids.status_accepted', 'CHẤP THUẬN')}
           </span>
         );
       case 'REJECTED':
@@ -138,7 +140,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
             style={{ gap: '0.3rem', padding: '0.3rem 0.65rem', fontSize: '0.76rem', fontWeight: 800 }}
           >
             <XCircle size={12} />
-            TỪ CHỐI
+            {t('bids.status_rejected', 'TỪ CHỐI')}
           </span>
         );
       case 'CANCELLED':
@@ -156,7 +158,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
             }}
           >
             <AlertCircle size={12} />
-            ĐÃ HỦY
+            {t('bids.status_cancelled', 'ĐÃ HỦY')}
           </span>
         );
       default:
@@ -173,7 +175,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
     if (!offer) return null;
 
     const p = offer.player;
-    const playerName = p?.common_name || (p ? `${p.first_name || ''} ${p.last_name || ''}`.trim() : 'Cầu thủ');
+    const playerName = p?.common_name || (p ? `${p.first_name || ''} ${p.last_name || ''}`.trim() : t('common.player', 'Cầu thủ'));
     const isLoan = Boolean(offer.is_loan);
     const amount = Number(offer.offer_amount);
 
@@ -181,7 +183,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
       return (
         <div>
           <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
-            Bạn có chắc chắn muốn hủy lời đề nghị chuyển nhượng này không?
+            {t('bids.confirm_cancel')}
           </p>
           <div
             style={{
@@ -195,10 +197,10 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
               fontSize: '0.86rem',
             }}
           >
-            <div>Cầu thủ: <strong style={{ color: '#0f172a' }}>{playerName}</strong></div>
-            <div>Gửi tới CLB: <strong style={{ color: '#0f172a' }}>{offer.seller_club?.name || offer.to_club?.name || 'CLB Đối Tác'}</strong></div>
-            <div>Hình thức: <strong>{isLoan ? 'Mượn Cầu Thủ' : 'Mua Đứt'}</strong></div>
-            <div>Phí đề nghị: <strong style={{ color: '#dc2626' }}>{isLoan ? '€0 (Mượn)' : formatMoney(amount)}</strong></div>
+            <div>{t('player_modal.player_label', 'Cầu thủ:')} <strong style={{ color: '#0f172a' }}>{playerName}</strong></div>
+            <div>{t('bids.to_club', 'Gửi tới CLB:')} <strong style={{ color: '#0f172a' }}>{offer.seller_club?.name || offer.to_club?.name || t('bids.partner_club_fallback', 'CLB Đối Tác')}</strong></div>
+            <div>{t('player_modal.type_label', 'Hình thức:')} <strong>{isLoan ? t('player_modal.type_loan', 'Mượn Cầu Thủ') : t('player_modal.type_buy', 'Mua Đứt')}</strong></div>
+            <div>{t('player_offer.offer_fee_label', 'Phí đề nghị:')} <strong style={{ color: '#dc2626' }}>{isLoan ? t('player_offer.loan_zero', '€0 (Mượn)') : formatMoney(amount)}</strong></div>
           </div>
           <p style={{ margin: '0.85rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
             * Lưu ý: Thao tác hủy lời đề nghị sẽ được cập nhật ngay lập tức và không thể hoàn tác.
@@ -211,7 +213,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
       return (
         <div>
           <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
-            Bạn có đồng ý {isLoan ? 'cho mượn' : 'chuyển nhượng bán'} cầu thủ này theo các điều khoản sau?
+            {t('bids.confirm_sell_msg', 'Bạn có đồng ý {type} cầu thủ này theo các điều khoản sau?').replace('{type}', isLoan ? t('player_modal.type_loan', 'cho mượn') : t('player_modal.type_buy', 'chuyển nhượng bán'))}
           </p>
           <div
             style={{
@@ -225,15 +227,15 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
               fontSize: '0.86rem',
             }}
           >
-            <div>Cầu thủ: <strong style={{ color: '#0f172a' }}>{playerName}</strong></div>
-            <div>CLB đối tác: <strong style={{ color: '#0f172a' }}>{offer.buyer_club?.name || offer.from_club?.name || 'Rival Club'}</strong></div>
-            <div>Hình thức: <strong style={{ color: '#16a34a' }}>{isLoan ? 'Cho Mượn Cầu Thủ' : 'Chuyển Nhượng Mua Đứt'}</strong></div>
+            <div>{t('player_modal.player_label', 'Cầu thủ:')} <strong style={{ color: '#0f172a' }}>{playerName}</strong></div>
+            <div>{t('bids.partner_club_fallback', 'CLB đối tác:')} <strong style={{ color: '#0f172a' }}>{offer.buyer_club?.name || offer.from_club?.name || t('bids.rival_club_fallback', 'CLB Đối Thủ')}</strong></div>
+            <div>{t('player_modal.type_label', 'Hình thức:')} <strong style={{ color: '#16a34a' }}>{isLoan ? t('bids.type_loan_receive', 'Cho Mượn Cầu Thủ') : t('bids.type_buy_receive', 'Chuyển Nhượng Mua Đứt')}</strong></div>
             <div>
-              Số tiền nhận được: <strong style={{ fontSize: '1.05rem', color: '#15803d' }}>{isLoan ? '€0 (Mượn)' : formatMoney(amount)}</strong>
+              {t('bids.receive_amount_label', 'Số tiền nhận được:')} <strong style={{ fontSize: '1.05rem', color: '#15803d' }}>{isLoan ? '€0 (Mượn)' : formatMoney(amount)}</strong>
             </div>
           </div>
           <p style={{ margin: '0.85rem 0 0 0', fontSize: '0.82rem', color: '#16a34a', fontWeight: 600 }}>
-            ✓ Khoản tiền sẽ được cộng trực tiếp vào số dư tiền mặt của CLB ngay khi hoàn tất.
+            {t('bids.cash_added_notice', '✓ Khoản tiền sẽ được cộng trực tiếp vào số dư tiền mặt của CLB ngay khi hoàn tất.')}
           </p>
         </div>
       );
@@ -243,7 +245,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
       return (
         <div>
           <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
-            Bạn có chắc chắn muốn từ chối lời đề nghị từ CLB đối tác không?
+            {t('bids.confirm_reject_msg', 'Bạn có chắc chắn muốn từ chối lời đề nghị từ CLB đối tác không?')}
           </p>
           <div
             style={{
@@ -257,9 +259,9 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
               fontSize: '0.86rem',
             }}
           >
-            <div>Cầu thủ: <strong style={{ color: '#0f172a' }}>{playerName}</strong></div>
-            <div>CLB đề nghị: <strong style={{ color: '#0f172a' }}>{offer.buyer_club?.name || offer.from_club?.name || 'Rival Club'}</strong></div>
-            <div>Mức giá đề xuất: <strong style={{ color: '#dc2626' }}>{isLoan ? '€0 (Mượn)' : formatMoney(amount)}</strong></div>
+            <div>{t('player_modal.player_label', 'Cầu thủ:')} <strong style={{ color: '#0f172a' }}>{playerName}</strong></div>
+            <div>{t('bids.from_club', 'CLB đề nghị:')} <strong style={{ color: '#0f172a' }}>{offer.buyer_club?.name || offer.from_club?.name || 'Rival Club'}</strong></div>
+            <div>{t('bids.offered_price_label', 'Mức giá đề xuất:')} <strong style={{ color: '#dc2626' }}>{isLoan ? '€0 (Mượn)' : formatMoney(amount)}</strong></div>
           </div>
           <p style={{ margin: '0.85rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
             * CLB đối tác sẽ nhận được phản hồi từ chối thương vụ này.
@@ -295,7 +297,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
             onClick={() => setActiveTab('all')}
             style={{ fontWeight: 700 }}
           >
-            Tất Cả Đề Nghị ({incomingOffers.length + outgoingOffers.length})
+            {t('bids.tab_all', 'Tất Cả Đề Nghị ({count})').replace('{count}', String(incomingOffers.length + outgoingOffers.length))}
           </button>
           <button
             type="button"
@@ -304,7 +306,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
             style={{ fontWeight: 700 }}
           >
             <Send size={14} style={{ marginRight: '0.35rem' }} />
-            Đã Gửi Đi ({outgoingOffers.length})
+            {t('bids.tab_sent', 'Đã Gửi Đi ({count})').replace('{count}', String(outgoingOffers.length))}
             {pendingOutgoingCount > 0 && (
               <span
                 style={{
@@ -327,7 +329,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
             style={{ fontWeight: 700 }}
           >
             <Inbox size={14} style={{ marginRight: '0.35rem' }} />
-            Đề Nghị Nhận Được ({incomingOffers.length})
+            {t('bids.tab_received', 'Đề Nghị Nhận Được ({count})').replace('{count}', String(incomingOffers.length))}
             {pendingIncomingCount > 0 && (
               <span
                 style={{
@@ -347,7 +349,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
         </div>
 
         <div style={{ fontSize: '0.82rem', color: 'var(--text-muted, #64748b)' }}>
-          Cập nhật chuyển nhượng theo thời gian thực
+          {t('bids.realtime_update', 'Cập nhật chuyển nhượng theo thời gian thực')}
         </div>
       </div>
 
@@ -402,10 +404,10 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                       color: 'var(--text-bright, #0f172a)',
                     }}
                   >
-                    Đề Nghị Mua Của Bạn Đã Gửi Đi
+                    {t('bids.sent_title')}
                   </h3>
                   <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                    Các đề nghị mua đứt / mượn cầu thủ bạn đã gửi tới các CLB
+                    {t('bids.sent_desc')}
                   </div>
                 </div>
               </div>
@@ -433,10 +435,10 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
               >
                 <Send size={40} style={{ margin: '0 auto 0.75rem', opacity: 0.35 }} />
                 <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#64748b' }}>
-                  Chưa có đề nghị mua nào được gửi đi
+                  {t('bids.no_sent', 'Chưa có đề nghị mua nào được gửi đi')}
                 </div>
                 <div style={{ fontSize: '0.82rem', marginTop: '4px' }}>
-                  Tìm cầu thủ trên thị trường và gửi lời đề nghị chuyển nhượng ngay.
+                  {t('bids.no_sent_sub', 'Tìm cầu thủ trên thị trường và gửi lời đề nghị chuyển nhượng ngay.')}
                 </div>
               </div>
             ) : (
@@ -445,7 +447,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                   const p = offer.player;
                   const playerName =
                     p?.common_name ||
-                    (p ? `${p.first_name || ''} ${p.last_name || ''}`.trim() : 'Cầu thủ mục tiêu');
+                    (p ? `${p.first_name || ''} ${p.last_name || ''}`.trim() : t('bids.target_player', 'Cầu thủ mục tiêu'));
                   const pos = p?.position || (p as any)?.player_positions?.[0]?.positions?.code || 'ST';
                   const clubPartner = offer.seller_club || offer.to_club;
                   const isLoan = Boolean(offer.is_loan);
@@ -483,7 +485,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                             minWidth: 0,
                           }}
                           onClick={() => onSelectPlayer && p && onSelectPlayer(p)}
-                          title={onSelectPlayer && p ? 'Bấm để xem chi tiết cầu thủ' : undefined}
+                          title={onSelectPlayer && p ? t('squad.view_player_tooltip', 'Bấm để xem chi tiết cầu thủ') : undefined}
                         >
                           <PlayerAvatar
                             name={playerName}
@@ -523,14 +525,14 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                                 marginTop: '2px',
                               }}
                             >
-                              {p?.age && <span>{p.age} tuổi</span>}
+                              {p?.age && <span>{t('tactics.age_years', '{age} tuổi').replace('{age}', String(p.age))}</span>}
                               {p?.ovr && (
                                 <span style={{ fontWeight: 700, color: '#16a34a' }}>
                                   OVR {p.ovr}
                                 </span>
                               )}
                               {p?.market_value && (
-                                <span>Định giá: {formatMoney(Number(p.market_value))}</span>
+                                <span>{t('bids.market_val_label', 'Định giá: {val}').replace('{val}', formatMoney(Number(p.market_value)))}</span>
                               )}
                             </div>
                           </div>
@@ -554,16 +556,16 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                       >
                         <div>
                           <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <Building2 size={13} /> Gửi tới CLB:
+                            <Building2 size={13} /> {t('bids.to_club')}
                           </span>
                           <strong style={{ color: '#0f172a', display: 'block', marginTop: '2px' }}>
-                            {clubPartner?.name || 'CLB Đối Tác'}
+                            {clubPartner?.name || t('bids.partner_club_fallback', 'CLB Đối Tác')}
                           </strong>
                         </div>
 
                         <div>
                           <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <User size={13} /> Hình thức:
+                            <User size={13} /> {t('bids.method')}
                           </span>
                           <span
                             style={{
@@ -577,13 +579,13 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                               color: isLoan ? '#92400e' : '#15803d',
                             }}
                           >
-                            {isLoan ? 'Cho Mượn' : 'Mua Đứt'}
+                            {isLoan ? t('player_modal.type_loan', 'Cho Mượn') : t('player_modal.type_buy', 'Mua Đứt')}
                           </span>
                         </div>
 
                         <div>
                           <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <DollarSign size={13} /> Phí chuyển nhượng:
+                            <DollarSign size={13} /> {t('bids.fee', 'Phí chuyển nhượng:')}
                           </span>
                           <strong
                             style={{
@@ -593,15 +595,15 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                               color: isLoan ? '#92400e' : '#16a34a',
                             }}
                           >
-                            {isLoan ? '€0 (Mượn)' : formatMoney(Number(offer.offer_amount))}
+                            {isLoan ? t('player_offer.loan_zero', '€0 (Mượn)') : formatMoney(Number(offer.offer_amount))}
                           </strong>
                         </div>
 
                         {offer.proposed_wage !== undefined && offer.proposed_wage > 0 && (
                           <div>
-                            <span style={{ color: '#64748b' }}>Lương đề xuất:</span>
+                            <span style={{ color: '#64748b' }}>{t('player_offer.suggested_wage', 'Lương đề xuất:')}</span>
                             <strong style={{ display: 'block', marginTop: '2px', color: '#d97706' }}>
-                              €{Number(offer.proposed_wage).toLocaleString()}/tuần
+                              €{Number(offer.proposed_wage).toLocaleString()} {t('player_modal.per_week', '/ tuần')}
                             </strong>
                           </div>
                         )}
@@ -629,7 +631,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                           }}
                         >
                           <Calendar size={13} />
-                          <span>Gửi ngày: {formatDate(offer.created_at)}</span>
+                          <span>{t('bids.sent_at')} {formatDate(offer.created_at)}</span>
                         </div>
 
                         {/* NÚT HỦY ĐỀ NGHỊ (Chỉ khi PENDING) */}
@@ -644,10 +646,10 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                               borderRadius: '6px',
                             }}
                             onClick={() => handleOpenConfirm('cancel', offer)}
-                            title="Hủy lời đề nghị chuyển nhượng này"
+                            title={t('bids.cancel_this_bid_tooltip', 'Hủy lời đề nghị chuyển nhượng này')}
                           >
                             <Trash2 size={13} />
-                            <span>HỦY ĐỀ NGHỊ</span>
+                            <span>{t('bids.cancel_offer')}</span>
                           </button>
                         )}
                       </div>
@@ -698,10 +700,10 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                       color: 'var(--text-bright, #0f172a)',
                     }}
                   >
-                    Đề Nghị Mua Cầu Thủ Của Bạn
+                    {t('bids.received_title')}
                   </h3>
                   <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                    Các CLB khác đang hỏi mua / mượn cầu thủ trong đội hình bạn
+                    {t('bids.received_desc')}
                   </div>
                 </div>
               </div>
@@ -729,10 +731,10 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
               >
                 <Inbox size={40} style={{ margin: '0 auto 0.75rem', opacity: 0.35 }} />
                 <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#64748b' }}>
-                  Hiện chưa có đề nghị chuyển nhượng nào gửi tới
+                  {t('bids.no_received', 'Hiện chưa có đề nghị chuyển nhượng nào gửi tới')}
                 </div>
                 <div style={{ fontSize: '0.82rem', marginTop: '4px' }}>
-                  Khi có CLB muốn mua cầu thủ của bạn, thông báo sẽ hiển thị tại đây.
+                  {t('bids.no_received_sub', 'Khi có CLB muốn mua cầu thủ của bạn, thông báo sẽ hiển thị tại đây.')}
                 </div>
               </div>
             ) : (
@@ -741,7 +743,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                   const p = offer.player;
                   const playerName =
                     p?.common_name ||
-                    (p ? `${p.first_name || ''} ${p.last_name || ''}`.trim() : 'Cầu thủ của bạn');
+                    (p ? `${p.first_name || ''} ${p.last_name || ''}`.trim() : t('bids.your_player_fallback', 'Cầu thủ của bạn'));
                   const pos = p?.position || (p as any)?.player_positions?.[0]?.positions?.code || 'ST';
                   const clubBuyer = offer.buyer_club || offer.from_club;
                   const isLoan = Boolean(offer.is_loan);
@@ -781,7 +783,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                             minWidth: 0,
                           }}
                           onClick={() => onSelectPlayer && p && onSelectPlayer(p)}
-                          title={onSelectPlayer && p ? 'Bấm để xem chi tiết cầu thủ' : undefined}
+                          title={onSelectPlayer && p ? t('squad.view_player_tooltip', 'Bấm để xem chi tiết cầu thủ') : undefined}
                         >
                           <PlayerAvatar
                             name={playerName}
@@ -821,14 +823,14 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                                 marginTop: '2px',
                               }}
                             >
-                              {p?.age && <span>{p.age} tuổi</span>}
+                              {p?.age && <span>{t('tactics.age_years', '{age} tuổi').replace('{age}', String(p.age))}</span>}
                               {p?.ovr && (
                                 <span style={{ fontWeight: 700, color: '#16a34a' }}>
                                   OVR {p.ovr}
                                 </span>
                               )}
                               {marketVal > 0 && (
-                                <span>Định giá: {formatMoney(marketVal)}</span>
+                                <span>{t('bids.market_val_label', 'Định giá: {val}').replace('{val}', formatMoney(marketVal))}</span>
                               )}
                             </div>
                           </div>
@@ -852,7 +854,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                       >
                         <div>
                           <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <Building2 size={13} /> CLB Đề Nghị:
+                            <Building2 size={13} /> {t('bids.from_club')}
                           </span>
                           <strong style={{ color: '#0f172a', display: 'block', marginTop: '2px' }}>
                             {clubBuyer?.name || 'Rival Club'}
@@ -861,7 +863,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
 
                         <div>
                           <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <User size={13} /> Hình thức:
+                            <User size={13} /> {t('bids.method')}
                           </span>
                           <span
                             style={{
@@ -875,13 +877,13 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                               color: isLoan ? '#92400e' : '#15803d',
                             }}
                           >
-                            {isLoan ? 'Mượn Cầu Thủ' : 'Mua Đứt'}
+                            {isLoan ? t('player_modal.type_loan', 'Mượn Cầu Thủ') : t('player_modal.type_buy', 'Mua Đứt')}
                           </span>
                         </div>
 
                         <div>
                           <span style={{ color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                            <DollarSign size={13} /> Mức giá đề nghị:
+                            <DollarSign size={13} /> {t('player_offer.fee_label', 'Mức giá đề nghị:')}
                           </span>
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginTop: '2px' }}>
                             <strong
@@ -890,11 +892,11 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                                 color: '#15803d',
                               }}
                             >
-                              {isLoan ? '€0 (Mượn)' : formatMoney(offerAmount)}
+                              {isLoan ? t('player_offer.loan_zero', '€0 (Mượn)') : formatMoney(offerAmount)}
                             </strong>
                             {!isLoan && marketVal > 0 && offerAmount > marketVal && (
                               <span style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 700 }}>
-                                (+{Math.round(((offerAmount - marketVal) / marketVal) * 100)}% giá thị trường)
+                                {t('bids.price_diff_percent', '(+{pct}% giá thị trường)').replace('{pct}', String(Math.round(((offerAmount - marketVal) / marketVal) * 100)))}
                               </span>
                             )}
                           </div>
@@ -923,7 +925,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                           }}
                         >
                           <Calendar size={13} />
-                          <span>Nhận lúc: {formatDate(offer.created_at)}</span>
+                          <span>{t('bids.received_at')} {formatDate(offer.created_at)}</span>
                         </div>
 
                         {offer.status === 'PENDING' ? (
@@ -943,7 +945,7 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                               onClick={() => handleOpenConfirm('accept', offer)}
                             >
                               <Check size={14} />
-                              <span>{isLoan ? 'Đồng Ý Cho Mượn' : 'Chấp Nhận Bán'}</span>
+                              <span>{isLoan ? t('bids.accept_loan') : t('bids.accept_buy')}</span>
                             </button>
                             <button
                               type="button"
@@ -957,12 +959,12 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
                               onClick={() => handleOpenConfirm('reject', offer)}
                             >
                               <X size={14} />
-                              <span>Từ Chối</span>
+                              <span>{t('bids.reject_btn')}</span>
                             </button>
                           </div>
                         ) : (
                           <div style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>
-                            Giao dịch đã kết thúc ({offer.status})
+                            {t('bids.transaction_ended', 'Giao dịch đã kết thúc ({status})').replace('{status}', offer.status)}
                           </div>
                         )}
                       </div>
@@ -980,10 +982,10 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
         isOpen={confirmModal.isOpen}
         title={
           confirmModal.type === 'cancel'
-            ? 'Xác Nhận Hủy Lời Đề Nghị'
+            ? t('bids.modal_title_cancel', 'Xác Nhận Hủy Lời Đề Nghị')
             : confirmModal.type === 'accept'
-            ? 'Xác Nhận Chấp Thuận Chuyển Nhượng'
-            : 'Xác Nhận Từ Chối Đề Nghị'
+            ? t('bids.modal_title_accept', 'Xác Nhận Chấp Thuận Chuyển Nhượng')
+            : t('bids.modal_title_reject', 'Xác Nhận Từ Chối Đề Nghị')
         }
         variant={
           confirmModal.type === 'accept'
@@ -992,12 +994,12 @@ export const TransferBidsView: React.FC<TransferBidsViewProps> = ({
         }
         confirmText={
           confirmModal.type === 'cancel'
-            ? 'Đồng Ý Hủy'
+            ? t('bids.btn_confirm_cancel', 'Đồng Ý Hủy')
             : confirmModal.type === 'accept'
-            ? 'Chấp Nhận Ngay'
-            : 'Xác Nhận Từ Chối'
+            ? t('bids.btn_accept_now', 'Chấp Nhận Ngay')
+            : t('bids.btn_confirm_reject', 'Xác Nhận Từ Chối')
         }
-        cancelText="Quay Lại"
+        cancelText={t('bids.btn_back', 'Quay Lại')}
         isLoading={isProcessing}
         onConfirm={handleConfirmAction}
         onClose={handleCloseConfirm}

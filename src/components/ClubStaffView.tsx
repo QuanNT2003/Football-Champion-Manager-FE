@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import React, { useState, useEffect } from 'react';
 import {
   Users,
@@ -30,6 +31,7 @@ export const ClubStaffView: React.FC<Props> = ({
   cashBalance,
   onNavigateToMarket,
 }) => {
+  const { t } = useTranslation();
   const [staffList, setStaffList] = useState<StaffMarketItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -62,19 +64,19 @@ export const ClubStaffView: React.FC<Props> = ({
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'HEAD_COACH':
-        return { label: 'HLV Trưởng', color: '#16a34a', bg: '#dcfce7' };
+        return { label: t('staff.head_coach', 'HLV Trưởng'), color: '#16a34a', bg: '#dcfce7' };
       case 'ASSISTANT_COACH':
-        return { label: 'Trợ Lý HLV', color: '#0284c7', bg: '#e0f2fe' };
+        return { label: t('staff.assistant_coach', 'Trợ Lý HLV'), color: '#0284c7', bg: '#e0f2fe' };
       case 'FITNESS_COACH':
-        return { label: 'HLV Thể Lực', color: '#ea580c', bg: '#ffedd5' };
+        return { label: t('staff.fitness_coach', 'HLV Thể Lực'), color: '#ea580c', bg: '#ffedd5' };
       case 'GOALKEEPING_COACH':
-        return { label: 'HLV Thủ Môn', color: '#7c3aed', bg: '#ede9fe' };
+        return { label: t('staff.gk_coach', 'HLV Thủ Môn'), color: '#7c3aed', bg: '#ede9fe' };
       case 'SCOUT':
-        return { label: 'Tuyển Trạch Viên', color: '#4f46e5', bg: '#e0e7ff' };
+        return { label: t('staff.scout', 'Tuyển Trạch Viên'), color: '#4f46e5', bg: '#e0e7ff' };
       case 'PHYSIO':
-        return { label: 'Bác Sĩ / Trị Liệu', color: '#db2777', bg: '#fce7f3' };
+        return { label: t('staff.physio', 'Bác Sĩ / Trị Liệu'), color: '#db2777', bg: '#fce7f3' };
       case 'YOUTH_DIRECTOR':
-        return { label: 'GĐ Đào Tạo Trẻ', color: '#059669', bg: '#d1fae5' };
+        return { label: t('staff.youth_director', 'GĐ Đào Tạo Trẻ'), color: '#059669', bg: '#d1fae5' };
       default:
         return { label: role, color: '#475569', bg: '#f1f5f9' };
     }
@@ -163,10 +165,10 @@ export const ClubStaffView: React.FC<Props> = ({
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Quy Mô Ban Huấn Luyện
+              {t('staff.title')}
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a' }}>
-              {staffList.length} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>thành viên</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>{t('staff.members_count', '{count} thành viên').replace('{count}', String(staffList.length))}</span>
             </div>
           </div>
         </div>
@@ -200,10 +202,10 @@ export const ClubStaffView: React.FC<Props> = ({
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Tổng Quỹ Lương Nhân Sự
+              {t('staff.total_wage', 'Tổng Quỹ Lương Nhân Sự')}
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#d97706' }}>
-              {formatMoney(totalWage)} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>/ tuần</span>
+              {formatMoney(totalWage)} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>{t('staff.per_week', '/ tuần')}</span>
             </div>
           </div>
         </div>
@@ -237,10 +239,10 @@ export const ClubStaffView: React.FC<Props> = ({
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              HLV Trưởng Hiện Tại
+              {t('staff.current_head_coach', 'HLV Trưởng Hiện Tại')}
             </div>
             <div style={{ fontSize: '1.05rem', fontWeight: 800, color: headCoach ? '#0f172a' : '#dc2626' }}>
-              {headCoach ? headCoach.name : 'Chưa Có HLV Trưởng!'}
+              {headCoach ? headCoach.name : t('staff.no_head_coach', 'Chưa Có HLV Trưởng!')}
             </div>
           </div>
         </div>
@@ -266,7 +268,7 @@ export const ClubStaffView: React.FC<Props> = ({
             <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
             <input
               type="text"
-              placeholder="Tìm theo tên nhân sự, quốc gia..."
+              placeholder={t('staff.search_placeholder', 'Tìm theo tên nhân sự, quốc gia...')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{
@@ -295,14 +297,14 @@ export const ClubStaffView: React.FC<Props> = ({
                 background: '#ffffff',
               }}
             >
-              <option value="ALL">Tất cả vai trò</option>
-              <option value="HEAD_COACH">HLV Trưởng</option>
-              <option value="ASSISTANT_COACH">Trợ lý HLV</option>
-              <option value="FITNESS_COACH">HLV Thể lực</option>
-              <option value="GOALKEEPING_COACH">HLV Thủ môn</option>
-              <option value="SCOUT">Tuyển trạch viên</option>
-              <option value="PHYSIO">Bác sĩ / Y tế</option>
-              <option value="YOUTH_DIRECTOR">GĐ Đào tạo trẻ</option>
+              <option value="ALL">{t('staff.role_all', 'Tất cả vai trò')}</option>
+              <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
+              <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ lý HLV')}</option>
+              <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể lực')}</option>
+              <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ môn')}</option>
+              <option value="SCOUT">{t('staff.scout', 'Tuyển trạch viên')}</option>
+              <option value="PHYSIO">{t('staff.physio', 'Bác sĩ / Y tế')}</option>
+              <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'GĐ Đào tạo trẻ')}</option>
             </select>
           </div>
         </div>
@@ -322,7 +324,7 @@ export const ClubStaffView: React.FC<Props> = ({
             }}
           >
             <Plus size={16} />
-            <span>Tuyển Thêm Nhân Sự</span>
+            <span>{t('staff.hire_more_btn', 'Tuyển Thêm Nhân Sự')}</span>
           </button>
         )}
       </div>
@@ -331,7 +333,7 @@ export const ClubStaffView: React.FC<Props> = ({
       {loading ? (
         <div style={{ textAlign: 'center', padding: '3.5rem', background: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0', color: '#64748b' }}>
           <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.75rem' }} />
-          <div>Đang tải danh sách ban huấn luyện CLB...</div>
+          <div>{t('staff.loading_list', 'Đang tải danh sách ban huấn luyện CLB...')}</div>
         </div>
       ) : filteredStaff.length === 0 ? (
         <div
@@ -346,12 +348,12 @@ export const ClubStaffView: React.FC<Props> = ({
         >
           <Briefcase size={40} style={{ margin: '0 auto 0.75rem', color: '#94a3b8' }} />
           <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: 800, color: '#0f172a' }}>
-            Chưa có nhân sự nào phù hợp
+            {t('staff.no_staff_match_title', 'Chưa có nhân sự nào phù hợp')}
           </h4>
           <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.88rem' }}>
             {staffList.length === 0
-              ? 'CLB của bạn hiện chưa có nhân sự nào trong ban huấn luyện. Hãy tuyển mộ thêm từ thị trường tự do!'
-              : 'Không tìm thấy nhân viên nào khớp với bộ lọc hiện tại.'}
+              ? t('staff.no_staff_in_club', 'CLB của bạn hiện chưa có nhân sự nào trong ban huấn luyện. Hãy tuyển mộ thêm từ thị trường tự do!')
+              : t('staff.no_staff_filter', 'Không tìm thấy nhân viên nào khớp với bộ lọc hiện tại.')}
           </p>
           {onNavigateToMarket && staffList.length === 0 && (
             <button
@@ -360,7 +362,7 @@ export const ClubStaffView: React.FC<Props> = ({
               className="btn btn-sm btn-primary"
               style={{ padding: '0.65rem 1.35rem', fontWeight: 800, borderRadius: '8px' }}
             >
-              Khám Phá Thị Trường Nhân Sự
+              {t('staff.explore_market', 'Khám Phá Thị Trường Nhân Sự')}
             </button>
           )}
         </div>
@@ -491,19 +493,19 @@ export const ClubStaffView: React.FC<Props> = ({
                   }}
                 >
                   <div>
-                    <span style={{ color: '#64748b' }}>Triết lý: </span>
+                    <span style={{ color: '#64748b' }}>{t('staff.philosophy_label', 'Triết lý:')} </span>
                     <strong style={{ color: '#16a34a' }}>{st.tacticalStyle || 'BALANCED'}</strong>
                   </div>
                   <div>
-                    <span style={{ color: '#64748b' }}>Sơ đồ: </span>
+                    <span style={{ color: '#64748b' }}>{t('staff.formation_label', 'Sơ đồ:')} </span>
                     <strong style={{ color: '#0f172a' }}>{st.preferredFormation?.name || '4-3-3'}</strong>
                   </div>
                   <div>
-                    <span style={{ color: '#64748b' }}>Lương tuần: </span>
+                    <span style={{ color: '#64748b' }}>{t('staff.weekly_wage_label', 'Lương tuần:')} </span>
                     <strong style={{ color: '#d97706' }}>{formatMoney(st.wage)}</strong>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <span style={{ color: '#64748b' }}>Danh tiếng: </span>
+                    <span style={{ color: '#64748b' }}>{t('staff.reputation_label', 'Danh tiếng:')} </span>
                     {renderStars(st.reputation)}
                   </div>
                 </div>
@@ -511,10 +513,10 @@ export const ClubStaffView: React.FC<Props> = ({
                 {/* Footer Action */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#64748b', paddingTop: '0.25rem' }}>
                   <span style={{ color: '#16a34a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <UserCheck size={14} /> Hợp đồng chính thức
+                    <UserCheck size={14} /> {t('staff.official_contract', 'Hợp đồng chính thức')}
                   </span>
                   <span style={{ color: '#0284c7', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                    Xem hồ sơ <ChevronRight size={14} />
+                    {t('staff.view_profile', 'Xem hồ sơ')} <ChevronRight size={14} />
                   </span>
                 </div>
               </div>

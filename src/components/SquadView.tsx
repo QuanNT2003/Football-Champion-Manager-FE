@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import { PlayerAvatar } from './common/PlayerAvatar';
 import React, { useState } from 'react';
 import { Player } from '../types';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
+  const { t } = useTranslation();
   const [filterType, setFilterType] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -56,11 +58,11 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
         {/* Position Filter Pills */}
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {[
-            { id: 'ALL', label: `Tất Cả (${players.length})` },
-            { id: 'GK', label: 'Thủ Môn' },
-            { id: 'DEF', label: 'Hậu Vệ' },
-            { id: 'MID', label: 'Tiền Vệ' },
-            { id: 'FWD', label: 'Tiền Đạo' },
+            { id: 'ALL', label: `${t('squad.tab_all', 'Tất Cả')} (${players.length})` },
+            { id: 'GK', label: t('squad.tab_gk', 'Thủ Môn') },
+            { id: 'DEF', label: t('squad.tab_def', 'Hậu Vệ') },
+            { id: 'MID', label: t('squad.tab_mid', 'Tiền Vệ') },
+            { id: 'FWD', label: t('squad.tab_fwd', 'Tiền Đạo') },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -78,7 +80,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
           <input
             type="text"
             className="input-text"
-            placeholder="Tìm cầu thủ theo tên..."
+            placeholder={t('squad.search_placeholder')}
             style={{
               width: '100%',
               paddingLeft: '36px',
@@ -102,7 +104,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Users size={20} className="text-cyan" />
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-              DANH SÁCH CẦU THỦ CÂU LẠC BỘ ({filtered.length})
+              {t('squad.title')} ({filtered.length})
             </h3>
           </div>
         </div>
@@ -110,23 +112,23 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
         <table className="table-hud">
           <thead>
             <tr>
-              <th style={{ width: '60px' }}>Số</th>
-              <th>Cầu Thủ</th>
-              <th>Vị Trí</th>
-              <th>Tuổi</th>
-              <th>Điểm OVR</th>
-              <th>Tiềm Năng</th>
-              <th>Thể Lực</th>
-              <th>Trạng Thái</th>
-              <th>Định Giá</th>
-              <th style={{ textAlign: 'right' }}>Hành Động</th>
+              <th style={{ width: '60px' }}>{t('squad.col_number')}</th>
+              <th>{t('squad.col_player')}</th>
+              <th>{t('squad.col_position')}</th>
+              <th>{t('squad.col_age')}</th>
+              <th>{t('squad.col_ovr')}</th>
+              <th>{t('squad.col_potential')}</th>
+              <th>{t('squad.col_fitness')}</th>
+              <th>{t('squad.col_status')}</th>
+              <th>{t('squad.col_value')}</th>
+              <th style={{ textAlign: 'right' }}>{t('squad.col_action')}</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={10} style={{ textAlign: 'center', padding: '32px', color: '#64748b' }}>
-                  Không tìm thấy cầu thủ nào phù hợp với bộ lọc.
+                  {t('squad.empty_filter')}
                 </td>
               </tr>
             ) : (
@@ -135,10 +137,10 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                 const ovr = getOvrRating(player);
                 const posCode = player.position?.code || player.player_positions?.[0]?.position_code || 'ST';
                 const posCategory = getPositionCategory(posCode);
-                const playerName = player.name || `${player.first_name || ''} ${player.last_name || ''}`.trim() || player.common_name || 'Cầu Thủ';
+                const playerName = player.name || `${player.first_name || ''} ${player.last_name || ''}`.trim() || player.common_name || t('common.player', 'Cầu Thủ');
 
                 return (
-                  <tr key={player.id} onClick={() => onSelectPlayer(player)} style={{ cursor: "pointer" }} title="Bấm để xem chi tiết cầu thủ">
+                  <tr key={player.id} onClick={() => onSelectPlayer(player)} style={{ cursor: "pointer" }} title={t('squad.view_player_tooltip', 'Bấm để xem chi tiết cầu thủ')}>
                     <td>
                       <strong style={{ color: '#15803d', fontFamily: 'var(--font-game)', fontSize: '1rem' }}>
                         #{player.squad_number || '-'}
@@ -154,7 +156,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                         <div>
                           <strong style={{ display: 'block', color: '#0f172a', fontSize: '0.95rem' }}>{playerName}</strong>
                           <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                            {typeof player.nationality === 'object' ? (player.nationality as any)?.name || 'Quốc tế' : (player.nationality || 'Quốc tế')}
+                            {typeof player.nationality === 'object' ? (player.nationality as any)?.name || t('common.international', 'Quốc tế') : (player.nationality || t('common.international', 'Quốc tế'))}
                           </span>
                         </div>
                       </div>
@@ -200,19 +202,19 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                     <td>
                       {player.status?.is_injured ? (
                         <span style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '2px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700 }}>
-                          Chấn Thương 🚑
+                          {t('squad.status_injured', 'Chấn Thương 🚑')}
                         </span>
                       ) : player.status?.is_suspended ? (
                         <span style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', padding: '2px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700 }}>
-                          Treo Giò 🟥
+                          {t('squad.status_suspended', 'Treo Giò 🟥')}
                         </span>
                       ) : player.status?.is_transfer_listed ? (
                         <span style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700 }}>
-                          Rao Bán 🏷️
+                          {t('squad.status_listed', 'Rao Bán 🏷️')}
                         </span>
                       ) : (
                         <span style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700 }}>
-                          Sẵn Sàng
+                          {t('squad.status_ready', 'Sẵn Sàng')}
                         </span>
                       )}
                     </td>
@@ -226,7 +228,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                         className="btn btn-secondary btn-sm"
                         onClick={() => onSelectPlayer(player)}
                       >
-                        Chi Tiết
+                        {t('common.details', 'Chi Tiết')}
                       </button>
                     </td>
                   </tr>

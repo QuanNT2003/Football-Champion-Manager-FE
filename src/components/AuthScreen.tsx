@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../services/auth.service';
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'login' }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -42,7 +44,7 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
 
     if (mode === 'login') {
       if (!username.trim() || !password) {
-        setError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu');
+        setError(t('auth.error_required_login', 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu'));
         return;
       }
       setLoading(true);
@@ -50,21 +52,21 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
         await authApi.login(username.trim(), password);
         onAuthSuccess();
       } catch (err: any) {
-        setError(err?.response?.data?.message || 'Tài khoản hoặc mật khẩu không chính xác');
+        setError(err?.response?.data?.message || t('auth.error_invalid_credentials', 'Tài khoản hoặc mật khẩu không chính xác'));
       } finally {
         setLoading(false);
       }
     } else {
       if (!username.trim() || !email.trim() || !password) {
-        setError('Vui lòng điền đầy đủ các thông tin bắt buộc');
+        setError(t('auth.error_required_register', 'Vui lòng điền đầy đủ các thông tin bắt buộc'));
         return;
       }
       if (password !== confirmPassword) {
-        setError('Mật khẩu xác nhận không khớp');
+        setError(t('auth.error_password_mismatch', 'Mật khẩu xác nhận không khớp'));
         return;
       }
       if (password.length < 6) {
-        setError('Mật khẩu phải có ít nhất 6 ký tự');
+        setError(t('auth.error_password_length', 'Mật khẩu phải có ít nhất 6 ký tự'));
         return;
       }
       setLoading(true);
@@ -72,7 +74,7 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
         await authApi.register(username.trim(), email.trim(), password);
         onAuthSuccess();
       } catch (err: any) {
-        setError(err?.response?.data?.message || 'Đăng ký tài khoản thất bại. Tên đăng nhập hoặc email có thể đã tồn tại.');
+        setError(err?.response?.data?.message || t('auth.error_register_failed', 'Đăng ký tài khoản thất bại. Tên đăng nhập hoặc email có thể đã tồn tại.'));
       } finally {
         setLoading(false);
       }
@@ -110,7 +112,7 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
           </div>
           <h1 className="auth-title">FOOTBALL CHAMPION</h1>
           <p className="auth-subtitle">
-            Hệ thống Quản lý Bóng đá Thực chiến • Tranh hùng 112 Quốc gia & Cúp Châu Lục
+            {t('auth.tagline', 'Hệ thống Quản lý Bóng đá Thực chiến • Tranh hùng 112 Quốc gia & Cúp Châu Lục')}
           </p>
         </div>
 
@@ -122,7 +124,7 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
             onClick={() => switchMode('login')}
           >
             <LogIn size={18} />
-            <span>ĐĂNG NHẬP HLV</span>
+            <span>{t('auth.login_tab', 'ĐĂNG NHẬP HLV')}</span>
           </button>
           <button
             type="button"
@@ -130,7 +132,7 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
             onClick={() => switchMode('register')}
           >
             <UserPlus size={18} />
-            <span>ĐĂNG KÝ BẰNG HLV</span>
+            <span>{t('auth.register_tab', 'ĐĂNG KÝ BẰNG HLV')}</span>
           </button>
         </div>
 
@@ -145,12 +147,12 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
         {/* Form */}
         <form onSubmit={handleSubmit} className="auth-form-hud">
           <div className="form-group-hud">
-            <label>TÊN ĐĂNG NHẬP {mode === 'login' ? 'HOẶC EMAIL' : ''}</label>
+            <label>{mode === 'login' ? t('auth.username_or_email_label', 'TÊN ĐĂNG NHẬP HOẶC EMAIL') : t('auth.username_label', 'TÊN ĐĂNG NHẬP')}</label>
             <div className="input-hud-wrap">
               <User size={18} className="input-icon" />
               <input
                 type="text"
-                placeholder={mode === 'login' ? 'Nhập username hoặc email...' : 'Chọn tên HLV (ví dụ: coach_alex)'}
+                placeholder={mode === 'login' ? t('auth.username_login_placeholder', 'Nhập username hoặc email...') : t('auth.username_register_placeholder', 'Chọn tên HLV (ví dụ: coach_alex)')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoFocus
@@ -162,7 +164,7 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
 
           {mode === 'register' && (
             <div className="form-group-hud">
-              <label>ĐỊA CHỈ EMAIL LIÊN HỆ</label>
+              <label>{t('auth.email_label', 'ĐỊA CHỈ EMAIL LIÊN HỆ')}</label>
               <div className="input-hud-wrap">
                 <Mail size={18} className="input-icon" />
                 <input
@@ -178,12 +180,12 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
           )}
 
           <div className="form-group-hud">
-            <label>MẬT KHẨU TÀI KHOẢN</label>
+            <label>{t('auth.password_label', 'MẬT KHẨU TÀI KHOẢN')}</label>
             <div className="input-hud-wrap">
               <Lock size={18} className="input-icon" />
               <input
                 type="password"
-                placeholder="Nhập mật khẩu bảo mật..."
+                placeholder={t('auth.password_placeholder', 'Nhập mật khẩu bảo mật...')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -194,12 +196,12 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
 
           {mode === 'register' && (
             <div className="form-group-hud">
-              <label>XÁC NHẬN MẬT KHẨU</label>
+              <label>{t('auth.confirm_password_label', 'XÁC NHẬN MẬT KHẨU')}</label>
               <div className="input-hud-wrap">
                 <Lock size={18} className="input-icon" />
                 <input
                   type="password"
-                  placeholder="Nhập lại mật khẩu..."
+                  placeholder={t('auth.confirm_password_placeholder', 'Nhập lại mật khẩu...')}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -215,16 +217,16 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
             disabled={loading}
           >
             {loading ? (
-              <span className="btn-spinner">Đang xác thực thông tin...</span>
+              <span className="btn-spinner">{t('auth.verifying', 'Đang xác thực thông tin...')}</span>
             ) : mode === 'login' ? (
               <>
                 <LogIn size={20} />
-                <span>VÀO PHÒNG ĐIỀU HÀNH CHIẾN THUẬT</span>
+                <span>{t('auth.login_button', 'VÀO PHÒNG ĐIỀU HÀNH CHIẾN THUẬT')}</span>
               </>
             ) : (
               <>
                 <UserPlus size={20} />
-                <span>HOÀN TẤT NHẬN CHỨNG CHỈ HLV</span>
+                <span>{t('auth.register_button', 'HOÀN TẤT NHẬN CHỨNG CHỈ HLV')}</span>
               </>
             )}
           </button>
@@ -238,17 +240,17 @@ export const AuthScreen: React.FC<Props> = ({ onAuthSuccess, defaultMode = 'logi
             onClick={handleDemoAccount}
           >
             <Sparkles size={16} className="text-amber" />
-            <span>Tạo nhanh hồ sơ HLV ngẫu nhiên (Thử nghiệm ngay)</span>
+            <span>{t('auth.random_profile_btn', 'Tạo nhanh hồ sơ HLV ngẫu nhiên (Thử nghiệm ngay)')}</span>
           </button>
 
           <div className="server-telemetry-row">
             <div className="telemetry-item">
               <Globe size={14} className="text-cyan" />
-              <span>Máy chủ Mùa 1 Toàn Cầu</span>
+              <span>{t('auth.server_season_badge', 'Máy chủ Mùa 1 Toàn Cầu')}</span>
             </div>
             <div className="telemetry-item">
               <Trophy size={14} className="text-amber" />
-              <span>Real-time Engine 90 Phút</span>
+              <span>{t('auth.engine_badge', 'Real-time Engine 90 Phút')}</span>
             </div>
           </div>
         </div>

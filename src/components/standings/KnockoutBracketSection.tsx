@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { KnockoutBracketResponse, KnockoutRound } from '../../types';
 import { Swords, Calendar, CheckCircle2 } from 'lucide-react';
@@ -19,12 +20,13 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
   filteredKnockoutRounds,
   currentClubId,
 }) => {
+  const { t } = useTranslation();
   if (!knockoutBracket || allKnockoutRounds.length === 0) {
     return (
       <div className="card text-center" style={{ padding: '3.5rem', borderRadius: '16px' }}>
         <Swords size={40} color="#cbd5e1" style={{ marginBottom: '8px', display: 'inline-block' }} />
         <p style={{ margin: 0, fontSize: '0.95rem', color: '#64748b', fontWeight: 600 }}>
-          Chưa có nhánh đấu loại trực tiếp (Knockout) nào được bốc thăm cho giải đấu này.
+          {t('standings.no_bracket')}
         </p>
       </div>
     );
@@ -52,7 +54,7 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Swords size={20} color="#15803d" />
           <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-            {activeRound?.roundName || 'Vòng Đấu'}
+            {activeRound?.roundName || t('knockout.round_fallback', 'Vòng Đấu')}
           </h3>
           {activeRound && (
             <span
@@ -65,13 +67,13 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
                 fontWeight: 700,
               }}
             >
-              {activeRound.matches.length} Cặp Đấu • Ngày {activeRound.seasonDay}
+              {t('knockout.match_pairs', '{count} Cặp Đấu • Ngày {day}').replace('{count}', String(activeRound.matches.length)).replace('{day}', String(activeRound.seasonDay))}
             </span>
           )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>Chọn Vòng:</span>
+          <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>{t('knockout.select_round', 'Chọn Vòng:')}</span>
           <select
             value={activeRound?.roundName || selectedRoundName}
             onChange={(e) => setSelectedRoundName(e.target.value)}
@@ -89,7 +91,7 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
           >
             {allKnockoutRounds.map((rnd) => (
               <option key={rnd.roundOrder} value={rnd.roundName}>
-                {rnd.roundName} (Ngày {rnd.seasonDay} - {rnd.matches.length} trận)
+                {t('knockout.round_summary', '{name} (Ngày {day} - {matches} trận)').replace('{name}', rnd.roundName).replace('{day}', String(rnd.seasonDay)).replace('{matches}', String(rnd.matches.length))}
               </option>
             ))}
           </select>
@@ -166,10 +168,10 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', marginBottom: '8px', borderBottom: '1px solid #f1f5f9', paddingBottom: '6px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <Calendar size={12} />
-                      <span>Ngày {match.seasonDay || 1}</span>
+                      <span>{t('knockout.day_n', 'Ngày {day}').replace('{day}', String(match.seasonDay || 1))}</span>
                     </div>
                     <span style={{ fontWeight: 700, color: match.status === 'COMPLETED' ? '#16a34a' : '#15803d' }}>
-                      {match.status === 'COMPLETED' ? 'ĐÃ KẾT THÚC' : 'SẮP DIỄN RA'}
+                      {match.status === 'COMPLETED' ? t('common.finished', 'ĐÃ KẾT THÚC') : t('common.upcoming', 'SẮP DIỄN RA')}
                     </span>
                   </div>
 
@@ -178,9 +180,9 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
                       <span style={{ fontSize: '1rem' }}>⚽</span>
                       <span style={{ fontSize: '0.88rem', fontWeight: isHomeWinner || isHomeCurrent ? 700 : 500, color: isHomeWinner ? '#15803d' : isHomeCurrent ? '#15803d' : '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {match.homeClub?.name || 'Đội Nhà'}
+                        {match.homeClub?.name || t('matches.home_team', 'Đội Nhà')}
                       </span>
-                      {isHomeCurrent && <span style={{ fontSize: '0.65rem', background: '#15803d', color: '#fff', padding: '1px 4px', borderRadius: '4px', fontWeight: 700 }}>BẠN</span>}
+                      {isHomeCurrent && <span style={{ fontSize: '0.65rem', background: '#15803d', color: '#fff', padding: '1px 4px', borderRadius: '4px', fontWeight: 700 }}>{t('knockout.you_badge', 'BẠN')}</span>}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       {isHomeWinner && <CheckCircle2 size={14} color="#16a34a" />}
@@ -195,9 +197,9 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
                       <span style={{ fontSize: '1rem' }}>⚽</span>
                       <span style={{ fontSize: '0.88rem', fontWeight: isAwayWinner || isAwayCurrent ? 700 : 500, color: isAwayWinner ? '#15803d' : isAwayCurrent ? '#15803d' : '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {match.awayClub?.name || 'Đội Khách'}
+                        {match.awayClub?.name || t('matches.away_team', 'Đội Khách')}
                       </span>
-                      {isAwayCurrent && <span style={{ fontSize: '0.65rem', background: '#15803d', color: '#fff', padding: '1px 4px', borderRadius: '4px', fontWeight: 700 }}>BẠN</span>}
+                      {isAwayCurrent && <span style={{ fontSize: '0.65rem', background: '#15803d', color: '#fff', padding: '1px 4px', borderRadius: '4px', fontWeight: 700 }}>{t('knockout.you_badge', 'BẠN')}</span>}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       {isAwayWinner && <CheckCircle2 size={14} color="#16a34a" />}

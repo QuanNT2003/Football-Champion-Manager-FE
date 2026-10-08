@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React, { useState } from 'react';
 import { CompetitionCountry } from '../../services/competitions.service';
 import { X, Search, Globe2, Flag } from 'lucide-react';
@@ -19,6 +20,7 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
   allCountries,
   loading,
 }) => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedContinent, setSelectedContinent] = useState<string>('ALL');
 
@@ -89,10 +91,10 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
             <Globe2 size={24} />
             <div>
               <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>
-                Khám Phá Giải Đấu Toàn Cầu
+                {t('standings.country_modal_title')}
               </h3>
               <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.9 }}>
-                Hệ thống 96 Quốc Gia Tinh Hoa (UEFA, AFC, AMERICAS, CAF)
+                {t('standings.country_modal_sub')}
               </p>
             </div>
           </div>
@@ -127,7 +129,7 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
               />
               <input
                 type="text"
-                placeholder="Tìm kiếm quốc gia hoặc mã (VD: Vietnam, Anh, VIE, ENG...)"
+                placeholder={t('standings.country_search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -144,11 +146,11 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
 
           <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
             {[
-              { id: 'ALL', label: 'Tất Cả (96)' },
-              { id: 'UEFA', label: 'Châu Âu - UEFA (32)' },
-              { id: 'AFC', label: 'Châu Á - AFC (32)' },
-              { id: 'AMERICAS', label: 'Châu Mỹ (16)' },
-              { id: 'CAF', label: 'Châu Phi - CAF (16)' },
+              { id: 'ALL', label: t('confed.tab_all', 'Tất Cả (96)') },
+              { id: 'UEFA', label: t('confed.tab_uefa', 'Châu Âu - UEFA (32)') },
+              { id: 'AFC', label: t('confed.tab_afc', 'Châu Á - AFC (32)') },
+              { id: 'AMERICAS', label: t('confed.tab_americas', 'Châu Mỹ (16)') },
+              { id: 'CAF', label: t('confed.tab_caf', 'Châu Phi - CAF (16)') },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -178,11 +180,11 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
           {loading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
               <div className="spinner" style={{ margin: '0 auto 1rem auto' }}></div>
-              <p>Đang tải danh sách quốc gia...</p>
+              <p>{t('country_select.loading', 'Đang tải danh sách quốc gia...')}</p>
             </div>
           ) : filteredCountries.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
-              <p>Không tìm thấy quốc gia phù hợp với từ khóa.</p>
+              <p>{t('country_select.not_found', 'Không tìm thấy quốc gia phù hợp với từ khóa.')}</p>
             </div>
           ) : (
             <div
@@ -247,7 +249,7 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
                         {c.name}
                       </div>
                       <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                        {c.confederation?.name || (c as any).continent || 'Liên Đoàn'}
+                        {c.confederation?.name || (c as any).continent || t('country_select.confed_fallback', 'Liên Đoàn')}
                       </div>
                     </div>
                     {isSelected && (
@@ -261,8 +263,8 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
                           fontWeight: 700,
                         }}
                       >
-                        Đang xem
-                      </span>
+                          {t('country_select.viewing', 'Đang xem')}
+                        </span>
                     )}
                   </button>
                 );

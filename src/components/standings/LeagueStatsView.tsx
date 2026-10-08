@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { Target, TrendingUp } from 'lucide-react';
 
@@ -25,6 +26,7 @@ interface LeagueStatsViewProps {
 }
 
 export const LeagueStatsView: React.FC<LeagueStatsViewProps> = ({ topScorers, topAssists }) => {
+  const { t } = useTranslation();
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }}>
       {/* Top Scorers */}
@@ -41,10 +43,10 @@ export const LeagueStatsView: React.FC<LeagueStatsViewProps> = ({ topScorers, to
           }}
         >
           <Target size={20} color="#059669" />
-          <span>Vua Phá Lưới (Top Scorers)</span>
+          <span>{t('standings.top_scorers')}</span>
         </h3>
         {topScorers.length === 0 ? (
-          <p style={{ color: '#64748b', fontSize: '0.88rem' }}>Chưa có bàn thắng nào được ghi nhận.</p>
+          <p style={{ color: '#64748b', fontSize: '0.88rem' }}>{t('standings.no_goals')}</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {topScorers.slice(0, 10).map((ps, idx) => {
@@ -53,7 +55,7 @@ export const LeagueStatsView: React.FC<LeagueStatsViewProps> = ({ topScorers, to
                 ps.player?.common_name ||
                 `${ps.player?.first_name || ''} ${ps.player?.last_name || ''}`.trim() ||
                 ps.playerName ||
-                'Cầu Thủ';
+                t('common.player', 'Cầu Thủ');
               const cName = ps.club?.name || ps.clubName || 'CLB';
               return (
                 <div
@@ -78,7 +80,7 @@ export const LeagueStatsView: React.FC<LeagueStatsViewProps> = ({ topScorers, to
                     </div>
                   </div>
                   <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#059669' }}>
-                    {ps.goals || 0} <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>BÀN</span>
+                    {ps.goals || 0} <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>{t('stats.goals_unit', 'BÀN')}</span>
                   </div>
                 </div>
               );
@@ -101,10 +103,10 @@ export const LeagueStatsView: React.FC<LeagueStatsViewProps> = ({ topScorers, to
           }}
         >
           <TrendingUp size={20} color="#15803d" />
-          <span>Vua Kiến Tạo (Top Assists)</span>
+          <span>{t('standings.top_assists')}</span>
         </h3>
         {topAssists.length === 0 ? (
-          <p style={{ color: '#64748b', fontSize: '0.88rem' }}>Chưa có đường kiến tạo nào được ghi nhận.</p>
+          <p style={{ color: '#64748b', fontSize: '0.88rem' }}>{t('stats.no_assists', 'Chưa có đường kiến tạo nào được ghi nhận.')}</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {topAssists.slice(0, 10).map((ps, idx) => {
@@ -113,7 +115,7 @@ export const LeagueStatsView: React.FC<LeagueStatsViewProps> = ({ topScorers, to
                 ps.player?.common_name ||
                 `${ps.player?.first_name || ''} ${ps.player?.last_name || ''}`.trim() ||
                 ps.playerName ||
-                'Cầu Thủ';
+                t('common.player', 'Cầu Thủ');
               const cName = ps.club?.name || ps.clubName || 'CLB';
               return (
                 <div
@@ -138,7 +140,7 @@ export const LeagueStatsView: React.FC<LeagueStatsViewProps> = ({ topScorers, to
                     </div>
                   </div>
                   <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#15803d' }}>
-                    {ps.assists || 0} <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>KIẾN TẠO</span>
+                    {ps.assists || 0} <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600 }}>{t('stats.assists_unit', 'KIẾN TẠO')}</span>
                   </div>
                 </div>
               );

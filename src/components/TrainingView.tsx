@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import React, { useState, useEffect } from 'react';
 import { trainingApi } from '../services/training.service';
 import { TrainingType, TrainingSession } from '../types';
@@ -8,6 +9,7 @@ interface TrainingViewProps {
 }
 
 export const TrainingView: React.FC<TrainingViewProps> = ({ currentClubId }) => {
+  const { t } = useTranslation();
   const [types, setTypes] = useState<TrainingType[]>([]);
   const [sessions, setSessions] = useState<TrainingSession[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,9 +67,9 @@ export const TrainingView: React.FC<TrainingViewProps> = ({ currentClubId }) => 
         <div>
           <h1 className="view-title flex-center" style={{ gap: '0.75rem' }}>
             <Dumbbell className="text-primary" size={28} />
-            Squad Training Ground
+            {t('training.title')}
           </h1>
-          <p className="view-subtitle">Select focus drills, calibrate training intensity, and boost player attributes</p>
+          <p className="view-subtitle">{t('training.subtitle')}</p>
         </div>
       </div>
 
@@ -83,7 +85,7 @@ export const TrainingView: React.FC<TrainingViewProps> = ({ currentClubId }) => 
         <div className="card">
           <h3 className="card-title flex-center" style={{ justifyContent: 'flex-start', gap: '0.5rem', marginBottom: '1.25rem' }}>
             <Calendar className="text-warning" size={20} />
-            Schedule New Training Session
+            {t('training.select_type')}
           </h3>
 
           <form onSubmit={handleSchedule}>
@@ -107,7 +109,7 @@ export const TrainingView: React.FC<TrainingViewProps> = ({ currentClubId }) => 
 
             <div style={{ marginBottom: '1.5rem' }}>
               <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <label style={{ fontSize: '0.875rem', fontWeight: 600 }}>Training Intensity</label>
+                <label style={{ fontSize: '0.875rem', fontWeight: 600 }}>{t('training.intensity')}</label>
                 <span className="badge badge-primary">{intensity} / 5</span>
               </div>
               <input
@@ -119,9 +121,9 @@ export const TrainingView: React.FC<TrainingViewProps> = ({ currentClubId }) => 
                 style={{ width: '100%' }}
               />
               <div className="flex-center" style={{ justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
-                <span>Light (Low fatigue)</span>
-                <span>Balanced</span>
-                <span>Intense (High fatigue & risk)</span>
+                <span>{t('training.intensity_low')}</span>
+                <span>{t('training.intensity_medium')}</span>
+                <span>{t('training.intensity_high')}</span>
               </div>
             </div>
 
@@ -131,7 +133,7 @@ export const TrainingView: React.FC<TrainingViewProps> = ({ currentClubId }) => 
               style={{ width: '100%' }}
               disabled={submitting || !selectedTypeId}
             >
-              {submitting ? 'Scheduling Drill...' : 'Confirm & Schedule Session'}
+              {submitting ? t('training.scheduling') : t('training.schedule_btn')}
             </button>
           </form>
         </div>
@@ -140,11 +142,11 @@ export const TrainingView: React.FC<TrainingViewProps> = ({ currentClubId }) => 
         <div className="card">
           <h3 className="card-title flex-center" style={{ justifyContent: 'flex-start', gap: '0.5rem', marginBottom: '1.25rem' }}>
             <Clock className="text-primary" size={20} />
-            Recent Training History
+            {t('training.history_title')}
           </h3>
 
           {sessions.length === 0 ? (
-            <p className="text-muted text-center" style={{ padding: '2rem 0' }}>No previous training sessions on record.</p>
+            <p className="text-muted text-center" style={{ padding: '2rem 0' }}>{t('training.no_sessions')}</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {sessions.slice(0, 8).map((s) => (

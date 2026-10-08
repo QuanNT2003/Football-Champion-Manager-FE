@@ -1,3 +1,4 @@
+import { useTranslation } from '../i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   CalendarDays,
@@ -28,16 +29,6 @@ interface Props {
 
 type StatusFilter = 'ALL' | 'SCHEDULED' | 'FINISHED';
 
-const formatDate = (value?: string) => {
-  if (!value) return 'Chưa có ngày';
-  return new Intl.DateTimeFormat('vi-VN', {
-    weekday: 'short',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(new Date(value));
-};
-
 const formatTime = (value?: string) => {
   if (!value) return '--:--';
   const date = new Date(value);
@@ -52,8 +43,6 @@ const formatTime = (value?: string) => {
 
   return value.slice(0, 5);
 };
-
-const statusLabel = (status: Match['status']) => (status === 'FINISHED' ? 'Đã đá' : 'Sắp đá');
 
 const ClubBadge: React.FC<{
   name?: string;
@@ -102,6 +91,7 @@ export const MatchCenterView: React.FC<Props> = ({
   onSimulateMatch,
   onMatchSimulated,
 }) => {
+  const { t } = useTranslation();
   const [matchList, setMatchList] = useState<Match[]>(initialMatches || []);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
@@ -112,6 +102,7 @@ export const MatchCenterView: React.FC<Props> = ({
   const [simulating, setSimulating] = useState(false);
   const [simResult, setSimResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const statusLabel = (status: Match['status']) => (status === 'FINISHED' ? t('matches.finished', 'Đã đá') : t('matches.upcoming', 'Sắp đá'));
 
   const seasonId = timeline?.season?.id;
 
@@ -134,7 +125,7 @@ export const MatchCenterView: React.FC<Props> = ({
       setMatchList(items);
     } catch (err) {
       console.error('Failed to load matches:', err);
-      setError('Không tải được lịch thi đấu.');
+      setError(t('matches.load_error', 'Không tải được lịch thi đấu.'));
     } finally {
       setLoading(false);
     }
@@ -162,7 +153,7 @@ export const MatchCenterView: React.FC<Props> = ({
       await loadMatches();
       if (onMatchSimulated) onMatchSimulated();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Không thể mô phỏng trận đấu');
+      alert(err.response?.data?.message || t('matches.sim_error', 'Không thể mô phỏng trận đấu'));
     } finally {
       setSimulating(false);
     }
@@ -208,28 +199,28 @@ export const MatchCenterView: React.FC<Props> = ({
   const isFinished = selectedMatch?.status === 'FINISHED' || Boolean(simResult);
   const selectedHomeScore = simResult?.homeScore ?? selectedMatch?.homeScore ?? 0;
   const selectedAwayScore = simResult?.awayScore ?? selectedMatch?.awayScore ?? 0;
-  const selectedCompName = selectedMatch?.competitionSeason?.name || selectedMatch?.stage?.name || 'Giải Đấu Mùa';
-  const selectedRoundName = selectedMatch?.round?.name || `Vòng ${selectedMatch?.season_day || 1}`;
+  const selectedCompName = selectedMatch?.competitionSeason?.name || selectedMatch?.stage?.name || t('matches.comp_default', 'Giải Đấu Mùa');
+  const selectedRoundName = selectedMatch?.round?.name || t('matches.round_default', 'Vòng {round}').replace('{round}', String(selectedMatch?.season_day || 1));
   const selectedStadium = typeof selectedMatch?.stadium === 'string'
     ? selectedMatch.stadium
-    : selectedMatch?.stadium?.name || 'Sân vận động chính';
+    : selectedMatch?.stadium?.name || t('matches.stadium_default', 'Sân vận động chính');
 
   const seasonLabel = timeline?.season
     ? `${timeline.season.name} · Day ${timeline.season.current_day}/${timeline.season.total_days}`
-    : 'Mùa hiện tại';
+    : t('matches.season_current', 'Mùa hiện tại');
 
   return (
     <div className="match-season-view">
       <section className="match-season-list glass-panel">
         <div className="match-season-header">
           <div>
-            <h2>Lịch Thi Đấu</h2>
+            <h2>{t('matches.title')}</h2>
             <p>{seasonLabel}</p>
           </div>
           <button className="btn btn-secondary btn-sm" onClick={loadMatches} disabled={loading}>
             {loading ? <Loader2 className="spinner-icon" size={16} /> : <CalendarDays size={16} />}
-            Làm mới
-          </button>
+          {t('common.refresh', 'Làm mới')}
+        </button>
         </div>
 
         <div className="match-toolbar">
@@ -238,12 +229,12 @@ export const MatchCenterView: React.FC<Props> = ({
             <input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Tìm đội bóng, giải đấu, sân..."
+              placeholder={t('common.search')}
             />
           </div>
 
           <select value={dayFilter} onChange={(event) => setDayFilter(event.target.value)} className="input-select">
-            <option value="ALL">Tất cả ngày</option>
+            <option value="ALL">{t('matches.all_days', 'Tất cả ngày')}</option>
             {days.map((day) => (
               <option key={day} value={day}>
                 Day {day}
@@ -257,7 +248,7 @@ export const MatchCenterView: React.FC<Props> = ({
               onChange={(event) => setCompetitionFilter(event.target.value)}
               className="input-select"
             >
-              <option value="ALL">Tất cả giải đấu ({competitions.length})</option>
+              <option value="ALL">{t('matches.all_comps', 'Tất cả giải đấu ({count})').replace('{count}', String(competitions.length))}</option>
               {competitions.map((comp) => (
                 <option key={comp} value={comp}>
                   {comp}
@@ -266,7 +257,7 @@ export const MatchCenterView: React.FC<Props> = ({
             </select>
           )}
 
-          <div className="match-status-tabs" aria-label="Lọc trạng thái trận">
+          <div className="match-status-tabs" aria-label={t('matches.status_filter_aria', 'Lọc trạng thái trận')}>
             {(['ALL', 'SCHEDULED', 'FINISHED'] as StatusFilter[]).map((status) => (
               <button
                 key={status}
@@ -275,7 +266,7 @@ export const MatchCenterView: React.FC<Props> = ({
                 onClick={() => setStatusFilter(status)}
               >
                 <Filter size={14} />
-                {status === 'ALL' ? 'Tất cả' : status === 'SCHEDULED' ? 'Sắp đá' : 'Đã đá'}
+                {status === 'ALL' ? t('matches.filter_all') : status === 'SCHEDULED' ? t('matches.filter_scheduled') : t('matches.filter_finished')}
               </button>
             ))}
           </div>
@@ -287,12 +278,12 @@ export const MatchCenterView: React.FC<Props> = ({
           {loading && matchList.length === 0 ? (
             <div className="match-empty-state">
               <Loader2 className="spinner-icon" size={28} />
-              <span>Đang tải lịch mùa giải...</span>
+              <span>{t('matches.loading_schedule')}</span>
             </div>
           ) : filteredMatches.length === 0 ? (
             <div className="match-empty-state">
               <CalendarDays size={32} />
-              <span>Không có trận nào khớp với bộ lọc tìm kiếm.</span>
+              <span>{t('matches.no_matches_filter')}</span>
             </div>
           ) : (
             <div className="season-fixture-table" role="list">
@@ -301,7 +292,7 @@ export const MatchCenterView: React.FC<Props> = ({
                 const showDayHeader = !previousMatch || previousMatch.season_day !== match.season_day;
                 const isSelected = selectedMatch?.id === match.id;
                 const isMyClub = match.homeClub?.id === club?.id || match.awayClub?.id === club?.id;
-                const competitionName = match.competitionSeason?.name || match.stage?.name || 'Giải đấu';
+                const competitionName = match.competitionSeason?.name || match.stage?.name || t('matches.comp_fallback', 'Giải đấu');
                 const roundName = match.round?.name;
 
                 return (
@@ -339,7 +330,7 @@ export const MatchCenterView: React.FC<Props> = ({
                           </span>
                           {isMyClub && (
                             <span className="fixture-my-club-badge">
-                              <Shield size={12} /> CLB CỦA BẠN
+                              <Shield size={12} /> {t('matches.your_club', 'CLB CỦA BẠN')}
                             </span>
                           )}
                         </div>
@@ -349,8 +340,8 @@ export const MatchCenterView: React.FC<Props> = ({
                       <div className="fixture-card-matchup">
                         {/* Đội nhà */}
                         <div className={`fixture-team home ${match.homeClub?.id === club?.id ? 'my-club' : ''}`}>
-                          <span className="club-name" title={match.homeClub?.name || 'Đội nhà'}>
-                            {match.homeClub?.name || 'Đội nhà'}
+                          <span className="club-name" title={match.homeClub?.name || t('matches.home_team', 'Đội nhà')}>
+                            {match.homeClub?.name || t('matches.home_team', 'Đội nhà')}
                           </span>
                           <ClubBadge
                             name={match.homeClub?.name}
@@ -381,8 +372,8 @@ export const MatchCenterView: React.FC<Props> = ({
                             isHome={false}
                             isMyClub={match.awayClub?.id === club?.id}
                           />
-                          <span className="club-name" title={match.awayClub?.name || 'Đội khách'}>
-                            {match.awayClub?.name || 'Đội khách'}
+                          <span className="club-name" title={match.awayClub?.name || t('matches.away_team', 'Đội khách')}>
+                            {match.awayClub?.name || t('matches.away_team', 'Đội khách')}
                           </span>
                         </div>
                       </div>
@@ -400,8 +391,8 @@ export const MatchCenterView: React.FC<Props> = ({
         {!selectedMatch ? (
           <div className="match-detail-empty">
             <Swords size={46} />
-            <h3>Chi Tiết Trận Đấu</h3>
-            <p>Chọn một trận trong danh sách lịch thi đấu để xem thông tin sân đấu, giải đấu, tỷ số và diễn biến trực tiếp.</p>
+            <h3>{t('matches.match_details')}</h3>
+            <p>{t('matches.match_details_sub')}</p>
           </div>
         ) : (
           <div className="match-detail-content">
@@ -412,7 +403,7 @@ export const MatchCenterView: React.FC<Props> = ({
                   <Trophy size={13} />
                   <span>{selectedCompName} · {selectedRoundName}</span>
                 </div>
-                <button className="btn-close-detail" type="button" onClick={() => setSelectedMatch(null)} title="Đóng">
+                <button className="btn-close-detail" type="button" onClick={() => setSelectedMatch(null)} title={t('matches.close_tooltip', 'Đóng')}>
                   <X size={16} />
                 </button>
               </div>
@@ -420,7 +411,7 @@ export const MatchCenterView: React.FC<Props> = ({
               <div className="match-detail-main-row">
                 <div className="title-box">
                   <span className={`match-status-badge ${isFinished ? 'finished' : 'scheduled'}`}>
-                    {isFinished ? 'ĐÃ KẾT THÚC' : 'SẮP DIỄN RA'}
+                    {isFinished ? t('common.finished') : t('common.upcoming')}
                   </span>
                   <h3>Day {selectedMatch.season_day}</h3>
                 </div>
@@ -440,15 +431,15 @@ export const MatchCenterView: React.FC<Props> = ({
                   isMyClub={selectedMatch.homeClub?.id === club?.id}
                   size="lg"
                 />
-                <strong title={selectedMatch.homeClub?.name}>{selectedMatch.homeClub?.name || 'Đội nhà'}</strong>
-                <span className="team-role">Chủ nhà</span>
+                <strong title={selectedMatch.homeClub?.name}>{selectedMatch.homeClub?.name || t('matches.home_team', 'Đội nhà')}</strong>
+                <span className="team-role">{t('matches.home_role')}</span>
               </div>
 
               <div className="score-block">
                 {isFinished ? (
                   <>
                     <strong className="score-digits">{selectedHomeScore} - {selectedAwayScore}</strong>
-                    <span className="score-label finished">KẾT QUẢ</span>
+                    <span className="score-label finished">{t('matches.score_label')}</span>
                   </>
                 ) : (
                   <>
@@ -466,8 +457,8 @@ export const MatchCenterView: React.FC<Props> = ({
                   isMyClub={selectedMatch.awayClub?.id === club?.id}
                   size="lg"
                 />
-                <strong title={selectedMatch.awayClub?.name}>{selectedMatch.awayClub?.name || 'Đội khách'}</strong>
-                <span className="team-role">Đội khách</span>
+                <strong title={selectedMatch.awayClub?.name}>{selectedMatch.awayClub?.name || t('matches.away_team', 'Đội khách')}</strong>
+                <span className="team-role">{t('matches.away_role')}</span>
               </div>
             </div>
 
@@ -476,7 +467,7 @@ export const MatchCenterView: React.FC<Props> = ({
               <div className="match-info-row">
                 <div className="info-label">
                   <MapPin size={15} />
-                  <span>Sân vận động</span>
+                  <span>{t('matches.stadium_label')}</span>
                 </div>
                 <div className="info-val" title={selectedStadium}>
                   {selectedStadium}
@@ -486,7 +477,7 @@ export const MatchCenterView: React.FC<Props> = ({
               <div className="match-info-row">
                 <div className="info-label">
                   <CheckCircle2 size={15} />
-                  <span>Vòng thi đấu</span>
+                  <span>{t('matches.round_label')}</span>
                 </div>
                 <div className="info-val">
                   {selectedRoundName}
@@ -496,24 +487,24 @@ export const MatchCenterView: React.FC<Props> = ({
               <div className="match-info-row">
                 <div className="info-label">
                   <Users size={15} />
-                  <span>Khán giả</span>
+                  <span>{t('matches.attendance_label')}</span>
                 </div>
                 <div className="info-val">
                   {isFinished
-                    ? `${(simResult?.attendance ?? selectedMatch.attendance ?? 0).toLocaleString()} khán giả`
-                    : 'Chưa diễn ra'}
+                    ? t('matches.attendance_count', '{count} khán giả').replace('{count}', (simResult?.attendance ?? selectedMatch.attendance ?? 0).toLocaleString())
+                    : t('matches.not_played', 'Chưa diễn ra')}
                 </div>
               </div>
 
               <div className="match-info-row">
                 <div className="info-label">
                   <DollarSign size={15} />
-                  <span>Doanh thu vé</span>
+                  <span>{t('matches.ticket_revenue')}</span>
                 </div>
                 <div className="info-val highlight-gold">
                   {isFinished
                     ? `€${Number(simResult?.ticketRevenue ?? selectedMatch.ticketRevenue ?? 0).toLocaleString()}`
-                    : 'Chưa kết toán'}
+                    : t('matches.not_settled', 'Chưa kết toán')}
                 </div>
               </div>
             </div>
@@ -522,18 +513,18 @@ export const MatchCenterView: React.FC<Props> = ({
             {!isFinished && (
               <button className="match-simulate-btn" onClick={handleSimulate} disabled={simulating}>
                 {simulating ? <Loader2 className="spinner-icon" size={18} /> : <Play size={18} />}
-                {simulating ? 'Đang mô phỏng trận...' : 'Mô phỏng trận đấu'}
+                {simulating ? t('matches.simulating', 'Đang mô phỏng trận...') : t('matches.simulate_btn', 'Mô phỏng trận đấu')}
               </button>
             )}
 
             {/* Diễn biến trận đấu */}
             <div className="match-events-panel">
               <h4>
-                <Swords size={16} /> Diễn Biến Trận Đấu
+                <Swords size={16} /> {t('matches.events_title')}
               </h4>
               {selectedEvents.length === 0 ? (
                 <div className="match-events-empty">
-                  <p>{isFinished ? 'Trận đấu không có sự kiện bàn thắng hoặc thẻ phạt.' : 'Trận đấu chưa bắt đầu, diễn biến sẽ cập nhật khi bóng lăn.'}</p>
+                  <p>{isFinished ? t('matches.no_events', 'Trận đấu không có sự kiện bàn thắng hoặc thẻ phạt.') : t('matches.not_started', 'Trận đấu chưa bắt đầu, diễn biến sẽ cập nhật khi bóng lăn.')}</p>
                 </div>
               ) : (
                 <div className="match-event-list">
@@ -544,7 +535,7 @@ export const MatchCenterView: React.FC<Props> = ({
                       <div key={event.id || idx} className="match-event-row">
                         <span className="match-event-minute">{event.minute}'</span>
                         <div className="match-event-desc">
-                          <strong>{isGoal ? '⚽ Bàn thắng' : isCard ? '🟨 Thẻ phạt' : event.eventType}</strong>: {event.player?.name || 'Cầu thủ'} {event.metadata?.description || ''}
+                          <strong>{isGoal ? t('matches.event_goal', '⚽ Bàn thắng') : isCard ? t('matches.event_card', '🟨 Thẻ phạt') : event.eventType}</strong>: {event.player?.name || t('matches.player_fallback', 'Cầu thủ')} {event.metadata?.description || ''}
                         </div>
                       </div>
                     );

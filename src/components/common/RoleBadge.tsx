@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../../i18n';
 
 interface Props {
   role: string;
@@ -6,22 +7,24 @@ interface Props {
 }
 
 export const RoleBadge: React.FC<Props> = ({ role, size = 'md' }) => {
+  const { t } = useTranslation();
+
   const getRoleConfig = (r: string) => {
     switch (r) {
       case 'HEAD_COACH':
-        return { label: 'HLV Trưởng', color: '#16a34a', bg: '#dcfce7' };
+        return { label: t('staff.manager'), color: '#16a34a', bg: '#dcfce7' };
       case 'ASSISTANT_COACH':
-        return { label: 'Trợ Lý HLV', color: '#0284c7', bg: '#e0f2fe' };
+        return { label: t('staff.assistant'), color: '#0284c7', bg: '#e0f2fe' };
       case 'FITNESS_COACH':
-        return { label: 'HLV Thể Lực', color: '#ea580c', bg: '#ffedd5' };
+        return { label: t('staff.fitness_coach', 'HLV Thể Lực'), color: '#ea580c', bg: '#ffedd5' };
       case 'GOALKEEPING_COACH':
-        return { label: 'HLV Thủ Môn', color: '#7c3aed', bg: '#ede9fe' };
+        return { label: t('staff.gk_coach', 'HLV Thủ Môn'), color: '#7c3aed', bg: '#ede9fe' };
       case 'SCOUT':
-        return { label: 'Tuyển Trạch Viên', color: '#4f46e5', bg: '#e0e7ff' };
+        return { label: t('staff.scout'), color: '#4f46e5', bg: '#e0e7ff' };
       case 'PHYSIO':
-        return { label: 'Bác Sĩ / Trị Liệu', color: '#db2777', bg: '#fce7f3' };
+        return { label: t('staff.physio'), color: '#db2777', bg: '#fce7f3' };
       case 'YOUTH_DIRECTOR':
-        return { label: 'GĐ Đào Tạo Trẻ', color: '#059669', bg: '#d1fae5' };
+        return { label: t('staff.youth_director', 'GĐ Đào Tạo Trẻ'), color: '#059669', bg: '#d1fae5' };
       default:
         return { label: r, color: '#475569', bg: '#f1f5f9' };
     }

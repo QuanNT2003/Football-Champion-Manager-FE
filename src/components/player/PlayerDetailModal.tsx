@@ -1,3 +1,4 @@
+import { useTranslation } from '../../i18n';
 ﻿import { ConfirmModal } from '../common/ConfirmModal';
 import { PlayerSkillsTab } from './PlayerSkillsTab';
 import { PlayerMatchesTab } from './PlayerMatchesTab';
@@ -41,6 +42,7 @@ export interface Props {
 }
 
 export const PlayerDetailModal: React.FC<Props> = ({
+
   player,
   playersList = [],
   currentClubId,
@@ -50,6 +52,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
   onSelectPlayer,
   onOfferSuccess,
 }) => {
+  const { t } = useTranslation();
   const [detail, setDetail] = useState<PlayerDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
@@ -181,14 +184,14 @@ export const PlayerDetailModal: React.FC<Props> = ({
       setCancellingOffer(true);
       setOfferError('');
       await transfersApi.cancelOffer(existingOffer.id, String(currentClubId));
-      setOfferSuccess('Đã hủy lời đề nghị chuyển nhượng thành công!');
+      setOfferSuccess(t('player_modal.cancel_offer_success', 'Đã hủy lời đề nghị chuyển nhượng thành công!'));
       setExistingOffer({ ...existingOffer, status: 'CANCELLED' });
       setConfirmCancelModal(false);
       if (onOfferSuccess) {
         onOfferSuccess();
       }
     } catch (err: any) {
-      setOfferError(err.response?.data?.message || err.message || 'Không thể hủy đề nghị.');
+      setOfferError(err.response?.data?.message || err.message || t('player_modal.cancel_offer_failed', 'Không thể hủy đề nghị.'));
     } finally {
       setCancellingOffer(false);
     }
@@ -199,17 +202,17 @@ export const PlayerDetailModal: React.FC<Props> = ({
     setOfferSuccess('');
 
     if (!currentClubId) {
-      setOfferError('Bạn cần quản lý một CLB để gửi đề nghị chuyển nhượng!');
+      setOfferError(t('player_modal.need_club_to_offer', 'Bạn cần quản lý một CLB để gửi đề nghị chuyển nhượng!'));
       return;
     }
     if (!isLoan && cashBalance !== undefined && offerAmount > cashBalance) {
-      setOfferError(`Ngân sách CLB không đủ! Bạn hiện có €${cashBalance.toLocaleString()}, trong khi phí chuyển nhượng đề xuất là €${offerAmount.toLocaleString()}. Vui lòng giảm mức giá hoặc chọn mượn cầu thủ.`);
+      setOfferError(t('player_modal.insufficient_budget', 'Ngân sách CLB không đủ! Bạn hiện có €{cash}, trong khi phí chuyển nhượng đề xuất là €{offer}. Vui lòng giảm mức giá hoặc chọn mượn cầu thủ.').replace('{cash}', cashBalance.toLocaleString()).replace('{offer}', offerAmount.toLocaleString()));
       return;
     }
     const targetPlayerId = (player as any).playerId || player.id;
     const targetClubId = (player as any).currentClub?.id || player.club_id || (player as any).club?.id;
     if (!targetClubId) {
-      setOfferError('Không xác định được CLB chủ quản của cầu thủ.');
+      setOfferError(t('player_modal.unknown_owner_club', 'Không xác định được CLB chủ quản của cầu thủ.'));
       return;
     }
 
@@ -226,8 +229,8 @@ export const PlayerDetailModal: React.FC<Props> = ({
 
       setOfferSuccess(
         isLoan
-          ? 'Đã gửi lời đề nghị mượn cầu thủ thành công tới CLB chủ quản!'
-          : 'Đã gửi lời đề nghị mua đứt cầu thủ thành công tới CLB chủ quản!'
+          ? t('player_modal.loan_offer_sent', 'Đã gửi lời đề nghị mượn cầu thủ thành công tới CLB chủ quản!')
+          : t('player_modal.buy_offer_sent', 'Đã gửi lời đề nghị mua đứt cầu thủ thành công tới CLB chủ quản!')
       );
       setExistingOffer({
         status: 'PENDING',
@@ -239,7 +242,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
         onOfferSuccess();
       }
     } catch (err: any) {
-      setOfferError(err.response?.data?.message || err.message || 'Không thể gửi đề nghị chuyển nhượng.');
+      setOfferError(err.response?.data?.message || err.message || t('player_modal.send_offer_failed', 'Không thể gửi đề nghị chuyển nhượng.'));
     } finally {
       setOfferSubmitting(false);
     }
@@ -289,32 +292,32 @@ export const PlayerDetailModal: React.FC<Props> = ({
   // Get skills dynamically based on DB attributes & position key attributes
   const getDisplayedSkills = () => {
     if (!detail?.skills) {
-      return { left: [], right: [], total: 0, label: 'Chỉ số cốt lõi' };
+      return { left: [], right: [], total: 0, label: t('player_modal.core_skills', 'Chỉ số cốt lõi') };
     }
 
     let list: any[] = [];
-    let label = 'Chỉ số cốt lõi vị trí (10)';
+    let label = t('player_modal.core_skills_pos', 'Chỉ số cốt lõi vị trí (10)').replace('{count}', '10');
 
     if (skillCategory === 'KEY') {
       list = (detail.skills.key_attributes && detail.skills.key_attributes.length > 0)
         ? detail.skills.key_attributes
         : [...(detail.skills.left_column || []), ...(detail.skills.right_column || [])];
-      label = `Chỉ số cốt lõi vị trí (${list.length})`;
+      label = t('player_modal.core_skills_pos', 'Chỉ số cốt lõi vị trí ({count})').replace('{count}', String(list.length));
     } else if (skillCategory === 'PHYSICAL') {
       list = detail.skills.categories?.physical || [];
-      label = `Thể chất - Physical (${list.length})`;
+      label = t('player_modal.attr_physical', 'Thể chất - Physical ({count})').replace('{count}', String(list.length));
     } else if (skillCategory === 'TECHNICAL') {
       list = detail.skills.categories?.technical || [];
-      label = `Kỹ thuật - Technical (${list.length})`;
+      label = t('player_modal.attr_technical', 'Kỹ thuật - Technical ({count})').replace('{count}', String(list.length));
     } else if (skillCategory === 'MENTAL') {
       list = detail.skills.categories?.mental || [];
-      label = `Tâm lý & Nhận thức - Mental (${list.length})`;
+      label = t('player_modal.attr_mental', 'Tâm lý & Nhận thức - Mental ({count})').replace('{count}', String(list.length));
     } else if (skillCategory === 'GOALKEEPING') {
       list = detail.skills.categories?.goalkeeping || [];
-      label = `Kỹ năng Thủ môn - Goalkeeping (${list.length})`;
+      label = t('player_modal.attr_gk', 'Kỹ năng Thủ môn - Goalkeeping ({count})').replace('{count}', String(list.length));
     } else {
       list = detail.skills.all_attributes || [];
-      label = `Tất cả chỉ số (${list.length})`;
+      label = t('player_modal.attr_all', 'Tất cả chỉ số ({count})').replace('{count}', String(list.length));
     }
 
     const half = Math.ceil(list.length / 2);
@@ -330,7 +333,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
   // Basic info from DB
   const pName = detail?.name || `${player.first_name} ${player.last_name}`.trim();
   const pAge = detail?.age ?? player.age ?? 20;
-  const pPos = detail?.primary_position?.name || detail?.position?.name || player.position?.name || 'Cầu thủ';
+  const pPos = detail?.primary_position?.name || detail?.position?.name || player.position?.name || t('common.player', 'Cầu thủ');
   const pPosCode = detail?.primary_position?.code || detail?.position?.code || player.position?.code || '-';
   
   // Chiều cao & Cân nặng chuẩn hóa từ DB
@@ -346,7 +349,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
 
   // Chân thuận
   const rawFoot = (detail?.preferred_foot || (player as any).preferred_foot || 'RIGHT').toUpperCase();
-  const pFoot = rawFoot === 'LEFT' ? 'Left (Trái)' : rawFoot === 'BOTH' ? 'Both (Hai chân)' : 'Right (Phải)';
+  const pFoot = rawFoot === 'LEFT' ? t('player_modal.foot_left', 'Left (Trái)') : rawFoot === 'BOTH' ? t('player_modal.foot_both', 'Both (Hai chân)') : t('player_modal.foot_right', 'Right (Phải)');
 
   // Danh tiếng & Tiềm năng
   const pReputation = detail?.reputation ?? player.reputation ?? 0;
@@ -354,7 +357,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
 
   // Điểm OVR / Average Quality
   const pQuality = (detail?.average_quality ?? player.overall_rating ?? 50.0).toFixed(2);
-  const pClubName = detail?.club?.name || player.club?.name || 'Tự do';
+  const pClubName = detail?.club?.name || player.club?.name || t('player_modal.free_agent', 'Tự do');
   const pCountry = typeof detail?.nationality === 'object'
     ? (detail?.nationality as any)?.name
     : typeof player.nationality === 'object'
@@ -368,8 +371,8 @@ export const PlayerDetailModal: React.FC<Props> = ({
 
   const pWeeklyWage = (detail as any)?.weekly_wage ?? (player.contract?.salary ? Math.round(Number(player.contract.salary) / 52) : null);
   const pWages = pWeeklyWage && pWeeklyWage > 0 
-    ? `${formatCurrency(pWeeklyWage)} / tuần` 
-    : (detail?.weekly_wages_display || 'Chưa ký HĐ');
+    ? `${formatCurrency(pWeeklyWage)} ${t('player_modal.per_week', '/ tuần')}` 
+    : (detail?.weekly_wages_display || t('player_modal.no_contract', 'Chưa ký HĐ'));
 
   // Hiển thị sao tiềm năng theo thang chuẩn 1-100 (mỗi 20 điểm = 1 sao)
   const renderStars = (pot: number) => {
@@ -394,7 +397,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
             <button
               className="pm-nav-btn"
               onClick={handlePrev}
-              title="Cầu thủ trước"
+              title={t('player_modal.prev_player', 'Cầu thủ trước')}
               disabled={!hasPrev}
             >
               <ChevronLeft size={20} />
@@ -402,25 +405,25 @@ export const PlayerDetailModal: React.FC<Props> = ({
             <button
               className="pm-nav-btn"
               onClick={handleNext}
-              title="Cầu thủ tiếp theo"
+              title={t('player_modal.next_player', 'Cầu thủ tiếp theo')}
               disabled={!hasNext}
             >
               <ChevronRight size={20} />
             </button>
             <h2 className="pm-player-title">{pName}</h2>
-            <button className="pm-icon-btn" title="Chỉnh sửa tên / biệt danh">
+            <button className="pm-icon-btn" title={t('player_modal.edit_name_tooltip', 'Chỉnh sửa tên / biệt danh')}>
               <Edit2 size={16} />
             </button>
             <button
               className={`pm-icon-btn ${isFavorite ? 'fav-active' : ''}`}
               onClick={() => setIsFavorite(!isFavorite)}
-              title="Đánh dấu yêu thích"
+              title={t('player_modal.fav_tooltip', 'Đánh dấu yêu thích')}
             >
               <Star size={17} fill={isFavorite ? '#eab308' : 'none'} color={isFavorite ? '#eab308' : '#64748b'} />
             </button>
           </div>
 
-          <button className="pm-close-btn" onClick={onClose} title="Đóng">
+          <button className="pm-close-btn" onClick={onClose} title={t('player_modal.close_tooltip', 'Đóng')}>
             <X size={20} />
           </button>
         </div>
@@ -446,7 +449,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
               )}
             </div>
             {/* Jersey Badge */}
-            <div className="pm-jersey-badge" title={`Số áo: ${pShirtNo}`}>
+            <div className="pm-jersey-badge" title={t('player_modal.shirt_no_tooltip', 'Số áo: {no}').replace('{no}', String(pShirtNo))}>
               <span className="pm-jersey-num">{pShirtNo}</span>
             </div>
           </div>
@@ -536,35 +539,35 @@ export const PlayerDetailModal: React.FC<Props> = ({
             onClick={() => setActiveTab('skills')}
           >
             <Star size={15} />
-            <span>Kỹ Năng</span>
+            <span>{t('player.tab_skills')}</span>
           </button>
           <button
             className={`pm-tab-btn ${activeTab === 'matches' ? 'active' : ''}`}
             onClick={() => setActiveTab('matches')}
           >
             <Activity size={15} />
-            <span>Trận Đấu</span>
+            <span>{t('player.tab_matches')}</span>
           </button>
           <button
             className={`pm-tab-btn ${activeTab === 'statistics' ? 'active' : ''}`}
             onClick={() => setActiveTab('statistics')}
           >
             <Award size={15} />
-            <span>Lịch Sử Các Mùa</span>
+            <span>{t('player_modal.career_history_tab', 'Lịch Sử Các Mùa')}</span>
           </button>
           <button
             className={`pm-tab-btn ${activeTab === 'transfers' ? 'active' : ''}`}
             onClick={() => setActiveTab('transfers')}
           >
             <Coins size={15} />
-            <span>Chuyển Nhượng</span>
+            <span>{t('player.tab_transfers')}</span>
           </button>
           <button
             className={`pm-tab-btn ${activeTab === 'injuries' ? 'active' : ''}`}
             onClick={() => setActiveTab('injuries')}
           >
             <HeartPulse size={15} />
-            <span>Lịch Sử Chấn Thương</span>
+            <span>{t('player.tab_injuries')}</span>
           </button>
           {isEligibleForOffer && (
             <button
@@ -573,7 +576,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
               style={activeTab === 'offer' ? { color: '#16a34a', borderBottomColor: '#16a34a', fontWeight: 700 } : {}}
             >
               <Coins size={15} />
-              <span>Đề Nghị Hợp Đồng (Offer)</span>
+              <span>{t('player.tab_offer')}</span>
             </button>
           )}
         </div>
@@ -583,7 +586,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
           {loading ? (
             <div className="pm-loading-state">
               <div className="pm-spinner" />
-              <span>Đang tải hồ sơ cầu thủ...</span>
+              <span>{t('player_modal.loading_profile', 'Đang tải hồ sơ cầu thủ...')}</span>
             </div>
           ) : (
             <>
@@ -660,17 +663,17 @@ export const PlayerDetailModal: React.FC<Props> = ({
         {/* MODAL XÁC NHẬN HỦY LỜI ĐỀ NGHỊ */}
         <ConfirmModal
           isOpen={confirmCancelModal}
-          title="Xác Nhận Hủy Lời Đề Nghị"
+          title={t('player_modal.confirm_cancel_title', 'Xác Nhận Hủy Lời Đề Nghị')}
           variant="danger"
-          confirmText="Đồng Ý Hủy"
-          cancelText="Quay Lại"
+          confirmText={t('player_modal.confirm_cancel_btn', 'Đồng Ý Hủy')}
+          cancelText={t('player_modal.cancel_back_btn', 'Quay Lại')}
           isLoading={cancellingOffer}
           onConfirm={executeCancelOffer}
           onClose={() => !cancellingOffer && setConfirmCancelModal(false)}
           message={
             <div>
               <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
-                Bạn có chắc chắn muốn rút lại lời đề nghị chuyển nhượng đang chờ phản hồi cho cầu thủ này không?
+                {t('player_modal.confirm_cancel_msg', 'Bạn có chắc chắn muốn rút lại lời đề nghị chuyển nhượng đang chờ phản hồi cho cầu thủ này không?')}
               </p>
               <div
                 style={{
@@ -684,9 +687,9 @@ export const PlayerDetailModal: React.FC<Props> = ({
                   gap: '0.4rem',
                 }}
               >
-                <div>Cầu thủ: <strong style={{ color: '#0f172a' }}>{player.name || player.common_name || (player.first_name ? player.first_name + ' ' + (player.last_name || '') : 'Cầu thủ')}</strong></div>
-                <div>Hình thức: <strong>{existingOffer && existingOffer.is_loan ? 'Cho Mượn' : 'Mua Đứt'}</strong></div>
-                <div>Mức phí hoàn trả: <strong style={{ color: '#dc2626' }}>{existingOffer && existingOffer.is_loan ? '€0 (Mượn)' : '€' + Number(existingOffer ? existingOffer.offer_amount : 0).toLocaleString()}</strong></div>
+                <div>{t('player_modal.player_label', 'Cầu thủ:')} <strong style={{ color: '#0f172a' }}>{player.name || player.common_name || (player.first_name ? player.first_name + ' ' + (player.last_name || '') : 'Cầu thủ')}</strong></div>
+                <div>{t('player_modal.type_label', 'Hình thức:')} <strong>{existingOffer && existingOffer.is_loan ? t('player_modal.type_loan', 'Cho Mượn') : t('player_modal.type_buy', 'Mua Đứt')}</strong></div>
+                <div>{t('player_modal.refund_fee_label', 'Mức phí hoàn trả:')} <strong style={{ color: '#dc2626' }}>{existingOffer && existingOffer.is_loan ? '€0 (Mượn)' : '€' + Number(existingOffer ? existingOffer.offer_amount : 0).toLocaleString()}</strong></div>
               </div>
             </div>
           }
