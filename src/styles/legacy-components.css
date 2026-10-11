@@ -7231,32 +7231,49 @@ body {
 .cockpit-hero-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 18px 24px;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Subtle top glow line */
+.cockpit-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981 0%, #059669 40%, #16a34a 100%);
+  border-radius: 18px 18px 0 0;
+}
+
+/* --- Block 1: Left Club Identity --- */
 .hero-club-left {
   display: flex;
   align-items: center;
   gap: 16px;
+  min-width: 310px;
 }
 
 .hero-crest-box {
-  width: 58px;
-  height: 58px;
+  width: 60px;
+  height: 60px;
   border-radius: 16px;
-  background: #f0fdf4;
-  border: 1.5px solid #bbf7d0;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #86efac;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.15);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .hero-crest-img {
@@ -7265,87 +7282,193 @@ body {
   object-fit: cover;
 }
 
-.hero-crest-placeholder {
+.hero-crest-badge-styled {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  line-height: 1;
 }
 
-.crest-symbol {
-  font-size: 20px;
-}
-
-.crest-text {
-  font-size: 10px;
-  font-weight: 800;
-  color: #15803d;
-  font-family: var(--font-game);
-}
-
-.hero-club-name {
-  font-size: 1.35rem;
+.crest-initials {
+  font-size: 15px;
   font-weight: 900;
-  color: #0f172a;
-  letter-spacing: -0.3px;
-  font-family: var(--font-display);
+  color: #15803d;
+  letter-spacing: 0.5px;
+  font-family: var(--font-display, inherit);
 }
 
-.hero-plus-badge {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  color: #475569;
-  font-size: 12px;
-  font-weight: 800;
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
+.crest-star {
+  font-size: 9px;
+  color: #16a34a;
+  margin-top: 1px;
+}
+
+.hero-club-info {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.hero-plus-badge:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-}
-
-.hero-badge-row {
+.hero-name-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+}
+
+.hero-club-title {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.4px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.btn-share-club {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.btn-share-club:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: scale(1.05);
+}
+
+.hero-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.hero-rank-pill {
+.pill-league-rank {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.75rem;
+  gap: 5px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  padding: 3px 9px;
+  border-radius: 8px;
+  font-size: 0.76rem;
   font-weight: 800;
-  color: #15803d;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-family: var(--font-game);
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.08);
 }
 
-.hero-season-pill, .hero-match-pill {
-  font-size: 0.72rem;
+.rank-badge-icon {
+  font-size: 11px;
+}
+
+.rank-text {
+  font-weight: 900;
+  color: #047857;
+}
+
+.rank-tier-divider {
+  color: #6ee7b7;
+}
+
+.tier-text {
   font-weight: 700;
-  color: #64748b;
-  font-family: var(--font-game);
+  color: #059669;
 }
 
-/* Right side of Hero Card */
+.pill-match-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+/* --- Block 2: Center Clash Widget --- */
+.hero-clash-widget {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 9px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 260px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.clash-widget-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #059669;
+}
+
+.clash-dot {
+  color: #cbd5e1;
+}
+
+.clash-widget-opponent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.clash-vs-badge {
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.clash-opponent-name {
+  font-weight: 800;
+  color: #1e293b;
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clash-venue-badge {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 700;
+}
+
+/* --- Block 3: Right Financial & Meters --- */
 .hero-club-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
+  min-width: 270px;
 }
 
 .hero-finances-row {
@@ -7354,299 +7477,91 @@ body {
   gap: 8px;
 }
 
-.hero-fin-pill {
-  display: flex;
+.hero-fin-chip {
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  gap: 6px;
   padding: 4px 10px;
   border-radius: 8px;
   font-size: 0.82rem;
   font-weight: 800;
-  font-family: var(--font-game);
-  color: #0f172a;
+  line-height: 1;
 }
 
-.hero-add-fund-btn {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: #16a34a;
-  color: #ffffff;
-  border: none;
-  font-size: 14px;
-  font-weight: 800;
+.hero-fin-chip.cash {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+.fin-icon-wrap.cash {
+  font-weight: 900;
+  color: #16a34a;
+}
+
+.hero-fin-chip.gold {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  color: #b45309;
+}
+
+.hero-meters-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s;
+  gap: 16px;
+  width: 100%;
+  justify-content: flex-end;
 }
 
-.hero-add-fund-btn:hover {
-  background: #15803d;
-}
-
-.hero-meters-grid {
+.hero-meter-item {
+  width: 125px;
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.hero-meter-box {
-  width: 135px;
-}
-
-.meter-label-row {
+.meter-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.68rem;
   font-weight: 700;
   color: #64748b;
-  margin-bottom: 3px;
-  font-family: var(--font-game);
 }
 
-.meter-bar-track {
+.meter-number {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.meter-track-bar {
   width: 100%;
   height: 6px;
-  background: #e2e8f0;
+  background: #f1f5f9;
   border-radius: 4px;
   overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
-.meter-bar-fill.popularity {
+.meter-fill-bar.popularity {
   height: 100%;
-  background: linear-gradient(90deg, #10b981 0%, #16a34a 100%);
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
   border-radius: 4px;
 }
 
-.meter-bar-fill.morale {
+.meter-fill-bar.morale {
   height: 100%;
   background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
   border-radius: 4px;
 }
 
-/* Section 2: Stay Updated Alert Banner */
-.stay-updated-banner {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-}
-
-.bell-glow-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #16a34a;
-  display: flex;
-  align-items: center;
+/* Strip empty state */
+.stadium-last-match-strip.empty {
   justify-content: center;
-}
-
-.btn-enable-notif {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #16a34a;
-  color: #ffffff;
-  border: none;
-  padding: 7px 14px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  font-family: var(--font-game);
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-enable-notif:hover {
-  background: #15803d;
-}
-
-.btn-banner-subtle {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #475569;
-  padding: 7px 12px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  font-family: var(--font-game);
-  cursor: pointer;
-}
-
-.btn-dismiss-banner {
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-dismiss-banner:hover {
-  color: #dc2626;
-}
-
-/* Section 3: Spotlight Tournament Widget */
-.spotlight-tournament-box {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 16px 20px;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
-}
-
-.spotlight-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.spotlight-crest {
-  font-size: 18px;
-}
-
-.spotlight-title {
-  font-size: 1rem;
-  font-weight: 900;
-  color: #0f172a;
-  letter-spacing: -0.2px;
-  font-family: var(--font-display);
-}
-
-.spotlight-live-badge {
-  background: #ef4444;
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 900;
-  padding: 2px 7px;
-  border-radius: 6px;
-  animation: pulse 1.6s infinite;
-}
-
-.spotlight-link-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  color: #16a34a;
-  font-size: 0.8rem;
-  font-weight: 800;
-  font-family: var(--font-game);
-  cursor: pointer;
-}
-
-.spotlight-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.spotlight-card {
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: all 0.2s;
+  border-top: 1px dashed #e2e8f0;
 }
 
-.spotlight-card:hover {
-  border-color: #bbf7d0;
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.08);
-}
-
-.spotlight-card-tag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.68rem;
-  font-weight: 800;
-  color: #64748b;
-  font-family: var(--font-game);
-  text-transform: uppercase;
-}
-
-.dot-red {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ef4444;
-}
-
-.spotlight-text-main {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.4;
-}
-
-.spotlight-text-sub {
-  font-size: 0.75rem;
-  color: #64748b;
-  line-height: 1.45;
-}
-
-.spotlight-match-chip {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 6px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.chip-sub {
-  font-size: 10px;
-  color: #94a3b8;
-}
-
-.spotlight-action-text {
-  background: transparent;
-  border: none;
-  color: #16a34a;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-align: left;
-  cursor: pointer;
-  margin-top: auto;
-}
-
-/* Section 4: 2-Column Main Cockpit */
-.cockpit-match-comps-grid {
-  display: grid;
-  grid-template-columns: 1.25fr 0.95fr;
-  gap: 18px;
-}
-
-@media (max-width: 1024px) {
-  .cockpit-match-comps-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Left Card: Next Match Stadium Pitch */
 .next-match-card-stadium {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -7743,6 +7658,8 @@ body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  padding: 0 16px;
+  gap: 12px;
 }
 
 .pitch-team-box {
@@ -7750,7 +7667,9 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  width: 120px;
+  width: 210px;
+  max-width: 210px;
+  flex: 1;
 }
 
 .pitch-crest-badge {
@@ -7775,11 +7694,20 @@ body {
 
 .pitch-team-name {
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.25;
+  word-break: normal;
+  overflow-wrap: break-word;
+  max-width: 200px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 2.5em;
 }
 
 .pitch-home-away-pill {
@@ -7787,22 +7715,25 @@ body {
   font-weight: 800;
   font-family: var(--font-game);
   color: #d1fae5;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 1px 7px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 2px 8px;
   border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .pitch-clash-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   z-index: 10;
+  width: 130px;
+  flex-shrink: 0;
 }
 
 .clash-vs-text {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 900;
   color: #ffffff;
   letter-spacing: 1px;
@@ -7810,17 +7741,23 @@ body {
 }
 
 .clash-countdown {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 800;
   color: #fde047;
   font-family: var(--font-game);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(253, 224, 71, 0.3);
 }
 
 .clash-date-time {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  color: #d1fae5;
+  font-weight: 700;
   font-family: var(--font-game);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .pitch-action-buttons {

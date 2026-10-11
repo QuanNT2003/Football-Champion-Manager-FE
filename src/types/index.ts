@@ -551,3 +551,84 @@ export interface PlayerDetailData extends Player {
   transfers?: PlayerTransfersData;
   injuries_tab?: PlayerInjuriesData;
 }
+
+export interface DashboardData {
+  club: {
+    id: string;
+    name: string;
+    short_name?: string;
+    logo_url?: string;
+    country: string;
+    country_code: string;
+    flag_url?: string;
+    reputation: number;
+    popularity: number;
+    team_morale: number;
+    avg_ovr: number;
+    players_count: number;
+    cash: number;
+    gold: number;
+    league_rank: number;
+    league_points: number;
+    tier_label: string;
+    competition_name: string;
+  };
+  next_match?: {
+    id: string;
+    competition_name: string;
+    season_day: number;
+    match_date: string;
+    kickoff_time: string;
+    status: string;
+    is_home: boolean;
+    countdown_hours: number;
+    opponent: {
+      id?: string;
+      name: string;
+      short_name?: string;
+      logo_url?: string | null;
+      is_home: boolean;
+    };
+    home_club: {
+      id?: string;
+      name: string;
+      logo_url?: string | null;
+    };
+    away_club: {
+      id?: string;
+      name: string;
+      logo_url?: string | null;
+    };
+  } | null;
+  last_match?: {
+    id?: string;
+    competition_name: string;
+    home_club_name?: string;
+    away_club_name?: string;
+    home_score: number;
+    away_score: number;
+  } | null;
+  competitions: Array<{
+    id: string;
+    name: string;
+    type: string;
+    color: string;
+    icon: string;
+    sub_title: string;
+    rank?: number;
+    points?: number;
+    played?: number;
+    round_label?: string;
+    status_label: string;
+  }>;
+  metrics: {
+    avg_ovr: number;
+    players_count: number;
+    team_morale: number;
+  };
+  timeline?: {
+    season_number: number;
+    current_day: number;
+    total_days: number;
+  };
+}

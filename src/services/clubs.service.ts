@@ -1,5 +1,5 @@
 import { request } from './client';
-import { Club, StarterCountry, StarterTier } from '../types';
+import { Club, StarterCountry, StarterTier, DashboardData } from '../types';
 
 export const clubsApi = {
   getClubs: (page: number = 1, limit: number = 20, search?: string) => {
@@ -9,6 +9,8 @@ export const clubsApi = {
   },
 
   getClubById: (id: string) => request<Club>(`/clubs/${id}`),
+
+  getDashboard: (id: string) => request<DashboardData>(`/clubs/${id}/dashboard`),
 
   getMyClub: () => request<Club | null>('/clubs/my-club'),
 
