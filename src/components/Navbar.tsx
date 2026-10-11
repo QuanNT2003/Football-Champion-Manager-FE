@@ -79,11 +79,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="cockpit-header">
+    <header className="cockpit-header master-header-hud">
       {/* =========================================================================
           TIER 1: COCKPIT QUICKBAR (Search, Clock, Currency, Alerts, Profile)
           ========================================================================= */}
-      <div className="cockpit-top-bar">
+      <div className="cockpit-top-bar-wrap">
+        <div className="cockpit-top-bar">
         {/* Left Section: Search & Live Clock */}
         <div className="cockpit-left-group">
           {/* Brand Title */}
@@ -226,6 +227,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
         </div>
+      </div>
       </div>
 
       {/* =========================================================================

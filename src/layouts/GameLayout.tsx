@@ -36,44 +36,46 @@ export const GameLayout: React.FC<Props> = ({
 }) => {
   return (
     <div className="app-container master-cockpit-layout">
-      {/* 1. Left Vertical Dock Rail (Menu những phần thuộc về Câu Lạc Bộ của mình) */}
-      <LeftDockRail squadCount={players.length} />
+      {/* Global Notification Banner */}
+      {globalNotification && (
+        <div className="notification-banner">
+          <span className="notification-icon">⚽</span>
+          <span>{globalNotification}</span>
+        </div>
+      )}
 
-      {/* Main Right Area (Header + Centered 60-70% Content) */}
-      <div className="cockpit-viewport">
-        {/* Global Notification Banner */}
-        {globalNotification && (
-          <div className="notification-banner">
-            <span className="notification-icon">⚽</span>
-            <span>{globalNotification}</span>
-          </div>
-        )}
+      {/* 1. TOP HEADER HUD: Chiều dài luôn 100% màn hình, nội dung bên trong đi theo content */}
+      <Navbar
+        club={club}
+        timeline={timeline}
+        user={user}
+        onOpenLogin={() => {}}
+        onLogout={onLogout}
+      />
 
-        {/* 2. Top Header HUD (Thanh Header thuộc về những gì BÊN NGOÀI câu lạc bộ) */}
-        <Navbar
-          club={club}
-          timeline={timeline}
-          user={user}
-          onOpenLogin={() => {}}
-          onLogout={onLogout}
-        />
+      {/* 2. KHUNG NỘI DUNG CHÍNH (Căn giữa theo container content 1380px) */}
+      <div className="cockpit-stage-wrapper">
+        <div className="cockpit-body-row">
+          {/* Menu bên trái điều hướng CLB (nằm dưới Header, áp sát vào Content) */}
+          <LeftDockRail squadCount={players.length} />
 
-        {/* 3. Center Content Area (Chiếm khoảng 60-70% màn hình nằm ở giữa) */}
-        <main className="main-content center-content-wrapper">
-          <Outlet
-            context={{
-              club,
-              user,
-              timeline,
-              players,
-              onUpgradeFacility,
-              onUpdateTransferListing,
-              refreshClubData,
-              loadClubSquad,
-              setSelectedPlayer,
-            }}
-          />
-        </main>
+          {/* Phần nội dung chính (Dashboard, Squad, Tactics...) */}
+          <main className="main-content center-content-wrapper">
+            <Outlet
+              context={{
+                club,
+                user,
+                timeline,
+                players,
+                onUpgradeFacility,
+                onUpdateTransferListing,
+                refreshClubData,
+                loadClubSquad,
+                setSelectedPlayer,
+              }}
+            />
+          </main>
+        </div>
       </div>
 
       {/* Modals */}
