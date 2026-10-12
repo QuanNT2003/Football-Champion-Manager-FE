@@ -70,18 +70,9 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
     <div className="view-container squad-page-view">
       {/* Control Bar: Filters & Search */}
       <div className="glass-panel" style={{ padding: '18px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        
         {/* SQUAD LEVEL TABS (Đội Một / Đội Trẻ U21 / Đội Dự Bị) */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', borderBottom: '1.5px solid rgba(255, 255, 255, 0.1)', paddingBottom: '14px' }}>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              className={`btn btn-sm ${squadTab === 'ALL' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setSquadTab('ALL')}
-              style={{ fontWeight: 700, padding: '7px 16px', borderRadius: '8px' }}
-            >
-              🌐 {t('squad.tab_all_squad', 'Tất Cả')} ({players.length})
-            </button>
             <button
               type="button"
               className={`btn btn-sm ${squadTab === 'FIRST_TEAM' ? 'btn-primary' : 'btn-secondary'}`}
