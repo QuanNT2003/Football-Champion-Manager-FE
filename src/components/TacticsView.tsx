@@ -622,39 +622,6 @@ export const TacticsView: React.FC<Props> = ({
     setTimeout(() => setSavedSuccess(''), 3000);
   };
 
-  // Auto-optimize Starting Lineup
-  const handleAutoOptimize = () => {
-    if (!currentFormation?.formation_positions || players.length === 0) return;
-
-    const sortedPlayers = [...players].sort((a, b) => getPlayerOvr(b) - getPlayerOvr(a));
-    const usedIds = new Set<string>();
-    const newLineup: Record<string, Player | null> = {};
-
-    currentFormation.formation_positions.forEach((fp) => {
-      const targetPos = fp.slot_code?.toUpperCase() || '';
-      let best = sortedPlayers.find((p) => {
-        if (usedIds.has(p.id.toString())) return false;
-        const pCode = getPlayerPos(p).toUpperCase();
-        return pCode === targetPos || (targetPos === 'GK' && pCode === 'GK');
-      });
-
-      if (!best) {
-        best = sortedPlayers.find((p) => !usedIds.has(p.id.toString()));
-      }
-
-      if (best) {
-        usedIds.add(best.id.toString());
-        newLineup[fp.id.toString()] = best;
-      }
-    });
-
-    setLineupMap(newLineup);
-    setSwapTarget(null);
-    setIsModified(true);
-    setSavedSuccess(t('tactics.auto_optimize_success', 'Đã tự động tối ưu hóa đội hình theo OVR và vị trí!'));
-    setTimeout(() => setSavedSuccess(''), 3000);
-  };
-
   // Apply Coach Preferred Formation
   const handleApplyCoachFormation = () => {
     if (headCoach?.preferredFormation?.id) {
@@ -670,22 +637,20 @@ export const TacticsView: React.FC<Props> = ({
   const handleSave = async () => {
     setSaving(true);
     try {
-      const positionsPayload = Object.entries(lineupMap)
-        .filter(([_, player]) => Boolean(player))
-        .map(([formationPositionId, player]) => ({
-          formationPositionId,
-          playerId: player!.id.toString(),
+      const positionsPayload = (currentFormation?.formation_positions || []).map((pos) => {
+        const player = lineupMap[pos.id.toString()];
+        return {
+          formationPositionId: pos.id.toString(),
+          playerId: player ? player.id.toString() : null,
           role: 'STANDARD',
           duty: 'SUPPORT',
-        }));
+        };
+      });
 
-      const substitutesPayload = substitutes
-        .map((player, idx) => ({ player, orderNo: idx + 1 }))
-        .filter((item) => Boolean(item.player))
-        .map((item) => ({
-          playerId: item.player!.id.toString(),
-          orderNo: item.orderNo,
-        }));
+      const substitutesPayload = substitutes.map((player, idx) => ({
+        playerId: player ? player.id.toString() : null,
+        orderNo: idx + 1,
+      }));
 
       const payload = {
         formationId: selectedFormationId,
@@ -713,8 +678,6 @@ export const TacticsView: React.FC<Props> = ({
       });
 
       setIsModified(false);
-      setSavedSuccess(t('tactics.save_success', 'Đã cập nhật chiến thuật, đội hình và ghế dự bị thành công vào CSDL!'));
-      setTimeout(() => setSavedSuccess(''), 3500);
     } catch (err: any) {
       alert(err.response?.data?.message || t('tactics.save_failed', 'Không thể lưu chiến thuật'));
     } finally {
@@ -805,7 +768,7 @@ export const TacticsView: React.FC<Props> = ({
                 )}
               </div>
               <span className="db-info-text">
-                {t('tactics.tactic_label', 'Chiến thuật:')} <strong>{savedTacticInfo?.name || t('tactics.default_tactic_name', 'Đội hình chính')}</strong> · {t('tactics.last_saved', 'Lần lưu cuối:')} <em>{formatDateTime(savedTacticInfo?.updatedAt)}</em>
+                {t('tactics.tactic_label', 'Chiến thuật:')} <strong>{savedTacticInfo?.name || t('tactics.default_tactic_name', 'Đội hình chính')}</strong> 
               </span>
             </div>
 
@@ -820,26 +783,6 @@ export const TacticsView: React.FC<Props> = ({
             <div className="tactics-alert-success">
               <CheckCircle2 size={18} />
               <span>{savedSuccess}</span>
-            </div>
-          )}
-
-          {/* BANNER HƯỚNG DẪN KHI ĐANG CHỌN CẦU THỦ HOÁN ĐỔI */}
-          {swapTarget && (
-            <div className="tactics-swap-prompt-bar">
-              <div className="flex items-center gap-2">
-                <ArrowUpDown size={16} />
-                <span>
-                  {swapTarget.type === 'STARTER' &&
-                    t('tactics.swap_banner_starter', 'Đang chọn cầu thủ đá chính {name}. Click cầu thủ khác để đổi vị trí hoặc click cầu thủ dự bị để thay người!').replace('{name}', swapTarget.player?.name || 'Vị trí')}
-                  {swapTarget.type === 'BENCH' &&
-                    t('tactics.swap_banner_bench', 'Đang chọn ghế dự bị #{slot} ({name}). Click cầu thủ trên sân để thay người, click ghế khác để đổi thứ tự, hoặc click cầu thủ ngoài danh sách để thế chỗ!').replace('{slot}', String(swapTarget.index + 1)).replace('{name}', swapTarget.player?.name || 'Ghế')}
-                  {swapTarget.type === 'RESERVE' &&
-                    t('tactics.swap_banner_reserve', 'Đang chọn cầu thủ {name}. Click một ghế dự bị hoặc vị trí trên sân để đưa cầu thủ này vào!').replace('{name}', swapTarget.player.name)}
-                </span>
-              </div>
-              <button type="button" onClick={() => setSwapTarget(null)}>
-                {t('tactics.deselect', 'Hủy chọn')}
-              </button>
             </div>
           )}
 
@@ -941,16 +884,6 @@ export const TacticsView: React.FC<Props> = ({
             >
               <Sliders size={16} />
               <span>{t('tactics.instructions')}</span>
-            </button>
-
-            <button
-              type="button"
-              className="btn-tactic-action btn-outline"
-              onClick={handleAutoOptimize}
-              title={t('tactics.auto_pick_tooltip', 'Tự động xếp 11 cầu thủ tốt nhất vào đúng vị trí')}
-            >
-              <Sparkles size={16} />
-              <span>{t('tactics.optimize')}</span>
             </button>
 
             <button
