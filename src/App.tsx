@@ -29,8 +29,8 @@ export function App() {
   const location = useLocation();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
-  const [club, setClub] = useState<Club | null>(null);
+  const [user, setUser] = useState<User | null>(() => authApi.getCurrentUser());
+  const [club, setClub] = useState<Club | null>(() => authApi.getCurrentClub());
   const [timeline, setTimeline] = useState<TimelineData | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -67,6 +67,7 @@ export function App() {
         return;
       }
       setUser(profile);
+      localStorage.setItem('fc_user', JSON.stringify(profile));
 
       // 2. Load Timeline
       gameWorldApi.getTimeline('1').then((tl) => {
@@ -77,12 +78,14 @@ export function App() {
       const myClub = await clubsApi.getMyClub().catch(() => null);
       if (!myClub || !myClub.id) {
         setClub(null);
+        localStorage.removeItem('fc_club');
         setIsLoading(false);
         return;
       }
 
       setClub(myClub);
-      loadClubSquad(myClub.id);
+      localStorage.setItem('fc_club', JSON.stringify(myClub));
+      await loadClubSquad(myClub.id);
       setIsLoading(false);
     } catch (err) {
       console.error('Error during auth verification:', err);
@@ -107,6 +110,7 @@ export function App() {
 
   const handleClubClaimed = (newClub: Club) => {
     setClub(newClub);
+    localStorage.setItem('fc_club', JSON.stringify(newClub));
     loadClubSquad(newClub.id);
     navigate('/dashboard');
   };

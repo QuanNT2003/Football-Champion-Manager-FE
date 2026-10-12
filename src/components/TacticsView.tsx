@@ -91,6 +91,7 @@ export const TacticsView: React.FC<Props> = ({
 
   // Track if user has unsaved modifications
   const [isModified, setIsModified] = useState<boolean>(false);
+  const [initialLoaded, setInitialLoaded] = useState<boolean>(false);
 
   // Lineup assignment map: formation_position_id -> Player (11 đá chính)
   const [lineupMap, setLineupMap] = useState<Record<string, Player | null>>({});
@@ -264,7 +265,7 @@ export const TacticsView: React.FC<Props> = ({
 
   // Tự động điền vị trí đá chính nếu slot trống khi đổi formation hoặc nạp player
   useEffect(() => {
-    if (!players || players.length === 0 || !currentFormation?.formation_positions) return;
+    if (!initialLoaded || !players || players.length === 0 || !currentFormation?.formation_positions) return;
 
     const positions = currentFormation.formation_positions;
     const currentAssignedIds = new Set<string>();
