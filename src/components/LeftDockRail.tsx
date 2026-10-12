@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Trophy,
   Users,
   Compass,
   Dumbbell,
@@ -118,6 +119,17 @@ export const LeftDockRail: React.FC<Props> = ({ squadCount = 16 }) => {
             <Swords size={20} />
           </div>
           <span className="dock-item-label">{t('nav.dock.matches')}</span>
+        </NavLink>
+
+        <NavLink
+          to="/trophies"
+          className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}
+          title="Phòng truyền thống CLB"
+        >
+          <div className="dock-icon-box">
+            <Trophy size={20} />
+          </div>
+          <span className="dock-item-label">Truyền thống</span>
         </NavLink>
       </nav>
 

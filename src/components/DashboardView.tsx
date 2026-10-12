@@ -172,6 +172,15 @@ export const DashboardView: React.FC<Props> = ({
                 <span className="rank-tier-divider">•</span>
                 <span className="tier-text">{tierLabel}</span>
               </span>
+              <button
+                type="button"
+                className="pill-trophies-link"
+                onClick={() => navigate('/trophies')}
+                title="Mở phòng truyền thống & Tủ cúp CLB"
+              >
+                <span>🏆</span>
+                <span>Tủ cúp <strong>({dashboardData?.club.trophies_count ?? 0})</strong></span>
+              </button>
               <span className="pill-match-time">
                 <span className="pill-dot" />
                 <span>Trận tới: <strong>{formatKickoffTime(nextMatch?.kickoff_time)}</strong> (Ngày {nextMatch?.season_day || 3})</span>

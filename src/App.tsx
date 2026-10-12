@@ -18,6 +18,7 @@ import { FacilitiesView } from './components/FacilitiesView';
 import { FinancesView } from './components/FinancesView';
 import { TrainingView } from './components/TrainingView';
 import { StandingsView } from './components/StandingsView';
+import { TrophiesView } from './components/TrophiesView';
 import { ClubStaffView } from './components/ClubStaffView';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from './i18n/I18nContext';
@@ -329,6 +330,15 @@ export function App() {
           path="/standings"
           element={
             <StandingsView
+              club={club}
+              currentClubId={club?.id || '1'}
+            />
+          }
+        />
+        <Route
+          path="/trophies"
+          element={
+            <TrophiesView
               club={club}
               currentClubId={club?.id || '1'}
             />

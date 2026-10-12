@@ -25,6 +25,7 @@ export interface Facility {
 }
 
 export interface Club {
+  founded_year?: number;
   country_id?: string;
   current_competition_id?: string;
   country_detail?: {
@@ -570,6 +571,7 @@ export interface DashboardData {
     gold: number;
     league_rank: number;
     league_points: number;
+    trophies_count?: number;
     tier_label: string;
     competition_name: string;
   };
@@ -631,4 +633,19 @@ export interface DashboardData {
     current_day: number;
     total_days: number;
   };
+}
+
+
+export interface ClubTrophy {
+  id: string;
+  club_id: string;
+  competition_id: string;
+  competition_name: string;
+  season_id: string;
+  season_number: number;
+  title_type: 'CHAMPION' | 'RUNNER_UP' | 'THIRD_PLACE' | string;
+  trophy_name: string;
+  trophy_url?: string | null;
+  rank_position: number;
+  achieved_at: string;
 }
