@@ -109,6 +109,7 @@ export interface Player {
   overall_rating?: number;
   potential_rating?: number;
   potential?: number;
+  experience?: any;
   market_value?: number;
   club_id?: string;
   club?: {
@@ -537,10 +538,7 @@ export interface PlayerDetailData extends Player {
     percentage: number;
     label: string;
   };
-  experience?: {
-    percentage: number;
-    label: string;
-  };
+  experience?: any;
   average_quality?: number;
   primary_position?: {
     code: string;

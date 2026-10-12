@@ -101,6 +101,8 @@ export const TacticsView: React.FC<Props> = ({
 
   // Tab đang chọn bên cột phải: 'BENCH' (9 ghế) hoặc 'RESERVES' (ngoài danh sách)
   const [activeRightTab, setActiveRightTab] = useState<'BENCH' | 'RESERVES'>('BENCH');
+  // Tuyến đội đang xem/chỉnh sửa: 'FIRST_TEAM' (Đội 1) hoặc 'YOUTH_U21' (Đội trẻ U21)
+  const [activeSquadTab, setActiveSquadTab] = useState<'FIRST_TEAM' | 'YOUTH_U21'>('FIRST_TEAM');
 
   // Mục đang được chọn để hoán đổi
   const [swapTarget, setSwapTarget] = useState<SwapTarget | null>(null);
@@ -135,7 +137,7 @@ export const TacticsView: React.FC<Props> = ({
 
       // 2. Tải chiến thuật và đội hình lưu trực tiếp từ CSDL
       if (club?.id) {
-        const tacticRes: any = await tacticsApi.getClubTactics(club.id);
+        const tacticRes: any = await tacticsApi.getClubTactics(club.id, activeSquadTab);
         if (tacticRes) {
           const formId = tacticRes.formation_id ? tacticRes.formation_id.toString() : '1';
           setSelectedFormationId(formId);
@@ -635,6 +637,86 @@ export const TacticsView: React.FC<Props> = ({
   };
 
   // Save / Update Tactic to Database
+  
+  // Chuyển đổi tuyến đội (Đội 1 <-> Đội trẻ U21)
+  const handleSwitchSquadTab = async (targetSquad: 'FIRST_TEAM' | 'YOUTH_U21') => {
+    if (targetSquad === activeSquadTab || !club?.id) return;
+    setActiveSquadTab(targetSquad);
+    setLoading(true);
+    setSwapTarget(null);
+    try {
+      const tacticRes: any = await tacticsApi.getClubTactics(club.id, targetSquad);
+      if (tacticRes) {
+        const formId = tacticRes.formation_id ? tacticRes.formation_id.toString() : '1';
+        setSelectedFormationId(formId);
+        if (tacticRes.mentality) setMentality(tacticRes.mentality);
+        if (tacticRes.tempo !== undefined) setTempo(Number(tacticRes.tempo));
+        if (tacticRes.pressing_intensity !== undefined) setPressing(Number(tacticRes.pressing_intensity));
+        if (tacticRes.defensive_line !== undefined) setDefensiveLine(Number(tacticRes.defensive_line));
+        if (tacticRes.passing_style) setPassingStyle(tacticRes.passing_style);
+        if (tacticRes.headCoach) setHeadCoach(tacticRes.headCoach);
+
+        setSavedTacticInfo({
+          id: tacticRes.id?.toString(),
+          name: tacticRes.name || (targetSquad === 'YOUTH_U21' ? t('tactics.youth_tactic_default_name', 'Đội hình trẻ U21') : t('tactics.default_tactic_name', 'Đội hình chính')),
+          updatedAt: tacticRes.updated_at,
+          formationId: formId,
+        });
+
+        const savedPositions = tacticRes.club_tactic_positions || [];
+        const newLineup: Record<string, Player | null> = {};
+        savedPositions.forEach((pos: any) => {
+          if (pos.formation_position_id && pos.players) {
+            const p = pos.players;
+            const enriched = players.find((pl) => pl.id.toString() === p.id.toString()) || {
+              id: p.id.toString(),
+              name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+              first_name: p.first_name,
+              last_name: p.last_name,
+              squad_number: p.squad_number,
+              photo_url: p.photo_url || '/assets/players/default.png',
+              age: p.age || 22,
+              preferred_foot: p.preferred_foot || 'RIGHT',
+              position: p.position || pos.formation_positions?.slot_code || 'MID',
+              overall_rating: p.overall_rating || 60,
+            };
+            newLineup[pos.formation_position_id.toString()] = enriched as Player;
+          }
+        });
+        setLineupMap(newLineup);
+
+        const loadedSubs: (Player | null)[] = Array(9).fill(null);
+        if (tacticRes.substitutes && Array.isArray(tacticRes.substitutes)) {
+          tacticRes.substitutes.forEach((sub: any, idx: number) => {
+            const slotIdx = (sub.order_no && sub.order_no >= 1 && sub.order_no <= 9) ? sub.order_no - 1 : idx;
+            if (slotIdx >= 0 && slotIdx < 9 && sub.players) {
+              const p = sub.players;
+              const enriched = players.find((pl) => pl.id.toString() === p.id.toString()) || {
+                id: p.id.toString(),
+                name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+                first_name: p.first_name,
+                last_name: p.last_name,
+                squad_number: p.squad_number,
+                photo_url: p.photo_url || '/assets/players/default.png',
+                age: p.age || 20,
+                preferred_foot: p.preferred_foot || 'RIGHT',
+                position: p.position || 'MID',
+                overall_rating: p.overall_rating || 60,
+              };
+              loadedSubs[slotIdx] = enriched as Player;
+            }
+          });
+        }
+        setSubstitutes(loadedSubs);
+      }
+      setIsModified(false);
+    } catch (err) {
+      console.error('Error switching squad tab:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -668,7 +750,7 @@ export const TacticsView: React.FC<Props> = ({
       if (onSaveTactics) {
         res = await onSaveTactics(payload);
       } else if (club?.id) {
-        res = await tacticsApi.updateClubTactics(club.id, payload);
+        res = await tacticsApi.updateClubTactics(club.id, payload, activeSquadTab);
       }
 
       setSavedTacticInfo({
@@ -704,6 +786,86 @@ export const TacticsView: React.FC<Props> = ({
     <div className="tactics-main-layout">
       {/* CỘT TRÁI: PANEL HLV + SA BÀN CHIẾN THUẬT */}
       <div className="tactics-left-col">
+        {/* SQUAD SELECTION HEADER BAR */}
+        <div className="glass-panel" style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 20px',
+          borderRadius: '12px',
+          border: '1.5px solid rgba(255, 255, 255, 0.1)',
+          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95))',
+          flexWrap: 'wrap',
+          gap: '12px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {t('tactics.squad_level', 'Tuyến Đội:')}
+            </span>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                className={`btn btn-sm ${activeSquadTab === 'FIRST_TEAM' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => handleSwitchSquadTab('FIRST_TEAM')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontWeight: 700,
+                  padding: '7px 16px',
+                  borderRadius: '8px',
+                  ...(activeSquadTab === 'FIRST_TEAM' ? {
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    borderColor: '#34d399',
+                    color: '#fff',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                  } : { background: 'rgba(255, 255, 255, 0.06)', color: '#94a3b8' })
+                }}
+              >
+                <Shield size={15} /> {t('tactics.first_team', 'Đội Một (First Team)')}
+              </button>
+
+              <button
+                type="button"
+                className={`btn btn-sm ${activeSquadTab === 'YOUTH_U21' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => handleSwitchSquadTab('YOUTH_U21')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontWeight: 700,
+                  padding: '7px 16px',
+                  borderRadius: '8px',
+                  ...(activeSquadTab === 'YOUTH_U21' ? {
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                    borderColor: '#60a5fa',
+                    color: '#fff',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.35)',
+                  } : { background: 'rgba(255, 255, 255, 0.06)', color: '#94a3b8' })
+                }}
+              >
+                <Sparkles size={15} /> {t('tactics.youth_u21', 'Đội Trẻ U21')}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              background: activeSquadTab === 'FIRST_TEAM' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+              color: activeSquadTab === 'FIRST_TEAM' ? '#34d399' : '#60a5fa',
+              fontWeight: 600,
+            }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'currentColor' }}></span>
+              {activeSquadTab === 'FIRST_TEAM' ? t('tactics.viewing_first_team', 'Sơ đồ & Đội hình Đội 1') : t('tactics.viewing_youth_u21', 'Sơ đồ & Đội hình Đội Trẻ U21')}
+            </span>
+          </div>
+        </div>
+
         {/* PANEL HUẤN LUYỆN VIÊN TRƯỞNG */}
         <div className="tactics-coach-panel glass-panel">
           <div className="coach-panel-avatar-wrap">

@@ -14,6 +14,7 @@ import { transfersApi } from '../../services/transfers.service';
 import {
   X,
   ChevronLeft,
+  Zap,
   ChevronRight,
   Star,
   Edit2,
@@ -354,6 +355,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
   // Danh tiếng & Tiềm năng
   const pReputation = detail?.reputation ?? player.reputation ?? 0;
   const pPotential = detail?.potential ?? player.potential ?? 0;
+  const pExperience = (detail as any)?.experience_points ?? (detail as any)?.experience?.points ?? (player as any)?.experience ?? 0;
 
   // Điểm OVR / Average Quality
   const pQuality = (detail?.average_quality ?? player.overall_rating ?? 50.0).toFixed(2);
@@ -516,6 +518,13 @@ export const PlayerDetailModal: React.FC<Props> = ({
                 <span className="pm-muted-note" style={{ fontSize: '0.75rem', marginRight: '6px' }}>/100</span>
                 <div className="pm-stars-wrap">{renderStars(pPotential)}</div>
               </div>
+            </div>
+            <div className="pm-info-row">
+              <span className="pm-label">{t('player_modal.experience', 'Kinh nghiệm (EXP):')}</span>
+              <span className="pm-value pm-val-bold" style={{ color: '#d97706', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Zap size={14} fill="#f59e0b" color="#f59e0b" />
+                {formatNumber(pExperience)} EXP
+              </span>
             </div>
             <div className="pm-info-row">
               <span className="pm-label">Worth:</span>
