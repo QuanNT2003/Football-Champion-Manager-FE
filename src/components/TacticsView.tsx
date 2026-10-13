@@ -876,10 +876,7 @@ export const TacticsView: React.FC<Props> = ({
                   padding: '7px 16px',
                   borderRadius: '8px',
                   ...(activeSquadTab === 'YOUTH_U21' ? {
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                    borderColor: '#60a5fa',
-                    color: '#fff',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.35)',
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderColor: '#34d399', color: '#fff', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
                   } : { background: 'rgba(255, 255, 255, 0.06)', color: '#94a3b8' })
                 }}
               >
@@ -895,8 +892,7 @@ export const TacticsView: React.FC<Props> = ({
               gap: '6px',
               padding: '4px 10px',
               borderRadius: '6px',
-              background: activeSquadTab === 'FIRST_TEAM' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-              color: activeSquadTab === 'FIRST_TEAM' ? '#34d399' : '#60a5fa',
+              background: 'rgba(16, 185, 129, 0.15)', color: '#34d399',
               fontWeight: 600,
             }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'currentColor' }}></span>

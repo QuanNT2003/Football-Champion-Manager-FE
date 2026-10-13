@@ -97,10 +97,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                 padding: '7px 16px',
                 borderRadius: '8px',
                 ...(squadTab === 'YOUTH_U21' ? {
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                  borderColor: '#60a5fa',
-                  color: '#fff',
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.35)',
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderColor: '#34d399', color: '#fff', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
                 } : {})
               }}
             >
@@ -219,7 +216,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <strong style={{ color: '#0f172a', fontSize: '0.95rem' }}>{playerName}</strong>
                             {player.squad_type === 'YOUTH_U21' && (
-                              <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', background: '#dbeafe', color: '#1d4ed8', fontWeight: 800 }}>
+                              <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', background: '#dcfce7', color: '#15803d', fontWeight: 800 }}>
                                 {t('squad.badge_u21', '🌟 U21')}
                               </span>
                             )}

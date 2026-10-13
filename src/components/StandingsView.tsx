@@ -391,24 +391,10 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                   borderRadius: '20px',
                   fontSize: '0.78rem',
                   fontWeight: 700,
-                  backgroundColor:
-                    compFormatType === 'KNOCKOUT'
-                      ? '#fef3c7'
-                      : compFormatType === 'GROUP_KNOCKOUT'
-                      ? '#e0e7ff'
-                      : '#dcfce7',
-                  color:
-                    compFormatType === 'KNOCKOUT'
-                      ? '#b45309'
-                      : compFormatType === 'GROUP_KNOCKOUT'
-                      ? '#4338ca'
-                      : '#166534',
+                  backgroundColor: compFormatType === 'KNOCKOUT' ? '#fef3c7' : '#dcfce7',
+                  color: compFormatType === 'KNOCKOUT' ? '#b45309' : '#166534',
                   border: `1px solid ${
-                    compFormatType === 'KNOCKOUT'
-                      ? '#fde68a'
-                      : compFormatType === 'GROUP_KNOCKOUT'
-                      ? '#c7d2fe'
-                      : '#bbf7d0'
+                    compFormatType === 'KNOCKOUT' ? '#fde68a' : '#bbf7d0'
                   }`,
                 }}
               >

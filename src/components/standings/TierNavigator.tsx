@@ -54,14 +54,8 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
             {[1, 2, 3, 4].map((tNum) => {
               const compInTier = domesticComps.find((c) => c.tier === tNum);
               const isAct = currentTier === tNum;
-              const label =
-                tNum === 1
-                  ? t('tier.t1_name', 'Tier 1 - VĐQG')
-                  : tNum === 2
-                  ? t('tier.t2_name', 'Tier 2 - Hạng Nhất (2 Bảng)')
-                  : tNum === 3
-                  ? t('tier.t3_name', 'Tier 3 - Hạng Nhì (4 Bảng)')
-                  : t('tier.t4_name', 'Tier 4 - Hạng Ba (8 Bảng)');
+              // Ưu tiên hiển thị tên giải lưu trong DB thay vì nhãn tiếng Việt mặc định
+              const label = compInTier?.displayName || compInTier?.name || `Tier ${tNum}`;
               return (
                 <button
                   key={tNum}

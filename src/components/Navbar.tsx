@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Trophy,
   ShoppingCart,
@@ -20,6 +20,8 @@ import {
   Check,
 } from 'lucide-react';
 import { User, Club, TimelineData } from '../types';
+import { competitionsApi, CompetitionsMenuResponse } from '../services/competitions.service';
+import { Award, Zap, Sparkles, ChevronRight, Layers } from 'lucide-react';
 import { useTranslation } from '../i18n';
 
 interface NavbarProps {
@@ -44,12 +46,22 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenLogin,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, language, setLanguage, languages, currentLanguageOption } = useTranslation();
 
   const [currentTime, setCurrentTime] = useState<string>('');
   const [showWorldModal, setShowWorldModal] = useState(false);
   const [showAlertModal, setShowAlertModal] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [federationMenu, setFederationMenu] = useState<CompetitionsMenuResponse | null>(null);
+  const [showFederationMenu, setShowFederationMenu] = useState(false);
+
+  useEffect(() => {
+    const cId = club?.country_id?.toString() || '1';
+    competitionsApi.getMenu(cId)
+      .then((res) => setFederationMenu(res))
+      .catch((err) => console.error('Failed to load federation menu:', err));
+  }, [club?.country_id]);
 
   // Live ticking clock (Kickoff Boss style)
   useEffect(() => {
@@ -235,14 +247,563 @@ export const Navbar: React.FC<NavbarProps> = ({
           ========================================================================= */}
       <nav className="external-nav-bar">
         <div className="external-nav-container">
-          <NavLink
-            to="/standings"
-            className={({ isActive }) => `ext-nav-link ${isActive ? 'active' : ''}`}
+          <div
+            className="federation-dropdown-wrapper"
+            style={{ position: 'relative' }}
+            onMouseEnter={() => setShowFederationMenu(true)}
+            onMouseLeave={() => setShowFederationMenu(false)}
           >
-            <Trophy size={15} className="ext-icon" />
-            <span>{t('nav.ext.federation')}</span>
-            <span className="dropdown-caret">▾</span>
-          </NavLink>
+            {(() => {
+              const queryParams = new URLSearchParams(location.search);
+              const currentCompId = queryParams.get('id');
+              const isFederationActive = location.pathname.startsWith('/competitions') || location.pathname === '/standings';
+              const isLeagueActive = location.pathname === '/competitions/league' || location.pathname === '/standings';
+              const isNatCupActive = location.pathname === '/competitions/cup' && currentCompId === String(federationMenu?.domestic?.nationalCup?.id);
+              const isSuperCupActive = location.pathname === '/competitions/cup' && currentCompId === String(federationMenu?.domestic?.superCup?.id);
+              const isYouthCupActive = location.pathname === '/competitions/cup' && currentCompId === String(federationMenu?.domestic?.youthCup?.id);
+              const isContinentalActive = (cId: string | number) => location.pathname === '/competitions/continental' && currentCompId === String(cId);
+              const isInternationalActive = (cId: string | number) => location.pathname === '/competitions/international' && currentCompId === String(cId);
+
+              return (
+                <>
+                  <NavLink
+                    to="/competitions/league"
+                    className={`ext-nav-link ${isFederationActive ? 'active' : ''}`}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <Trophy size={15} className="ext-icon" />
+                    <span>{t('nav.ext.federation', 'FEDERATION')}</span>
+                    <span
+                      className="dropdown-caret"
+                      style={{
+                        transform: showFederationMenu ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.2s',
+                        display: 'inline-block',
+                      }}
+                    >
+                      ▼
+                    </span>
+                  </NavLink>
+
+                  {/* POPUP MENU FEDERATION: ĐỒNG BỘ THEME SÁNG & HIGHLIGHT GIẢI ĐANG XEM */}
+                  {showFederationMenu && (
+                    <div
+                      className="federation-menu-popup"
+                      style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        zIndex: 9999,
+                        display: 'flex',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '16px',
+                        boxShadow: '0 20px 40px -10px rgba(15, 23, 42, 0.14), 0 10px 20px -5px rgba(15, 23, 42, 0.08)',
+                        padding: '1.25rem',
+                        minWidth: '820px',
+                        gap: '1rem',
+                        animation: 'fadeIn 0.15s ease-out',
+                      }}
+                    >
+                      {/* CỘT 1: GIẢI QUỐC NỘI */}
+                      <div
+                        style={{
+                          flex: 1,
+                          minWidth: '250px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                          borderRight: '1px solid #f1f5f9',
+                          paddingRight: '1rem',
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '0.78rem',
+                            fontWeight: 800,
+                            color: '#15803d',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px',
+                            borderBottom: '2px solid #bbf7d0',
+                            paddingBottom: '8px',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          <Trophy size={15} color="#16a34a" />
+                          <span>{t('standings.domestic_comps', 'Giải Quốc Nội')} ({federationMenu?.country?.name || 'Domestic'})</span>
+                        </div>
+
+                        {/* 1. Vietnam League */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowFederationMenu(false);
+                            navigate('/competitions/league');
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '9px 12px',
+                            borderRadius: '10px',
+                            border: isLeagueActive ? '1.5px solid #22c55e' : '1px solid #e2e8f0',
+                            backgroundColor: isLeagueActive ? '#f0fdf4' : '#ffffff',
+                            color: isLeagueActive ? '#15803d' : '#1e293b',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            transition: 'all 0.15s ease',
+                            boxShadow: isLeagueActive ? '0 2px 8px rgba(34, 197, 94, 0.15)' : 'none',
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isLeagueActive) {
+                              e.currentTarget.style.backgroundColor = '#f8fafc';
+                              e.currentTarget.style.borderColor = '#cbd5e1';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isLeagueActive) {
+                              e.currentTarget.style.backgroundColor = '#ffffff';
+                              e.currentTarget.style.borderColor = '#e2e8f0';
+                            }
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '8px',
+                                backgroundColor: isLeagueActive ? '#dcfce7' : '#f1f5f9',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              <Trophy size={16} color={isLeagueActive ? '#16a34a' : '#64748b'} />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.86rem', fontWeight: isLeagueActive ? 800 : 700 }}>
+                                {federationMenu?.domestic?.league?.name || 'League'}
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: isLeagueActive ? '#16a34a' : '#64748b' }}>
+                                4 Hạng Đấu (T1 - T4)
+                              </div>
+                            </div>
+                          </div>
+                          {isLeagueActive ? (
+                            null
+                          ) : (
+                            <ChevronRight size={14} color="#94a3b8" />
+                          )}
+                        </button>
+
+                        {/* 2. National Cup */}
+                        {federationMenu?.domestic?.nationalCup && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowFederationMenu(false);
+                              navigate(`/competitions/cup?id=${federationMenu.domestic.nationalCup?.id}`);
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '9px 12px',
+                              borderRadius: '10px',
+                              border: isNatCupActive ? '1.5px solid #22c55e' : '1px solid #e2e8f0',
+                              backgroundColor: isNatCupActive ? '#f0fdf4' : '#ffffff',
+                              color: isNatCupActive ? '#15803d' : '#1e293b',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              transition: 'all 0.15s ease',
+                              boxShadow: isNatCupActive ? '0 2px 8px rgba(34, 197, 94, 0.15)' : 'none',
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isNatCupActive) {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.borderColor = '#cbd5e1';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isNatCupActive) {
+                                e.currentTarget.style.backgroundColor = '#ffffff';
+                                e.currentTarget.style.borderColor = '#e2e8f0';
+                              }
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  borderRadius: '8px',
+                                  backgroundColor: isNatCupActive ? '#dcfce7' : '#fef3c7',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                <Shield size={16} color={isNatCupActive ? '#16a34a' : '#d97706'} />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '0.86rem', fontWeight: isNatCupActive ? 800 : 700 }}>
+                                  {federationMenu.domestic.nationalCup.name}
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: isNatCupActive ? '#16a34a' : '#64748b' }}>
+                                  Cúp Quốc Gia (Knockout)
+                                </div>
+                              </div>
+                            </div>
+                            {isNatCupActive ? (
+                              null
+                            ) : (
+                              <ChevronRight size={14} color="#94a3b8" />
+                            )}
+                          </button>
+                        )}
+
+                        {/* 3. Super Cup */}
+                        {federationMenu?.domestic?.superCup && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowFederationMenu(false);
+                              navigate(`/competitions/cup?id=${federationMenu.domestic.superCup?.id}`);
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '9px 12px',
+                              borderRadius: '10px',
+                              border: isSuperCupActive ? '1.5px solid #22c55e' : '1px solid #e2e8f0',
+                              backgroundColor: isSuperCupActive ? '#f0fdf4' : '#ffffff',
+                              color: isSuperCupActive ? '#15803d' : '#1e293b',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              transition: 'all 0.15s ease',
+                              boxShadow: isSuperCupActive ? '0 2px 8px rgba(34, 197, 94, 0.15)' : 'none',
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isSuperCupActive) {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.borderColor = '#cbd5e1';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isSuperCupActive) {
+                                e.currentTarget.style.backgroundColor = '#ffffff';
+                                e.currentTarget.style.borderColor = '#e2e8f0';
+                              }
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  borderRadius: '8px',
+                                  backgroundColor: isSuperCupActive ? '#dcfce7' : '#fef9c3',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                <Zap size={16} color={isSuperCupActive ? '#16a34a' : '#ca8a04'} />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '0.86rem', fontWeight: isSuperCupActive ? 800 : 700 }}>
+                                  {federationMenu.domestic.superCup.name}
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: isSuperCupActive ? '#16a34a' : '#64748b' }}>
+                                  Tranh Siêu Cúp
+                                </div>
+                              </div>
+                            </div>
+                            {isSuperCupActive ? (
+                              null
+                            ) : (
+                              <ChevronRight size={14} color="#94a3b8" />
+                            )}
+                          </button>
+                        )}
+
+                        {/* 4. Youth Cup */}
+                        {federationMenu?.domestic?.youthCup && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowFederationMenu(false);
+                              navigate(`/competitions/cup?id=${federationMenu.domestic.youthCup?.id}`);
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '9px 12px',
+                              borderRadius: '10px',
+                              border: isYouthCupActive ? '1.5px solid #22c55e' : '1px solid #e2e8f0',
+                              backgroundColor: isYouthCupActive ? '#f0fdf4' : '#ffffff',
+                              color: isYouthCupActive ? '#15803d' : '#1e293b',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              transition: 'all 0.15s ease',
+                              boxShadow: isYouthCupActive ? '0 2px 8px rgba(34, 197, 94, 0.15)' : 'none',
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isYouthCupActive) {
+                                e.currentTarget.style.backgroundColor = '#f8fafc';
+                                e.currentTarget.style.borderColor = '#cbd5e1';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isYouthCupActive) {
+                                e.currentTarget.style.backgroundColor = '#ffffff';
+                                e.currentTarget.style.borderColor = '#e2e8f0';
+                              }
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div
+                                style={{
+                                  width: '32px',
+                                  height: '32px',
+                                  borderRadius: '8px',
+                                  backgroundColor: isYouthCupActive ? '#dcfce7' : '#e0f2fe',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                <Sparkles size={16} color={isYouthCupActive ? '#16a34a' : '#0284c7'} />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '0.86rem', fontWeight: isYouthCupActive ? 800 : 700 }}>
+                                  {federationMenu.domestic.youthCup.name}
+                                </div>
+                                <div style={{ fontSize: '0.72rem', color: isYouthCupActive ? '#16a34a' : '#64748b' }}>
+                                  Cúp Trẻ U21 Toàn Quốc
+                                </div>
+                              </div>
+                            </div>
+                            {isYouthCupActive ? (
+                              null
+                            ) : (
+                              <ChevronRight size={14} color="#94a3b8" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* CỘT 2: CÚP CHÂU LỤC CLB */}
+                      <div
+                        style={{
+                          flex: 1,
+                          minWidth: '250px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                          borderRight: '1px solid #f1f5f9',
+                          paddingRight: '1rem',
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '0.78rem',
+                            fontWeight: 800,
+                            color: '#15803d',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px',
+                            borderBottom: '2px solid #bbf7d0',
+                            paddingBottom: '8px',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          <Globe size={15} color="#16a34a" />
+                          <span>{t('standings.continental_comps', 'Cúp Châu Lục')} ({federationMenu?.confederation?.code || 'UEFA'})</span>
+                        </div>
+
+                        {federationMenu?.continental?.map((comp) => {
+                          const isActive = isContinentalActive(comp.id);
+                          return (
+                            <button
+                              key={comp.id}
+                              type="button"
+                              onClick={() => {
+                                setShowFederationMenu(false);
+                                navigate(`/competitions/continental?id=${comp.id}`);
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '9px 12px',
+                                borderRadius: '10px',
+                                border: isActive ? '1.5px solid #16a34a' : '1px solid #e2e8f0',
+                                backgroundColor: isActive ? '#f0fdf4' : '#ffffff',
+                                color: isActive ? '#15803d' : '#1e293b',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'all 0.15s ease',
+                                boxShadow: isActive ? '0 2px 8px rgba(22, 163, 74, 0.15)' : 'none',
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!isActive) {
+                                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                                  e.currentTarget.style.borderColor = '#cbd5e1';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isActive) {
+                                  e.currentTarget.style.backgroundColor = '#ffffff';
+                                  e.currentTarget.style.borderColor = '#e2e8f0';
+                                }
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div
+                                  style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '8px',
+                                    backgroundColor: isActive ? '#dcfce7' : '#f1f5f9',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                  }}
+                                >
+                                  <Trophy size={16} color={isActive ? "#16a34a" : "#64748b"} />
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: '0.84rem', fontWeight: isActive ? 800 : 700 }}>
+                                    {comp.name}
+                                  </div>
+                                  <div style={{ fontSize: '0.72rem', color: isActive ? '#16a34a' : '#64748b' }}>
+                                    Vòng Bảng & Knockout
+                                  </div>
+                                </div>
+                              </div>
+                              {isActive ? (
+                                null
+                              ) : (
+                                <ChevronRight size={14} color="#94a3b8" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* CỘT 3: ĐTQG QUỐC TẾ */}
+                      <div
+                        style={{
+                          flex: 1,
+                          minWidth: '240px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '0.78rem',
+                            fontWeight: 800,
+                            color: '#15803d',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px',
+                            borderBottom: '2px solid #bbf7d0',
+                            paddingBottom: '8px',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          <Award size={15} color="#16a34a" />
+                          <span>{t('standings.international_comps', 'Quốc Tế / ĐTQG')}</span>
+                        </div>
+
+                        {federationMenu?.international?.map((comp) => {
+                          const isActive = isInternationalActive(comp.id);
+                          return (
+                            <button
+                              key={comp.id}
+                              type="button"
+                              onClick={() => {
+                                setShowFederationMenu(false);
+                                navigate(`/competitions/international?id=${comp.id}`);
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '9px 12px',
+                                borderRadius: '10px',
+                                border: isActive ? '1.5px solid #16a34a' : '1px solid #e2e8f0',
+                                backgroundColor: isActive ? '#f0fdf4' : '#ffffff',
+                                color: isActive ? '#15803d' : '#1e293b',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'all 0.15s ease',
+                                boxShadow: isActive ? '0 2px 8px rgba(22, 163, 74, 0.15)' : 'none',
+                              }}
+                              onMouseEnter={(e) => {
+                                if (!isActive) {
+                                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                                  e.currentTarget.style.borderColor = '#cbd5e1';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isActive) {
+                                  e.currentTarget.style.backgroundColor = '#ffffff';
+                                  e.currentTarget.style.borderColor = '#e2e8f0';
+                                }
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div
+                                  style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '8px',
+                                    backgroundColor: isActive ? '#dcfce7' : '#f1f5f9',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                  }}
+                                >
+                                  <Globe size={16} color={isActive ? '#16a34a' : '#64748b'} />
+                                </div>
+                                <div>
+                                  <div style={{ fontSize: '0.84rem', fontWeight: isActive ? 800 : 700 }}>
+                                    {comp.name}
+                                  </div>
+                                  <div style={{ fontSize: '0.72rem', color: isActive ? '#16a34a' : '#64748b' }}>
+                                    Giải Đấu Quốc Tế
+                                  </div>
+                                </div>
+                              </div>
+                              {isActive ? (
+                                null
+                              ) : (
+                                <ChevronRight size={14} color="#94a3b8" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
 
           <NavLink
             to="/transfers"

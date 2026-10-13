@@ -18,6 +18,9 @@ import { FacilitiesView } from './components/FacilitiesView';
 import { FinancesView } from './components/FinancesView';
 import { TrainingView } from './components/TrainingView';
 import { StandingsView } from './components/StandingsView';
+import { LeagueView } from './components/standings/LeagueView';
+import { KnockoutCupView } from './components/standings/KnockoutCupView';
+import { GroupKnockoutView } from './components/standings/GroupKnockoutView';
 import { TrophiesView } from './components/TrophiesView';
 import { ClubStaffView } from './components/ClubStaffView';
 import { Loader2 } from 'lucide-react';
@@ -330,15 +333,11 @@ export function App() {
             />
           }
         />
-        <Route
-          path="/standings"
-          element={
-            <StandingsView
-              club={club}
-              currentClubId={club?.id || '1'}
-            />
-          }
-        />
+        <Route path="/competitions/league" element={<LeagueView />} />
+        <Route path="/competitions/cup" element={<KnockoutCupView />} />
+        <Route path="/competitions/continental" element={<GroupKnockoutView />} />
+        <Route path="/competitions/international" element={<GroupKnockoutView />} />
+        <Route path="/standings" element={<LeagueView />} />
         <Route
           path="/trophies"
           element={
