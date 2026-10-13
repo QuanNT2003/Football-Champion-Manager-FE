@@ -1,4 +1,5 @@
 import { useTranslation } from '../../i18n';
+import { useTournamentLocale } from '../../utils/tournamentLocalization';
 import React from 'react';
 import { ArrowUp, ArrowDown, Layers } from 'lucide-react';
 import { Competition } from '../../types';
@@ -29,6 +30,7 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
   activeTab,
 }) => {
   const { t } = useTranslation();
+  const { comp, group } = useTournamentLocale();
   return (
     <>
       {/* TIER STEPPER CONTROLS (HẠ CẤP / LÊN CẤP CHO GIẢI ĐẤU LEAGUE QUỐC NỘI) */}
@@ -55,7 +57,7 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
               const compInTier = domesticComps.find((c) => c.tier === tNum);
               const isAct = currentTier === tNum;
               // Ưu tiên hiển thị tên giải lưu trong DB thay vì nhãn tiếng Việt mặc định
-              const label = compInTier?.displayName || compInTier?.name || `Tier ${tNum}`;
+              const label = comp(compInTier?.displayName || compInTier?.name || `Tier ${tNum}`);
               return (
                 <button
                   key={tNum}
@@ -105,7 +107,7 @@ export const TierNavigator: React.FC<TierNavigatorProps> = ({
                 onClick={() => onSelectGroupIdx(idx)}
                 style={hasMyClub && selectedGroupIdx !== idx ? { borderColor: '#15803d', color: '#15803d', fontWeight: 800 } : {}}
               >
-                {grp.name || t('tier.group_n', 'Bảng {n}').replace('{n}', String.fromCharCode(65 + idx))}
+                {group(grp.name) || t('tier.group_n', 'Bảng {n}').replace('{n}', String.fromCharCode(65 + idx))}
                 {hasMyClub && <span style={{ marginLeft: '4px', fontSize: '0.75rem' }}>★</span>}
               </button>
             );

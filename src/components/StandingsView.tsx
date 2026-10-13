@@ -1,4 +1,5 @@
 import { useTranslation } from '../i18n';
+import { useTournamentLocale } from '../utils/tournamentLocalization';
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   competitionsApi,
@@ -37,6 +38,7 @@ interface StandingsViewProps {
 
 export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubId }) => {
   const { t } = useTranslation();
+  const { comp, group, format } = useTournamentLocale();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [selectedCompId, setSelectedCompId] = useState<string>('');
   const [standings, setStandings] = useState<StandingItem[]>([]);
@@ -437,7 +439,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                 <optgroup label={t('standings.national_system_optgroup', 'Hệ Thống Giải Quốc Nội ({country})').replace('{country}', viewingCountryName)}>
                   {domesticComps.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.tier ? `[Tier ${c.tier}] ` : ''}{c.displayName || c.name}
+                      {c.tier ? `[Tier ${c.tier}] ` : ''}{comp(c.displayName || c.name)}
                     </option>
                   ))}
                 </optgroup>
@@ -447,7 +449,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                 <optgroup label={t('standings.continental_optgroup', 'Cúp Châu Lục ({confed})').replace('{confed}', viewingConfedCode)}>
                   {continentalComps.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.displayName || c.name}
+                      {comp(c.displayName || c.name)}
                     </option>
                   ))}
                 </optgroup>
@@ -457,7 +459,7 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                 <optgroup label={t('standings.world_optgroup', 'Giải Đấu Thế Giới')}>
                   {internationalComps.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.displayName || c.name}
+                      {comp(c.displayName || c.name)}
                     </option>
                   ))}
                 </optgroup>

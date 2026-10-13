@@ -9,6 +9,7 @@ import {
 import { Competition, GroupStandings, KnockoutBracketResponse, KnockoutRound, PlayerStat, StandingItem } from '../../types';
 
 import { useTranslation } from '../../i18n';
+import { useTournamentLocale } from '../../utils/tournamentLocalization';
 import { KnockoutBracketSection } from './KnockoutBracketSection';
 import { TeamsListView } from './TeamsListView';
 import { LeagueStatsView } from './LeagueStatsView';
@@ -17,6 +18,7 @@ import { CountrySelectModal } from './CountrySelectModal';
 export const GroupKnockoutView: React.FC = () => {
   const currentClub = JSON.parse(localStorage.getItem('fc_club') || '{}');
   const { t } = useTranslation();
+  const { comp, group } = useTournamentLocale();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -127,7 +129,7 @@ export const GroupKnockoutView: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
               <Trophy size={24} color="#15803d" />
-              <span>{currentComp?.displayName || currentComp?.name || 'Cúp Châu Lục CLB'}</span>
+              <span>{comp(currentComp?.displayName || currentComp?.name || 'Continental Champions League')}</span>
             </h2>
 
             {/* Badge Format */}
@@ -238,7 +240,7 @@ export const GroupKnockoutView: React.FC = () => {
               <div key={grp.id} className="card" style={{ padding: '1rem', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
                   <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#1e293b' }}>
-                    {grp.name}
+                    {group(grp.name)}
                   </h4>
                   <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>4 Đội</span>
                 </div>

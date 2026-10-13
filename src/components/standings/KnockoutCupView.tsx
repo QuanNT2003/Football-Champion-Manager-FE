@@ -9,6 +9,7 @@ import {
 import { Competition, KnockoutBracketResponse, KnockoutRound, PlayerStat } from '../../types';
 
 import { useTranslation } from '../../i18n';
+import { useTournamentLocale } from '../../utils/tournamentLocalization';
 import { KnockoutBracketSection } from './KnockoutBracketSection';
 import { TeamsListView } from './TeamsListView';
 import { LeagueStatsView } from './LeagueStatsView';
@@ -17,6 +18,7 @@ import { CountrySelectModal } from './CountrySelectModal';
 export const KnockoutCupView: React.FC = () => {
   const currentClub = JSON.parse(localStorage.getItem('fc_club') || '{}');
   const { t } = useTranslation();
+  const { comp } = useTournamentLocale();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -181,7 +183,7 @@ export const KnockoutCupView: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
               <Trophy size={24} color="#d97706" />
-              <span>{currentComp?.displayName || currentComp?.name || `${viewingCountryName} Cup`}</span>
+              <span>{comp(currentComp?.displayName || currentComp?.name || `${viewingCountryName} Cup`)}</span>
             </h2>
 
             {/* Badge Format */}

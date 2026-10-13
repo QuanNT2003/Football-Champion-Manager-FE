@@ -1,4 +1,5 @@
 import { useTranslation } from '../i18n';
+import { useTournamentLocale } from '../utils/tournamentLocalization';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   CalendarDays,
@@ -92,6 +93,7 @@ export const MatchCenterView: React.FC<Props> = ({
   onMatchSimulated,
 }) => {
   const { t } = useTranslation();
+  const { comp, round } = useTournamentLocale();
   const [matchList, setMatchList] = useState<Match[]>(initialMatches || []);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
@@ -199,8 +201,8 @@ export const MatchCenterView: React.FC<Props> = ({
   const isFinished = selectedMatch?.status === 'FINISHED' || Boolean(simResult);
   const selectedHomeScore = simResult?.homeScore ?? selectedMatch?.homeScore ?? 0;
   const selectedAwayScore = simResult?.awayScore ?? selectedMatch?.awayScore ?? 0;
-  const selectedCompName = selectedMatch?.competitionSeason?.name || selectedMatch?.stage?.name || t('matches.comp_default', 'Giải Đấu Mùa');
-  const selectedRoundName = selectedMatch?.round?.name || t('matches.round_default', 'Vòng {round}').replace('{round}', String(selectedMatch?.season_day || 1));
+  const selectedCompName = comp(selectedMatch?.competitionSeason?.name || selectedMatch?.stage?.name) || t('matches.comp_default', 'Giải Đấu Mùa');
+  const selectedRoundName = round(selectedMatch?.round?.name) || t('matches.round_default', 'Vòng {round}').replace('{round}', String(selectedMatch?.season_day || 1));
   const selectedStadium = typeof selectedMatch?.stadium === 'string'
     ? selectedMatch.stadium
     : selectedMatch?.stadium?.name || t('matches.stadium_default', 'Sân vận động chính');
@@ -292,8 +294,8 @@ export const MatchCenterView: React.FC<Props> = ({
                 const showDayHeader = !previousMatch || previousMatch.season_day !== match.season_day;
                 const isSelected = selectedMatch?.id === match.id;
                 const isMyClub = match.homeClub?.id === club?.id || match.awayClub?.id === club?.id;
-                const competitionName = match.competitionSeason?.name || match.stage?.name || t('matches.comp_fallback', 'Giải đấu');
-                const roundName = match.round?.name;
+                const competitionName = comp(match.competitionSeason?.name || match.stage?.name) || t('matches.comp_fallback', 'Giải đấu');
+                const roundName = round(match.round?.name);
 
                 return (
                   <React.Fragment key={match.id}>

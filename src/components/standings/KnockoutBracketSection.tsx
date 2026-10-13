@@ -1,4 +1,5 @@
 import { useTranslation } from '../../i18n';
+import { useTournamentLocale } from '../../utils/tournamentLocalization';
 import React from 'react';
 import { KnockoutBracketResponse, KnockoutRound } from '../../types';
 import { Swords, Calendar, CheckCircle2 } from 'lucide-react';
@@ -21,6 +22,7 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
   currentClubId,
 }) => {
   const { t } = useTranslation();
+  const { round } = useTournamentLocale();
   if (!knockoutBracket || allKnockoutRounds.length === 0) {
     return (
       <div className="card text-center" style={{ padding: '3.5rem', borderRadius: '16px' }}>
@@ -54,7 +56,7 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Swords size={20} color="#15803d" />
           <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-            {activeRound?.roundName || t('knockout.round_fallback', 'Vòng Đấu')}
+            {round(activeRound?.roundName) || t('knockout.round_fallback', 'Vòng Đấu')}
           </h3>
           {activeRound && (
             <span
@@ -91,7 +93,7 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
           >
             {allKnockoutRounds.map((rnd) => (
               <option key={rnd.roundOrder} value={rnd.roundName}>
-                {t('knockout.round_summary', '{name} (Ngày {day} - {matches} trận)').replace('{name}', rnd.roundName).replace('{day}', String(rnd.seasonDay)).replace('{matches}', String(rnd.matches.length))}
+                {t('knockout.round_summary', '{name} (Ngày {day} - {matches} trận)').replace('{name}', round(rnd.roundName)).replace('{day}', String(rnd.seasonDay)).replace('{matches}', String(rnd.matches.length))}
               </option>
             ))}
           </select>
@@ -124,7 +126,7 @@ export const KnockoutBracketSection: React.FC<KnockoutProps> = ({
                 transition: 'all 0.15s ease',
               }}
             >
-              <span>{rnd.roundName}</span>
+              <span>{round(rnd.roundName)}</span>
               <span
                 style={{
                   fontSize: '0.7rem',
