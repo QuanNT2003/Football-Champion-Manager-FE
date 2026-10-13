@@ -13,14 +13,13 @@ interface Props {
 
 export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
   const { t } = useTranslation();
-  const [squadTab, setSquadTab] = useState<'ALL' | 'FIRST_TEAM' | 'YOUTH_U21' | 'RESERVES'>('ALL');
+  const [squadTab, setSquadTab] = useState<'FIRST_TEAM' | 'YOUTH_U21'>('FIRST_TEAM');
   const [filterType, setFilterType] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const firstTeamCount = players.filter((p) => !p.squad_type || p.squad_type === 'FIRST_TEAM').length;
   const youthCount = players.filter((p) => p.squad_type === 'YOUTH_U21' || p.squad_type === 'YOUTH_U19').length;
-  const reservesCount = players.filter((p) => p.squad_type === 'RESERVES').length;
-
+  
   const getPositionCategory = (posCode?: string) => {
     if (!posCode) return 'MID';
     const p = posCode.toUpperCase();
@@ -36,13 +35,11 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
   };
 
   const filtered = players.filter((p) => {
-    // 1. Lọc theo Tuyến Đội (Squad Tab)
+    // 1. Tách biệt hai đội 1 và đội trẻ - ở tab nào chỉ hiện đội đó
     if (squadTab === 'FIRST_TEAM') {
       if (p.squad_type && p.squad_type !== 'FIRST_TEAM') return false;
-    } else if (squadTab === 'YOUTH_U21') {
+    } else {
       if (p.squad_type !== 'YOUTH_U21' && p.squad_type !== 'YOUTH_U19') return false;
-    } else if (squadTab === 'RESERVES') {
-      if (p.squad_type !== 'RESERVES') return false;
     }
 
     // 2. Lọc theo Vị Trí (Position)
@@ -109,23 +106,12 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
             >
               <Sparkles size={14} style={{ marginRight: 5, display: 'inline' }} /> {t('squad.youth_team', 'Đội Trẻ U21')} ({youthCount})
             </button>
-            {reservesCount > 0 && (
-              <button
-                type="button"
-                className={`btn btn-sm ${squadTab === 'RESERVES' ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setSquadTab('RESERVES')}
-                style={{ fontWeight: 700, padding: '7px 16px', borderRadius: '8px' }}
-              >
-                📋 {t('squad.reserves', 'Dự Bị')} ({reservesCount})
-              </button>
-            )}
+            
           </div>
 
           <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>
-            {squadTab === 'FIRST_TEAM' && t('squad.first_team_desc', '🛡️ Danh sách thi đấu chính thức Đội Một')}
-            {squadTab === 'YOUTH_U21' && t('squad.youth_team_desc', '🌟 Tài năng trẻ Học viện U21 & Cúp U21 Quốc Gia')}
-            {squadTab === 'RESERVES' && t('squad.reserves_desc', '📋 Lực lượng dự phòng / chờ đăng ký')}
-            {squadTab === 'ALL' && t('squad.all_teams_desc', '🌐 Toàn bộ danh sách cầu thủ thuộc CLB')}
+            {squadTab === 'FIRST_TEAM' && t('squad.first_team_desc', '⚽ Danh sách thi đấu chính thức Đội Một')}
+            {squadTab === 'YOUTH_U21' && t('squad.youth_team_desc', '✨ Tài năng trẻ Học viện U21 & Cúp U21 Quốc Gia')}
           </div>
         </div>
 
@@ -237,12 +223,7 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                                 {t('squad.badge_u21', '🌟 U21')}
                               </span>
                             )}
-                            {player.squad_type === 'RESERVES' && (
-                              <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', background: '#f1f5f9', color: '#64748b', fontWeight: 700 }}>
-                                {t('squad.badge_reserves', '📋 Dự bị')}
-                              </span>
-                            )}
-                            {(!player.squad_type || player.squad_type === 'FIRST_TEAM') && (
+                                                        {(!player.squad_type || player.squad_type === 'FIRST_TEAM') && (
                               <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', background: '#dcfce7', color: '#15803d', fontWeight: 700 }}>
                                 {t('squad.badge_first_team', '🛡️ Đội 1')}
                               </span>

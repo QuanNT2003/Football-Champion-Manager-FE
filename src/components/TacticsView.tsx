@@ -104,6 +104,24 @@ export const TacticsView: React.FC<Props> = ({
   // Tuyến đội đang xem/chỉnh sửa: 'FIRST_TEAM' (Đội 1) hoặc 'YOUTH_U21' (Đội trẻ U21)
   const [activeSquadTab, setActiveSquadTab] = useState<'FIRST_TEAM' | 'YOUTH_U21'>('FIRST_TEAM');
 
+  // Lọc nghiêm ngặt chỉ cầu thủ thuộc đội đang chọn (Đội Một hoặc Đội Trẻ U21)
+  const squadPlayers = useMemo(() => {
+    return players.filter((p) => {
+      if (activeSquadTab === 'FIRST_TEAM') {
+        return !p.squad_type || p.squad_type === 'FIRST_TEAM';
+      }
+      return p.squad_type === 'YOUTH_U21' || p.squad_type === 'YOUTH_U19';
+    });
+  }, [players, activeSquadTab]);
+
+  const firstTeamCount = useMemo(() => {
+    return players.filter((p) => !p.squad_type || p.squad_type === 'FIRST_TEAM').length;
+  }, [players]);
+
+  const youthTeamCount = useMemo(() => {
+    return players.filter((p) => p.squad_type === 'YOUTH_U21' || p.squad_type === 'YOUTH_U19').length;
+  }, [players]);
+
   // Mục đang được chọn để hoán đổi
   const [swapTarget, setSwapTarget] = useState<SwapTarget | null>(null);
 
@@ -162,17 +180,24 @@ export const TacticsView: React.FC<Props> = ({
           savedPositions.forEach((pos: any) => {
             if (pos.formation_position_id && pos.players) {
               const p = pos.players;
-              const enriched = players.find((pl) => pl.id.toString() === p.id.toString()) || {
+              const matchInClub = players.find((pl) => pl.id.toString() === p.id.toString());
+              const sqType = matchInClub?.squad_type || p.squad_type || (activeSquadTab === 'YOUTH_U21' ? 'YOUTH_U21' : 'FIRST_TEAM');
+              const isCorrectSquad = activeSquadTab === 'FIRST_TEAM'
+                ? (!sqType || sqType === 'FIRST_TEAM')
+                : (sqType === 'YOUTH_U21' || sqType === 'YOUTH_U19');
+              if (!isCorrectSquad) return;
+              const enriched = matchInClub || {
                 id: p.id.toString(),
                 name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
                 first_name: p.first_name,
                 last_name: p.last_name,
                 squad_number: p.squad_number,
                 photo_url: p.photo_url || '/assets/players/default.png',
-                age: p.age || 22,
+                age: p.age || 20,
                 preferred_foot: p.preferred_foot || 'RIGHT',
                 position: p.position || pos.formation_positions?.slot_code || 'MID',
                 overall_rating: p.overall_rating || 60,
+                squad_type: sqType,
               };
               newLineup[pos.formation_position_id.toString()] = enriched as Player;
             }
@@ -185,24 +210,31 @@ export const TacticsView: React.FC<Props> = ({
             tacticRes.substitutes.forEach((sub: any, idx: number) => {
               const slotIdx = (sub.order_no && sub.order_no >= 1 && sub.order_no <= 9) ? sub.order_no - 1 : idx;
               if (slotIdx >= 0 && slotIdx < 9 && sub.players) {
-                const p = sub.players;
-                const enriched = players.find((pl) => pl.id.toString() === p.id.toString()) || {
-                  id: p.id.toString(),
-                  name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
-                  first_name: p.first_name,
-                  last_name: p.last_name,
-                  squad_number: p.squad_number,
-                  photo_url: p.photo_url || '/assets/players/default.png',
-                  age: p.age || 22,
-                  preferred_foot: p.preferred_foot || 'RIGHT',
-                  position: p.position || 'MID',
-                  overall_rating: p.overall_rating || 60,
-                };
-                loadedSubs[slotIdx] = enriched as Player;
-              }
-            });
-          }
-          setSubstitutes(loadedSubs);
+              const p = sub.players;
+              const matchInClub = players.find((pl) => pl.id.toString() === p.id.toString());
+              const sqType = matchInClub?.squad_type || p.squad_type || (activeSquadTab === 'YOUTH_U21' ? 'YOUTH_U21' : 'FIRST_TEAM');
+              const isCorrectSquad = activeSquadTab === 'FIRST_TEAM'
+                ? (!sqType || sqType === 'FIRST_TEAM')
+                : (sqType === 'YOUTH_U21' || sqType === 'YOUTH_U19');
+              if (!isCorrectSquad) return;
+              const enriched = matchInClub || {
+                id: p.id.toString(),
+                name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+                first_name: p.first_name,
+                last_name: p.last_name,
+                squad_number: p.squad_number,
+                photo_url: p.photo_url || '/assets/players/default.png',
+                age: p.age || 20,
+                preferred_foot: p.preferred_foot || 'RIGHT',
+                position: p.position || 'MID',
+                overall_rating: p.overall_rating || 60,
+                squad_type: sqType,
+              };
+              loadedSubs[slotIdx] = enriched as Player;
+            }
+          });
+        }
+        setSubstitutes(loadedSubs);
           setIsModified(false);
         }
       }
@@ -250,7 +282,7 @@ export const TacticsView: React.FC<Props> = ({
 
   // Danh sách cầu thủ ngoài danh sách đăng ký (Reserves)
   const reservePlayers = useMemo(() => {
-    const list = players.filter(
+    const list = squadPlayers.filter(
       (p) => !startingPlayerIds.has(p.id.toString()) && !benchPlayerIds.has(p.id.toString())
     );
 
@@ -263,11 +295,11 @@ export const TacticsView: React.FC<Props> = ({
       if (reserveFilter === 'FWD') return posCode.includes('W') || posCode.includes('ST') || posCode.includes('CF');
       return true;
     });
-  }, [players, startingPlayerIds, benchPlayerIds, reserveFilter]);
+  }, [squadPlayers, startingPlayerIds, benchPlayerIds, reserveFilter]);
 
   // Tự động điền vị trí đá chính nếu slot trống khi đổi formation hoặc nạp player
   useEffect(() => {
-    if (!initialLoaded || !players || players.length === 0 || !currentFormation?.formation_positions) return;
+    if (!initialLoaded || !squadPlayers || squadPlayers.length === 0 || !currentFormation?.formation_positions) return;
 
     const positions = currentFormation.formation_positions;
     const currentAssignedIds = new Set<string>();
@@ -278,7 +310,7 @@ export const TacticsView: React.FC<Props> = ({
     const hasEmptySlot = positions.some((pos) => !lineupMap[pos.id.toString()]);
     if (hasEmptySlot) {
       const newLineup = { ...lineupMap };
-      const availablePlayers = players.filter((p) => !currentAssignedIds.has(p.id.toString()));
+      const availablePlayers = squadPlayers.filter((p) => !currentAssignedIds.has(p.id.toString()));
 
       positions.forEach((pos) => {
         if (!newLineup[pos.id.toString()]) {
@@ -299,7 +331,7 @@ export const TacticsView: React.FC<Props> = ({
       });
       setLineupMap(newLineup);
     }
-  }, [players, currentFormation]);
+  }, [squadPlayers, currentFormation]);
 
   // When user switches formation
   const handleFormationChange = (newFormationId: string) => {
@@ -324,7 +356,7 @@ export const TacticsView: React.FC<Props> = ({
         chosen = currentAssignedPlayers.find((p) => !usedIds.has(p.id.toString()));
       }
       if (!chosen) {
-        chosen = players.find((p) => !usedIds.has(p.id.toString()));
+        chosen = squadPlayers.find((p) => !usedIds.has(p.id.toString()));
       }
       if (chosen) {
         usedIds.add(chosen.id.toString());
@@ -552,7 +584,7 @@ export const TacticsView: React.FC<Props> = ({
 
   // 6. Tự động chọn 9 cầu thủ dự bị tối ưu nhất (Auto-pick Bench)
   const handleAutoPickBench = () => {
-    const unassigned = players.filter((p) => !startingPlayerIds.has(p.id.toString()));
+    const unassigned = squadPlayers.filter((p) => !startingPlayerIds.has(p.id.toString()));
     if (unassigned.length === 0) return;
 
     // Phân loại cầu thủ theo vị trí và sắp xếp theo OVR giảm dần
@@ -668,17 +700,24 @@ export const TacticsView: React.FC<Props> = ({
         savedPositions.forEach((pos: any) => {
           if (pos.formation_position_id && pos.players) {
             const p = pos.players;
-            const enriched = players.find((pl) => pl.id.toString() === p.id.toString()) || {
+            const matchInClub = players.find((pl) => pl.id.toString() === p.id.toString());
+            const sqType = matchInClub?.squad_type || p.squad_type || (targetSquad === 'YOUTH_U21' ? 'YOUTH_U21' : 'FIRST_TEAM');
+            const isCorrectSquad = targetSquad === 'FIRST_TEAM'
+              ? (!sqType || sqType === 'FIRST_TEAM')
+              : (sqType === 'YOUTH_U21' || sqType === 'YOUTH_U19');
+            if (!isCorrectSquad) return;
+            const enriched = matchInClub || {
               id: p.id.toString(),
               name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
               first_name: p.first_name,
               last_name: p.last_name,
               squad_number: p.squad_number,
               photo_url: p.photo_url || '/assets/players/default.png',
-              age: p.age || 22,
+              age: p.age || 20,
               preferred_foot: p.preferred_foot || 'RIGHT',
               position: p.position || pos.formation_positions?.slot_code || 'MID',
               overall_rating: p.overall_rating || 60,
+              squad_type: sqType,
             };
             newLineup[pos.formation_position_id.toString()] = enriched as Player;
           }
@@ -822,7 +861,7 @@ export const TacticsView: React.FC<Props> = ({
                   } : { background: 'rgba(255, 255, 255, 0.06)', color: '#94a3b8' })
                 }}
               >
-                <Shield size={15} /> {t('tactics.first_team', 'Đội Một (First Team)')}
+                <Shield size={15} /> {t('tactics.first_team', 'Đội Một')} ({firstTeamCount})
               </button>
 
               <button
@@ -844,7 +883,7 @@ export const TacticsView: React.FC<Props> = ({
                   } : { background: 'rgba(255, 255, 255, 0.06)', color: '#94a3b8' })
                 }}
               >
-                <Sparkles size={15} /> {t('tactics.youth_u21', 'Đội Trẻ U21')}
+                <Sparkles size={15} /> {t('tactics.youth_u21', 'Đội Trẻ U21')} ({youthTeamCount})
               </button>
             </div>
           </div>
