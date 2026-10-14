@@ -10,12 +10,13 @@ interface Props {
 
 export const StaffSkillsTab: React.FC<Props> = ({ detail }) => {
   const { t } = useTranslation();
+
   const renderAttributeGroup = (
     title: string,
     icon: React.ReactNode,
     color: string,
     attributes?: StaffAttributeItem[],
-    emptyText: string = t('staff.no_skills')
+    emptyText: string = t('staff.no_skills', 'Chưa có dữ liệu chỉ số')
   ) => (
     <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1rem 1.15rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.85rem', color, fontWeight: 800 }}>
@@ -24,15 +25,21 @@ export const StaffSkillsTab: React.FC<Props> = ({ detail }) => {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
         {attributes && attributes.length > 0 ? (
-          attributes.map((attr) => (
-            <AttributeProgressBar
-              key={attr.id}
-              name={attr.name}
-              value={attr.value}
-              isKey={attr.is_key}
-              description={attr.description}
-            />
-          ))
+          attributes.map((attr) => {
+            const attrKey = attr.code ? attr.code.toLowerCase() : '';
+            const translatedName = attrKey ? t(`staff.attr_${attrKey}`, attr.name) : attr.name;
+            const translatedDesc = attrKey ? t(`staff.attr_desc_${attrKey}`, attr.description || '') : attr.description;
+
+            return (
+              <AttributeProgressBar
+                key={attr.id}
+                name={translatedName}
+                value={attr.value}
+                isKey={attr.is_key}
+                description={translatedDesc}
+              />
+            );
+          })
         ) : (
           <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>{emptyText}</div>
         )}
@@ -47,7 +54,7 @@ export const StaffSkillsTab: React.FC<Props> = ({ detail }) => {
         t('staff.skills_coaching', 'Huấn Luyện (Coaching)'),
         <Dumbbell size={18} />,
         '#16a34a',
-        detail?.groupedAttributes.coaching,
+        detail?.groupedAttributes?.coaching,
         t('staff.no_coaching_skills', 'Chưa có dữ liệu chỉ số huấn luyện')
       )}
 
@@ -56,7 +63,7 @@ export const StaffSkillsTab: React.FC<Props> = ({ detail }) => {
         t('staff.skills_mental', 'Tác Phong & Tinh Thần (Mental)'),
         <Brain size={18} />,
         '#0284c7',
-        detail?.groupedAttributes.mental,
+        detail?.groupedAttributes?.mental,
         t('staff.no_mental_skills', 'Chưa có dữ liệu chỉ số tinh thần')
       )}
 
@@ -65,7 +72,7 @@ export const StaffSkillsTab: React.FC<Props> = ({ detail }) => {
         t('staff.skills_scouting', 'Tuyển Trạch & Đánh Giá (Scouting)'),
         <Compass size={18} />,
         '#7c3aed',
-        detail?.groupedAttributes.scouting,
+        detail?.groupedAttributes?.scouting,
         t('staff.no_scouting_skills', 'Chưa có dữ liệu chỉ số tuyển trạch')
       )}
 
@@ -74,7 +81,7 @@ export const StaffSkillsTab: React.FC<Props> = ({ detail }) => {
         t('staff.skills_medical', 'Y Tế & Thể Lực (Medical)'),
         <HeartPulse size={18} />,
         '#db2777',
-        detail?.groupedAttributes.medical,
+        detail?.groupedAttributes?.medical,
         t('staff.no_medical_skills', 'Chưa có dữ liệu chỉ số y tế')
       )}
     </div>

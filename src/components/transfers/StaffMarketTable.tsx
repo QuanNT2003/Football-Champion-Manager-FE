@@ -1,7 +1,8 @@
 import { useTranslation } from '../../i18n';
-import { getFacepackUrl } from '../../utils/formatters';
 import React from 'react';
 import { StaffMarketItem } from '../../services/transfers.service';
+import { StaffAvatar } from '../common/StaffAvatar';
+import { RoleBadge } from '../common/RoleBadge';
 import { Search, Filter, Briefcase, UserCheck } from 'lucide-react';
 
 interface StaffMarketTableProps {
@@ -16,11 +17,12 @@ interface StaffMarketTableProps {
   onSearchSubmit: (e: React.FormEvent) => void;
   onRoleFilterChange: (val: string) => void;
   onPageChange: (p: number) => void;
+  onSelectStaff?: (staff: StaffMarketItem) => void;
+  onOpenOfferModal?: (staff: StaffMarketItem) => void;
   onOpenHireModal: (staff: StaffMarketItem) => void;
 }
 
 export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
-
   staffList,
   loading,
   currentClubId,
@@ -32,6 +34,8 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
   onSearchSubmit,
   onRoleFilterChange,
   onPageChange,
+  onSelectStaff,
+  onOpenOfferModal,
   onOpenHireModal,
 }) => {
   const { t } = useTranslation();
@@ -39,23 +43,6 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
     if (val >= 1000000) return `€${(val / 1000000).toFixed(1)}M`;
     if (val >= 1000) return `€${(val / 1000).toFixed(0)}K`;
     return `€${val.toLocaleString()}`;
-  };
-
-  const getStaffRoleLabel = (role: string) => {
-    switch (role) {
-      case 'HEAD_COACH':
-        return { label: t('staff.manager'), class: 'badge-role-head' };
-      case 'ASSISTANT_COACH':
-        return { label: t('staff.assistant'), class: 'badge-role-assistant' };
-      case 'FITNESS_COACH':
-        return { label: t('staff.fitness_coach', 'HLV Thể lực'), class: 'badge-role-fitness' };
-      case 'SCOUT':
-        return { label: t('staff.scout'), class: 'badge-role-scout' };
-      case 'PHYSIO':
-        return { label: t('staff.physio'), class: 'badge-role-physio' };
-      default:
-        return { label: role, class: 'badge-outline' };
-    }
   };
 
   const getLicenseBadge = (license: string) => {
@@ -93,14 +80,16 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
             className="input-select"
             value={roleFilter}
             onChange={(e) => onRoleFilterChange(e.target.value)}
-            style={{ width: '180px' }}
+            style={{ width: '220px' }}
           >
             <option value="">{t('staff.role_all', 'Tất cả vai trò')}</option>
             <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
-            <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ lý HLV')}</option>
-            <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể lực')}</option>
-            <option value="SCOUT">{t('staff.scout', 'Tuyển trạch viên')}</option>
-            <option value="PHYSIO">{t('staff.physio', 'Bác sĩ / Y tế')}</option>
+            <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ Lý HLV')}</option>
+            <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể Lực')}</option>
+            <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ Môn')}</option>
+            <option value="SCOUT">{t('staff.scout_short', 'Tuyển Trạch Viên')}</option>
+            <option value="PHYSIO">{t('staff.physio_short', 'Bác Sĩ / Trị Liệu')}</option>
+            <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'GĐ Đào Tạo Trẻ')}</option>
           </select>
 
           <button type="submit" className="btn btn-primary btn-sm flex-center" style={{ gap: '0.4rem' }}>
@@ -114,13 +103,13 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
         <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr>
-              <th className="th-left" style={{ width: '23%' }}>{t('staff_market.th_staff', 'Nhân Viên')}</th>
-              <th className="th-center" style={{ width: '12%' }}>{t('staff_market.th_role', 'Vai Trò')}</th>
+              <th className="th-left" style={{ width: '24%' }}>{t('staff_market.th_staff', 'Nhân Viên')}</th>
+              <th className="th-center" style={{ width: '13%' }}>{t('staff_market.th_role', 'Vai Trò')}</th>
               <th className="th-center" style={{ width: '8%' }}>{t('staff_market.th_license', 'Bằng Cấp')}</th>
               <th className="th-left" style={{ width: '13%' }}>{t('staff_market.th_philosophy', 'Triết Lý')}</th>
-              <th className="th-left" style={{ width: '13%' }}>{t('staff_market.th_formation', 'Sơ Đồ Sở Trường')}</th>
+              <th className="th-left" style={{ width: '12%' }}>{t('staff_market.th_formation', 'Sơ Đồ Sở Trường')}</th>
               <th className="th-center" style={{ width: '8%' }}>{t('staff_market.th_reputation', 'Danh Tiếng')}</th>
-              <th className="th-right" style={{ width: '12%' }}>{t('staff_market.th_wage_fee', 'Lương / Phí Tuyển')}</th>
+              <th className="th-right" style={{ width: '11%' }}>{t('staff_market.th_wage_fee', 'Lương / Phí Tuyển')}</th>
               <th className="th-center" style={{ width: '11%' }}>{t('staff_market.th_actions', 'Thao Tác')}</th>
             </tr>
           </thead>
@@ -140,24 +129,26 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
               </tr>
             ) : (
               staffList.map((st) => {
-                const roleInfo = getStaffRoleLabel(st.staffType);
                 const isOwnClub = st.currentClub?.id === currentClubId;
+                const styleKey = st.tacticalStyle ? st.tacticalStyle.toLowerCase() : '';
+                const styleLabel = styleKey ? t(`staff.style_${styleKey}`, st.tacticalStyle) : (st.tacticalStyle || 'BALANCED');
 
                 return (
-                  <tr key={st.id}>
+                  <tr
+                    key={st.id}
+                    onClick={() => onSelectStaff?.(st)}
+                    style={{ cursor: 'pointer' }}
+                    title={t('staff.view_profile', 'Xem hồ sơ')}
+                  >
                     {/* Nhân Viên */}
                     <td className="td-left">
                       <div className="staff-info-cell">
-                        <div
-                          className="player-avatar-sm"
-                          style={{
-                            background: '#f1f5f9',
-                            border: '1.5px solid #94a3b8',
-                            color: '#0f172a'
-                          }}
-                        >
-                          {st.name.charAt(0).toUpperCase()}
-                        </div>
+                        <StaffAvatar
+                          name={st.name}
+                          role={st.staffType}
+                          photoUrl={st.photoUrl || (st as any).photo_url}
+                          size={38}
+                        />
                         <div style={{ minWidth: 0, overflow: 'hidden' }}>
                           <div
                             style={{
@@ -180,9 +171,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
 
                     {/* Vai Trò */}
                     <td className="td-center">
-                      <span className={`badge-role ${roleInfo.class}`}>
-                        {roleInfo.label}
-                      </span>
+                      <RoleBadge role={st.staffType} size="sm" />
                     </td>
 
                     {/* Bằng Cấp */}
@@ -192,8 +181,8 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
 
                     {/* Triết Lý */}
                     <td className="td-left">
-                      <span className="tactical-style-tag">
-                        {st.tacticalStyle || 'BALANCED'}
+                      <span className="tactical-style-tag" title={styleLabel}>
+                        {styleLabel}
                       </span>
                     </td>
 
@@ -235,7 +224,14 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                         <button
                           className="btn btn-sm btn-primary flex-center"
                           style={{ gap: '0.35rem', margin: '0 auto' }}
-                          onClick={() => onOpenHireModal(st)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onOpenOfferModal) {
+                              onOpenOfferModal(st);
+                            } else {
+                              onOpenHireModal(st);
+                            }
+                          }}
                         >
                           <Briefcase size={14} /> {t('staff_market.hire_btn', 'Tuyển Mộ')}
                         </button>
@@ -250,7 +246,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
 
         {/* Pagination */}
         <div className="flex-center" style={{ justifyContent: 'space-between', padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)' }}>
-          <span className="text-muted" style={{ fontSize: '0.85rem' }}>Trang {page} / {totalPages}</span>
+          <span className="text-muted" style={{ fontSize: '0.85rem' }}>{t('common.page', 'Trang')} {page} / {totalPages}</span>
           <div className="btn-group">
             <button
               className="btn btn-xs btn-outline"
@@ -264,7 +260,7 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
             >
-              Trang sau
+              {t('staff_market.next_page', 'Trang sau')}
             </button>
           </div>
         </div>

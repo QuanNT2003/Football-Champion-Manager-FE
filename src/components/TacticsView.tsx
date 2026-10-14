@@ -1,9 +1,11 @@
 import { useTranslation } from '../i18n';
 import { PlayerAvatar } from './common/PlayerAvatar';
+import { StaffAvatar } from './common/StaffAvatar';
 import { getFacepackUrl } from '../utils/formatters';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Club, Formation, FormationPosition, Player } from '../types';
 import { tacticsApi } from '../services/tactics.service';
+import { transfersApi } from '../services/transfers.service';
 import {
   Sliders,
   Save,
@@ -164,7 +166,18 @@ export const TacticsView: React.FC<Props> = ({
           if (tacticRes.pressing_intensity !== undefined) setPressing(Number(tacticRes.pressing_intensity));
           if (tacticRes.defensive_line !== undefined) setDefensiveLine(Number(tacticRes.defensive_line));
           if (tacticRes.passing_style) setPassingStyle(tacticRes.passing_style);
-          if (tacticRes.headCoach) setHeadCoach(tacticRes.headCoach);
+          if (tacticRes.headCoach) {
+            setHeadCoach(tacticRes.headCoach);
+          } else if (club?.id) {
+            transfersApi.getClubStaff(club.id).then((staffList) => {
+              if (Array.isArray(staffList) && staffList.length > 0) {
+                const coach = activeSquadTab === 'YOUTH_U21'
+                  ? (staffList.find((s) => s.staffType === 'HEAD_COACH_YOUTH') || staffList.find((s) => s.staffType === 'HEAD_COACH'))
+                  : (staffList.find((s) => s.staffType === 'HEAD_COACH') || staffList[0]);
+                if (coach) setHeadCoach(coach);
+              }
+            }).catch(() => {});
+          }
 
           setSavedTacticInfo({
             id: tacticRes.id?.toString(),
@@ -686,7 +699,18 @@ export const TacticsView: React.FC<Props> = ({
         if (tacticRes.pressing_intensity !== undefined) setPressing(Number(tacticRes.pressing_intensity));
         if (tacticRes.defensive_line !== undefined) setDefensiveLine(Number(tacticRes.defensive_line));
         if (tacticRes.passing_style) setPassingStyle(tacticRes.passing_style);
-        if (tacticRes.headCoach) setHeadCoach(tacticRes.headCoach);
+        if (tacticRes.headCoach) {
+          setHeadCoach(tacticRes.headCoach);
+        } else if (club?.id) {
+          transfersApi.getClubStaff(club.id).then((staffList) => {
+            if (Array.isArray(staffList) && staffList.length > 0) {
+              const coach = targetSquad === 'YOUTH_U21'
+                ? (staffList.find((s) => s.staffType === 'HEAD_COACH_YOUTH') || staffList.find((s) => s.staffType === 'HEAD_COACH'))
+                : (staffList.find((s) => s.staffType === 'HEAD_COACH') || staffList[0]);
+              if (coach) setHeadCoach(coach);
+            }
+          }).catch(() => {});
+        }
 
         setSavedTacticInfo({
           id: tacticRes.id?.toString(),
@@ -904,14 +928,17 @@ export const TacticsView: React.FC<Props> = ({
         {/* PANEL HUẤN LUYỆN VIÊN TRƯỞNG */}
         <div className="tactics-coach-panel glass-panel">
           <div className="coach-panel-avatar-wrap">
-            <div className="coach-avatar-circle">
-              <Shield className="coach-shield-bg" />
-              <span className="coach-initials">
-                {headCoach?.name?.slice(0, 2).toUpperCase() || 'HLV'}
-              </span>
-            </div>
+            <StaffAvatar
+              name={headCoach?.name || t('tactics.head_coach_default', 'Huấn luyện viên trưởng')}
+              role={activeSquadTab === 'YOUTH_U21' ? 'HEAD_COACH_YOUTH' : 'HEAD_COACH'}
+              photoUrl={headCoach?.photoUrl || headCoach?.photo_url}
+              size={58}
+            />
             <div className="coach-nation-badge" title={headCoach?.nationality || 'Vietnam'}>
-              🇻🇳 {headCoach?.countryCode || 'VIE'}
+              {headCoach?.countryFlag ? (
+                <img src={headCoach.countryFlag} alt="" style={{ width: 14, height: 10, borderRadius: 2, marginRight: 3, objectFit: 'cover', display: 'inline-block', verticalAlign: 'middle' }} />
+              ) : null}
+              <span>{headCoach?.countryCode || 'VIE'}</span>
             </div>
           </div>
 

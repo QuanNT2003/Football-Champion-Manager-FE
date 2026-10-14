@@ -4,7 +4,7 @@ import { TransferOffer } from '../types';
 export interface StaffMarketItem {
   id: string;
   name: string;
-  staffType: 'HEAD_COACH' | 'ASSISTANT_COACH' | 'FITNESS_COACH' | 'SCOUT' | 'PHYSIO';
+  staffType: 'HEAD_COACH' | 'ASSISTANT_COACH' | 'FITNESS_COACH' | 'SCOUT' | 'PHYSIO' | 'HEAD_COACH_YOUTH';
   coachingLicense: 'PRO' | 'A' | 'B' | 'C';
   tacticalStyle: string;
   reputation: number;

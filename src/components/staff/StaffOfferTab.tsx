@@ -1,7 +1,8 @@
-import { useTranslation } from '../../i18n';
+﻿import { useTranslation } from '../../i18n';
 import React from 'react';
 import { UserCheck, Clock, CheckCircle2, AlertTriangle, Send } from 'lucide-react';
 import { StaffDetailResponse } from '../../services/transfers.service';
+import { RoleBadge } from '../common/RoleBadge';
 
 interface Props {
   detail: StaffDetailResponse | null;
@@ -24,7 +25,6 @@ interface Props {
 }
 
 export const StaffOfferTab: React.FC<Props> = ({
-
   detail,
   isCurrentOwnStaff,
   proposedWage,
@@ -43,6 +43,7 @@ export const StaffOfferTab: React.FC<Props> = ({
   onOpenCancelConfirm,
 }) => {
   const { t } = useTranslation();
+
   if (isCurrentOwnStaff) {
     return (
       <div
@@ -66,7 +67,7 @@ export const StaffOfferTab: React.FC<Props> = ({
 
   return (
     <div>
-      {/* Đề nghị đang chờ (nếu c�) */}
+      {/* Đề nghị đang chờ (nếu có) */}
       {detail?.existingOffer && (
         <div
           style={{
@@ -87,11 +88,14 @@ export const StaffOfferTab: React.FC<Props> = ({
           </div>
 
           <div style={{ fontSize: '0.84rem', color: '#78350f', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem' }}>
-            <div>Vai tr�: <strong>{detail.existingOffer.role_offered || 'HLV'}</strong></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              <span>{t('staff.role_label', 'Vai trò:')}</span>
+              <RoleBadge role={detail.existingOffer.role_offered || 'HEAD_COACH'} size="sm" />
+            </div>
             <div>{t('staff.proposed_wage_label', 'Lương đề xuất:')} <strong>{formatMoney(detail.existingOffer.proposed_wage)} {t('staff.per_week', '/ tuần')}</strong></div>
             <div>{t('staff.duration_label', 'Thời hạn:')} <strong>{t('staff.years_count', '{count} năm').replace('{count}', String(detail.existingOffer.contract_years))}</strong></div>
             {detail.existingOffer.signing_bonus > 0 && (
-              <div>L�t tay: <strong>{formatMoney(detail.existingOffer.signing_bonus)}</strong></div>
+              <div>{t('staff.signing_bonus_item', 'Lót tay:')} <strong>{formatMoney(detail.existingOffer.signing_bonus)}</strong></div>
             )}
           </div>
 
@@ -136,7 +140,7 @@ export const StaffOfferTab: React.FC<Props> = ({
         </h4>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-          {/* Vai tr� */}
+          {/* Vai trò */}
           <div>
             <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '0.35rem' }}>
               {t('staff.role_assign_label', 'Vai trò bổ nhiệm')}
@@ -146,13 +150,19 @@ export const StaffOfferTab: React.FC<Props> = ({
               onChange={(e) => setRoleOffered(e.target.value)}
               style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#ffffff', fontWeight: 600 }}
             >
-              <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
-              <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ Lý HLV')}</option>
-              <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể Lực')}</option>
-              <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ Môn')}</option>
-              <option value="SCOUT">{t('staff.scout', 'Tuyển Trạch Viên')}</option>
-              <option value="PHYSIO">{t('staff.physio', 'Bác Sĩ / Trị Liệu')}</option>
-              <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'GĐ Đào Tạo Trẻ')}</option>
+              <optgroup label={t('staff.optgroup_first_team', 'Đội Một (First Team)')}>
+                <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
+                <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ Lý HLV')}</option>
+                <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể Lực')}</option>
+                <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ Môn')}</option>
+                <option value="SCOUT">{t('staff.scout_short', 'Tuyển Trạch Viên')}</option>
+                <option value="PHYSIO">{t('staff.physio_short', 'Bác Sĩ / Trị Liệu')}</option>
+                <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'GĐ Đào Tạo Trẻ')}</option>
+              </optgroup>
+              <optgroup label={t('staff.optgroup_youth_team', 'Đội Trẻ U21 (Youth Team)')}>
+                <option value="HEAD_COACH_YOUTH">{t('staff.head_coach_youth', 'HLV Trưởng Đội Trẻ U21')}</option>
+                <option value="ASSISTANT_COACH_YOUTH">{t('staff.assistant_coach_youth', 'Trợ Lý HLV Đội Trẻ U21')}</option>
+              </optgroup>
             </select>
           </div>
 
@@ -191,7 +201,7 @@ export const StaffOfferTab: React.FC<Props> = ({
             </select>
           </div>
 
-          {/* Ph� l�t tay */}
+          {/* Phí lót tay */}
           <div>
             <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '0.35rem' }}>
               {t('staff.signing_bonus_label', 'Phí lót tay ký hợp đồng (€)')}
@@ -206,7 +216,7 @@ export const StaffOfferTab: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* N�t gửi */}
+        {/* Nút gửi */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
           <button
             type="button"

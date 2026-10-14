@@ -262,6 +262,7 @@ export const en: Translations = {
   'transfers.hire_btn': 'Hire Staff',
   'transfers.my_bids_title': 'Ongoing Negotiations & Bids',
   'transfers.no_offers': 'No ongoing transfer offers at this time.',
+  'transfers.title': 'Tranfer Market',
 
   // ==========================================
   // CLUB STAFF
@@ -271,6 +272,19 @@ export const en: Translations = {
   'staff.assistant': 'Assistant Manager',
   'staff.physio': 'Physiotherapist',
   'staff.scout': 'Chief Scout',
+  'staff.head_coach': 'Head Coach',
+  'staff.assistant_coach': 'Assistant Coach',
+  'staff.head_coach_youth': 'Youth Head Coach (U21)',
+  'staff.assistant_coach_youth': 'Youth Assistant Coach (U21)',
+  'staff.fitness_coach': 'Fitness Coach',
+  'staff.gk_coach': 'Goalkeeping Coach',
+  'staff.scout_short': 'Scout',
+  'staff.physio_short': 'Physiotherapist',
+  'staff.youth_director': 'Head of Youth Development',
+  'staff.optgroup_first_team': 'First Team',
+  'staff.optgroup_youth_team': 'Youth Team (U21)',
+  'staff.role_label': 'Role:',
+  'staff.signing_bonus_item': 'Signing bonus:',
   'staff.hire_staff': 'Recruit Staff Member',
   'staff.fire_staff': 'Terminate Contract',
   'staff.salary': 'Weekly Wage',

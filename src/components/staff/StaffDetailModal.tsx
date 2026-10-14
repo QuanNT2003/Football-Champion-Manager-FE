@@ -16,6 +16,7 @@ import {
 import { ConfirmModal } from '../common/ConfirmModal';
 import { RoleBadge } from '../common/RoleBadge';
 import { LicenseBadge } from '../common/LicenseBadge';
+import { StaffAvatar } from '../common/StaffAvatar';
 import { StaffSkillsTab } from './StaffSkillsTab';
 import { StaffHistoryTab } from './StaffHistoryTab';
 import { StaffOfferTab } from './StaffOfferTab';
@@ -85,6 +86,12 @@ export const StaffDetailModal: React.FC<Props> = ({
       loadDetail(staff.id);
     }
   }, [staff.id, currentClubId]);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, staff.id]);
 
   const currentIndex = staffList.findIndex((s) => s.id === staff.id);
   const hasPrev = currentIndex > 0;
@@ -224,22 +231,13 @@ export const StaffDetailModal: React.FC<Props> = ({
         <div className="pm-header-card">
           {/* Avatar with Badges */}
           <div className="pm-avatar-container">
-            <div className="pm-avatar-box">
-              {fullPhotoUrl ? (
-                <img
-                  src={fullPhotoUrl}
-                  alt={staff.name}
-                  className="pm-avatar-img"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLElement).style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="pm-avatar-placeholder">
-                  <span className="pm-placeholder-icon">👤</span>
-                </div>
-              )}
-            </div>
+            <StaffAvatar
+              name={staff.name}
+              role={staff.staffType}
+              photoUrl={staff.photoUrl || detail?.photoUrl}
+              size={96}
+              style={{ borderRadius: '16px' }}
+            />
           </div>
 
           {/* Column 1: Nationality, Tactical Style, Preferred Formation */}

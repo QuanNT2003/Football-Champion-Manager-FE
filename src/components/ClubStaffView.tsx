@@ -5,20 +5,16 @@ import {
   Search,
   Filter,
   Briefcase,
-  Award,
-  Calendar,
-  Clock,
-  Shield,
   Star,
   Plus,
   AlertTriangle,
   ChevronRight,
   UserCheck,
-  Compass,
 } from 'lucide-react';
 import { transfersApi, StaffMarketItem } from '../services/transfers.service';
 import { StaffDetailModal } from './StaffDetailModal';
-import { getFacepackUrl } from '../utils/formatters';
+import { StaffAvatar } from './common/StaffAvatar';
+import { RoleBadge } from './common/RoleBadge';
 
 interface Props {
   clubId: string;
@@ -61,27 +57,6 @@ export const ClubStaffView: React.FC<Props> = ({
     return `€${val.toLocaleString()}`;
   };
 
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'HEAD_COACH':
-        return { label: t('staff.head_coach', 'HLV Trưởng'), color: '#16a34a', bg: '#dcfce7' };
-      case 'ASSISTANT_COACH':
-        return { label: t('staff.assistant_coach', 'Trợ Lý HLV'), color: '#0284c7', bg: '#e0f2fe' };
-      case 'FITNESS_COACH':
-        return { label: t('staff.fitness_coach', 'HLV Thể Lực'), color: '#ea580c', bg: '#ffedd5' };
-      case 'GOALKEEPING_COACH':
-        return { label: t('staff.gk_coach', 'HLV Thủ Môn'), color: '#7c3aed', bg: '#ede9fe' };
-      case 'SCOUT':
-        return { label: t('staff.scout', 'Tuyển Trạch Viên'), color: '#4f46e5', bg: '#e0e7ff' };
-      case 'PHYSIO':
-        return { label: t('staff.physio', 'Bác Sĩ / Trị Liệu'), color: '#db2777', bg: '#fce7f3' };
-      case 'YOUTH_DIRECTOR':
-        return { label: t('staff.youth_director', 'GĐ Đào Tạo Trẻ'), color: '#059669', bg: '#d1fae5' };
-      default:
-        return { label: role, color: '#475569', bg: '#f1f5f9' };
-    }
-  };
-
   const getLicenseBadge = (license: string) => {
     switch (license) {
       case 'PRO':
@@ -89,11 +64,11 @@ export const ClubStaffView: React.FC<Props> = ({
       case 'A':
         return { text: 'A', bg: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff' };
       case 'B':
-        return { text: 'B', bg: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: '#ffffff' };
+        return { text: 'B', bg: 'linear-gradient(135deg, #0284c7, #0369a1)', color: '#ffffff' };
       case 'C':
-        return { text: 'C', bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#ffffff' };
+        return { text: 'C', bg: 'linear-gradient(135deg, #64748b, #475569)', color: '#ffffff' };
       default:
-        return { text: license, bg: '#94a3b8', color: '#ffffff' };
+        return { text: license || 'C', bg: '#e2e8f0', color: '#475569' };
     }
   };
 
@@ -130,7 +105,7 @@ export const ClubStaffView: React.FC<Props> = ({
 
   // Calculate telemetry
   const totalWage = staffList.reduce((acc, cur) => acc + (cur.wage || 0), 0);
-  const headCoach = staffList.find((s) => s.staffType === 'HEAD_COACH');
+  const headCoach = staffList.find((s) => s.staffType === 'HEAD_COACH' || s.staffType === 'HEAD_COACH_YOUTH') || staffList[0];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -154,26 +129,26 @@ export const ClubStaffView: React.FC<Props> = ({
               width: 48,
               height: 48,
               borderRadius: '12px',
-              background: '#dcfce7',
-              color: '#16a34a',
+              background: '#ecfdf5',
+              color: '#059669',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Briefcase size={24} />
+            <Users size={24} />
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              {t('staff.title')}
+              {t('staff.total_members', 'Quy Mô Nhân Sự')}
             </div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>{t('staff.members_count', '{count} thành viên').replace('{count}', String(staffList.length))}</span>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a' }}>
+              {staffList.length} <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>{t('staff.member_unit', 'thành viên')}</span>
             </div>
           </div>
         </div>
 
-        {/* Total Weekly Wage */}
+        {/* Total Weekly Wages */}
         <div
           style={{
             background: '#ffffff',
@@ -198,14 +173,14 @@ export const ClubStaffView: React.FC<Props> = ({
               justifyContent: 'center',
             }}
           >
-            <Award size={24} />
+            <Briefcase size={24} />
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              {t('staff.total_wage', 'Tổng Quỹ Lương Nhân Sự')}
+              {t('staff.total_wage_bill', 'Tổng Quỹ Lương Staff')}
             </div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#d97706' }}>
-              {formatMoney(totalWage)} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>{t('staff.per_week', '/ tuần')}</span>
+            <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#059669' }}>
+              {formatMoney(totalWage)} <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>{t('staff.per_week', '/ tuần')}</span>
             </div>
           </div>
         </div>
@@ -223,20 +198,29 @@ export const ClubStaffView: React.FC<Props> = ({
             gap: '1rem',
           }}
         >
-          <div
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: '12px',
-              background: headCoach ? '#e0f2fe' : '#fee2e2',
-              color: headCoach ? '#0284c7' : '#dc2626',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {headCoach ? <UserCheck size={24} /> : <AlertTriangle size={24} />}
-          </div>
+          {headCoach ? (
+            <StaffAvatar
+              name={headCoach.name}
+              role={headCoach.staffType}
+              photoUrl={headCoach.photoUrl || (headCoach as any).photo_url}
+              size={48}
+            />
+          ) : (
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: '12px',
+                background: '#fee2e2',
+                color: '#dc2626',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <AlertTriangle size={24} />
+            </div>
+          )}
           <div>
             <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
               {t('staff.current_head_coach', 'HLV Trưởng Hiện Tại')}
@@ -283,7 +267,7 @@ export const ClubStaffView: React.FC<Props> = ({
 
           {/* Role Filter */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Filter size={15} color="#64748b" />
+            <Filter size={16} color="#64748b" />
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
@@ -299,12 +283,14 @@ export const ClubStaffView: React.FC<Props> = ({
             >
               <option value="ALL">{t('staff.role_all', 'Tất cả vai trò')}</option>
               <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
-              <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ lý HLV')}</option>
-              <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể lực')}</option>
-              <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ môn')}</option>
-              <option value="SCOUT">{t('staff.scout', 'Tuyển trạch viên')}</option>
-              <option value="PHYSIO">{t('staff.physio', 'Bác sĩ / Y tế')}</option>
-              <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'GĐ Đào tạo trẻ')}</option>
+              <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ Lý HLV')}</option>
+              <option value="HEAD_COACH_YOUTH">{t('staff.head_coach_youth', 'HLV Trưởng Đội Trẻ U21')}</option>
+              <option value="ASSISTANT_COACH_YOUTH">{t('staff.assistant_coach_youth', 'Trợ Lý HLV Đội Trẻ U21')}</option>
+              <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể Lực')}</option>
+              <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ Môn')}</option>
+              <option value="SCOUT">{t('staff.scout_short', 'Tuyển Trạch Viên')}</option>
+              <option value="PHYSIO">{t('staff.physio_short', 'Bác Sĩ / Trị Liệu')}</option>
+              <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'GĐ Đào Tạo Trẻ')}</option>
             </select>
           </div>
         </div>
@@ -329,48 +315,38 @@ export const ClubStaffView: React.FC<Props> = ({
         )}
       </div>
 
-      {/* 3. Danh Sách Staff (Grid Layout) */}
+      {/* 3. Danh sách thẻ nhân sự trong CLB */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '3.5rem', background: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0', color: '#64748b' }}>
-          <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.75rem' }} />
-          <div>{t('staff.loading_list', 'Đang tải danh sách ban huấn luyện CLB...')}</div>
+        <div style={{ textAlign: 'center', padding: '4rem 1rem', background: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+          <div className="spinner" style={{ width: 32, height: 32, margin: '0 auto 1rem' }} />
+          <div style={{ color: '#64748b' }}>{t('staff.loading_club_staff', 'Đang nạp dữ liệu ban huấn luyện CLB...')}</div>
         </div>
       ) : filteredStaff.length === 0 ? (
-        <div
-          style={{
-            background: '#ffffff',
-            borderRadius: '14px',
-            border: '1px solid #e2e8f0',
-            padding: '3rem 2rem',
-            textAlign: 'center',
-            color: '#64748b',
-          }}
-        >
-          <Briefcase size={40} style={{ margin: '0 auto 0.75rem', color: '#94a3b8' }} />
-          <h4 style={{ margin: '0 0 0.5rem 0', fontWeight: 800, color: '#0f172a' }}>
-            {t('staff.no_staff_match_title', 'Chưa có nhân sự nào phù hợp')}
+        <div style={{ textAlign: 'center', padding: '4rem 1rem', background: '#ffffff', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+          <Users size={48} color="#94a3b8" style={{ margin: '0 auto 1rem' }} />
+          <h4 style={{ margin: '0 0 0.5rem', fontWeight: 800, color: '#0f172a' }}>
+            {t('staff.empty_club_staff', 'Chưa Có Nhân Sự Nào')}
           </h4>
-          <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.88rem' }}>
-            {staffList.length === 0
-              ? t('staff.no_staff_in_club', 'CLB của bạn hiện chưa có nhân sự nào trong ban huấn luyện. Hãy tuyển mộ thêm từ thị trường tự do!')
-              : t('staff.no_staff_filter', 'Không tìm thấy nhân viên nào khớp với bộ lọc hiện tại.')}
+          <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
+            {t('staff.empty_club_staff_desc', 'Hãy ghé qua Thị trường Tuyển mộ để ký hợp đồng với những chuyên gia bóng đá hàng đầu.')}
           </p>
-          {onNavigateToMarket && staffList.length === 0 && (
+          {onNavigateToMarket && (
             <button
               type="button"
               onClick={onNavigateToMarket}
-              className="btn btn-sm btn-primary"
-              style={{ padding: '0.65rem 1.35rem', fontWeight: 800, borderRadius: '8px' }}
+              className="btn btn-primary"
+              style={{ marginTop: '1.25rem', padding: '0.55rem 1.25rem', fontWeight: 800 }}
             >
-              {t('staff.explore_market', 'Khám Phá Thị Trường Nhân Sự')}
+              {t('staff.go_to_market_btn', 'Đến Thị Trường Tuyển Mộ')}
             </button>
           )}
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
           {filteredStaff.map((st) => {
-            const roleBadge = getRoleBadge(st.staffType);
             const licenseBadge = getLicenseBadge(st.coachingLicense);
+            const styleKey = st.tacticalStyle ? st.tacticalStyle.toLowerCase() : '';
+            const styleLabel = styleKey ? t(`staff.style_${styleKey}`, st.tacticalStyle) : (st.tacticalStyle || 'BALANCED');
 
             return (
               <div
@@ -380,13 +356,13 @@ export const ClubStaffView: React.FC<Props> = ({
                   background: '#ffffff',
                   borderRadius: '14px',
                   border: '1px solid #e2e8f0',
-                  padding: '1.15rem 1.25rem',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.03)',
-                  cursor: 'pointer',
-                  transition: 'all 0.18s ease-in-out',
+                  padding: '1.25rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.85rem',
+                  gap: '1rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.03)',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
@@ -402,30 +378,13 @@ export const ClubStaffView: React.FC<Props> = ({
                 {/* Header: Avatar, Name, License, Role */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                   <div style={{ position: 'relative' }}>
-                    {st.photoUrl ? (
-                      <img
-                        src={getFacepackUrl(st.photoUrl)}
-                        alt=""
-                        style={{ width: 52, height: 52, borderRadius: '12px', objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: 52,
-                          height: 52,
-                          borderRadius: '12px',
-                          background: 'linear-gradient(135deg, #1e293b, #0f172a)',
-                          color: '#ffffff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 800,
-                          fontSize: '1.25rem',
-                        }}
-                      >
-                        {st.name.charAt(0)}
-                      </div>
-                    )}
+                    <StaffAvatar
+                      name={st.name}
+                      role={st.staffType}
+                      photoUrl={st.photoUrl || (st as any).photo_url}
+                      size={52}
+                      style={{ borderRadius: '12px' }}
+                    />
                     <span
                       style={{
                         position: 'absolute',
@@ -459,18 +418,7 @@ export const ClubStaffView: React.FC<Props> = ({
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-                      <span
-                        style={{
-                          background: roleBadge.bg,
-                          color: roleBadge.color,
-                          fontSize: '0.72rem',
-                          fontWeight: 800,
-                          padding: '0.15rem 0.45rem',
-                          borderRadius: '6px',
-                        }}
-                      >
-                        {roleBadge.label}
-                      </span>
+                      <RoleBadge role={st.staffType} size="sm" />
 
                       <span style={{ fontSize: '0.76rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                         {st.countryFlag && <img src={st.countryFlag} alt="" style={{ width: 14, height: 10, borderRadius: 2 }} />}
@@ -494,7 +442,7 @@ export const ClubStaffView: React.FC<Props> = ({
                 >
                   <div>
                     <span style={{ color: '#64748b' }}>{t('staff.philosophy_label', 'Triết lý:')} </span>
-                    <strong style={{ color: '#16a34a' }}>{st.tacticalStyle || 'BALANCED'}</strong>
+                    <strong style={{ color: '#16a34a' }}>{styleLabel}</strong>
                   </div>
                   <div>
                     <span style={{ color: '#64748b' }}>{t('staff.formation_label', 'Sơ đồ:')} </span>
@@ -534,7 +482,9 @@ export const ClubStaffView: React.FC<Props> = ({
           cashBalance={cashBalance}
           onClose={() => setSelectedStaff(null)}
           onSelectStaff={(st) => setSelectedStaff(st)}
-          onOfferSuccess={() => loadClubStaff()}
+          onOfferSuccess={() => {
+            loadClubStaff();
+          }}
         />
       )}
     </div>

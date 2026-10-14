@@ -59,6 +59,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   const [staffPage, setStaffPage] = useState(1);
   const [staffTotalPages, setStaffTotalPages] = useState(1);
   const [selectedStaffForHire, setSelectedStaffForHire] = useState<StaffMarketItem | null>(null);
+  const [staffDetailInitialTab, setStaffDetailInitialTab] = useState<'skills' | 'history' | 'offer'>('skills');
   const [hiringStaff, setHiringStaff] = useState(false);
   const [hireSuccess, setHireSuccess] = useState('');
   const [hireError, setHireError] = useState('');
@@ -232,10 +233,22 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
     }
   };
 
-  const openHireStaffModal = (staff: StaffMarketItem) => {
+  const handleOpenStaffDetail = (staff: StaffMarketItem) => {
     setSelectedStaffForHire(staff);
+    setStaffDetailInitialTab('skills');
     setHireError('');
     setHireSuccess('');
+  };
+
+  const handleOpenStaffOffer = (staff: StaffMarketItem) => {
+    setSelectedStaffForHire(staff);
+    setStaffDetailInitialTab('offer');
+    setHireError('');
+    setHireSuccess('');
+  };
+
+  const openHireStaffModal = (staff: StaffMarketItem) => {
+    handleOpenStaffOffer(staff);
   };
 
   const handleHireStaff = async () => {
@@ -274,31 +287,18 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   return (
     <div className="view-container">
       {/* Header View */}
-      <div className="view-header">
+      <div className='bg-white p-4! rounded-lg'>
         <div>
           <h1 className="view-title flex-center" style={{ gap: '0.75rem' }}>
             <ShoppingCart className="text-primary" size={28} />
             {t('transfers.title')}
           </h1>
-          <p className="view-subtitle">
+          <p className="view-subtitle flex-center">
             {t('transfers.subtitle', 'Tìm kiếm tài năng cầu thủ, đàm phán hợp đồng chuyển nhượng và chiêu mộ ban huấn luyện chất lượng cao')}
           </p>
         </div>
 
-        <div className="flex-center" style={{ gap: '1rem' }}>
-          <div
-            className="stat-chip"
-            style={{
-              background: 'rgba(22, 163, 74, 0.1)',
-              border: '1px solid rgba(22, 163, 74, 0.3)',
-              padding: '0.5rem 1rem',
-              borderRadius: '8px'
-            }}
-          >
-            <DollarSign size={16} className="text-success" />
-            <span>{t('finances.cash_balance')}: <strong className="text-success">{formatMoney(cashBalance)}</strong></span>
-          </div>
-
+        <div className="flex-start mt-4!" style={{ gap: '1rem' }}>
           <div className="btn-group">
             <button
               className={`btn btn-sm ${activeTab === 'market' ? 'btn-primary' : 'btn-outline'}`}
@@ -413,7 +413,9 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
                 setStaffPage(1);
               }}
               onPageChange={setStaffPage}
-              onOpenHireModal={openHireStaffModal}
+              onSelectStaff={handleOpenStaffDetail}
+              onOpenOfferModal={handleOpenStaffOffer}
+              onOpenHireModal={handleOpenStaffOffer}
             />
           ) : (
             <ClubStaffView
@@ -483,6 +485,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
           staffList={staffList}
           currentClubId={currentClubId}
           cashBalance={cashBalance}
+          initialTab={staffDetailInitialTab}
           onClose={() => setSelectedStaffForHire(null)}
           onSelectStaff={(st) => setSelectedStaffForHire(st)}
           onOfferSuccess={() => {
