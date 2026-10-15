@@ -138,6 +138,9 @@ export function localizeStageName(rawName: string | undefined | null, lang: Lang
   if (/^Youth Cup \(Round of 32\)$/i.test(trimmed) || /Vòng 1 \(Vòng 32 Đội Trẻ\)/i.test(trimmed)) {
     return isEn ? 'Youth Cup (Round of 32)' : 'Cúp Trẻ (Vòng 32 Đội)';
   }
+  if (/^Youth Cup Final$/i.test(trimmed) || /Chung Kết Cúp Trẻ/i.test(trimmed)) {
+    return isEn ? 'Youth Cup Final' : 'Chung Kết Cúp Trẻ U21';
+  }
   if (/^Upcoming$/i.test(trimmed) || /^Chưa diễn ra$/i.test(trimmed)) {
     return isEn ? 'Upcoming' : 'Chưa diễn ra';
   }
@@ -159,14 +162,14 @@ export function localizeFormatLabel(rawLabel: string | undefined | null, lang: L
   if (/Single Elimination \(Knockout\)/i.test(trimmed) || /Cúp Loại Trực Tiếp \(Knockout\)/i.test(trimmed)) {
     return isEn ? 'Single Elimination (Knockout)' : 'Cúp Loại Trực Tiếp (Knockout)';
   }
+  if (/Youth Cup/i.test(trimmed) || /Cúp Trẻ/i.test(trimmed)) {
+    return isEn ? 'Youth Cup (Group & Knockout)' : 'Cúp Trẻ U21 (Vòng Bảng & Knockout 16 Đội)';
+  }
   if (/Group Stage & Knockout/i.test(trimmed) || /Vòng Bảng & Loại Trực Tiếp/i.test(trimmed)) {
     return isEn ? 'Group Stage & Knockout' : 'Vòng Bảng & Loại Trực Tiếp';
   }
   if (/Super Cup \(Single Match\)/i.test(trimmed) || /Tranh Siêu Cúp/i.test(trimmed)) {
     return isEn ? 'Super Cup (Single Match)' : 'Tranh Siêu Cúp (Một Trận)';
-  }
-  if (/Youth Cup \(Knockout\)/i.test(trimmed) || /Cúp Trẻ U21/i.test(trimmed)) {
-    return isEn ? 'Youth Cup (Knockout)' : 'Cúp Trẻ U21 (Knockout)';
   }
 
   return trimmed;

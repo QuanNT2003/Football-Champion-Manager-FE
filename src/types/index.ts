@@ -132,12 +132,30 @@ export interface Player {
     market_value?: number;
     wage?: number;
   };
-  contract?: {
-    salary?: number;
-    wage?: number;
-    start_date?: string;
-    end_date?: string;
-  } | null;
+  contract?: PlayerContractDetail | null;
+}
+
+export interface PlayerContractDetail {
+  id?: string;
+  club_id?: string;
+  club_name?: string;
+  club_logo?: string;
+  salary: number;
+  weekly_wage?: number;
+  wage?: number;
+  squad_role?: string;
+  status?: string;
+  start_date?: string;
+  end_date?: string | null;
+  start_season_id?: number;
+  start_season_day?: number;
+  end_season_id?: number;
+  end_season_day?: number;
+  signing_bonus?: number;
+  release_clause?: number;
+  is_loan_contract?: boolean;
+  current_season?: number;
+  remaining_seasons?: number;
 }
 
 export interface FormationPosition {
@@ -526,6 +544,7 @@ export interface PlayerDetailData extends Player {
   } | null;
   birthday_text?: string;
   worth_display?: string;
+  weekly_wage?: number;
   weekly_wages_display?: string;
   discipline?: {
     status: 'CLEAN' | 'WARNING' | 'SUSPENDED';

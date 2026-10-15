@@ -2176,8 +2176,8 @@ body {
 
 .player-modal-dialog {
   background: #ffffff;
-  width: 100%;
-  max-width: 820px;
+  width: 95%;
+  max-width: 960px;
   max-height: 92vh;
   border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
@@ -2462,19 +2462,29 @@ body {
 .pm-tabs-bar {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   padding: 0 16px;
   border-bottom: 1px solid #e2e8f0;
   background: #ffffff;
   overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.pm-tabs-bar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+  width: 0;
+  height: 0;
 }
 
 .pm-tab-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 14px;
-  font-size: 0.84rem;
+  padding: 10px 12px;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #475569;
   background: none;
@@ -2483,6 +2493,7 @@ body {
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .pm-tab-btn:hover {
@@ -2494,13 +2505,38 @@ body {
   border-bottom-color: #16a34a;
 }
 
-/* Tab Content */
-.pm-tab-content {
+/* Tab Content & Modal Body */
+.pm-tab-content,
+.pm-body {
   padding: 16px 20px;
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
   background: #ffffff;
   min-height: 280px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.pm-tab-content::-webkit-scrollbar,
+.pm-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pm-tab-content::-webkit-scrollbar-track,
+.pm-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pm-tab-content::-webkit-scrollbar-thumb,
+.pm-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.pm-tab-content::-webkit-scrollbar-thumb:hover,
+.pm-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .pm-loading-state {

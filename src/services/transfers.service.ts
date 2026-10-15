@@ -105,10 +105,18 @@ export interface StaffDetailResponse {
     id: string;
     club?: { id: string; name: string; logo_url?: string } | null;
     role?: string;
+    squad_type?: string;
     salary: number;
+    weekly_wage?: number;
     startDate: string;
     endDate?: string | null;
+    start_season_id?: number;
+    start_season_day?: number;
+    end_season_id?: number;
+    end_season_day?: number;
     status: string;
+    current_season?: number;
+    remaining_seasons?: number;
   } | null;
   contractHistory: Array<{
     id: string;
@@ -290,5 +298,29 @@ export const transfersApi = {
     request(`/transfers/staff-offers/${offerId}/cancel`, {
       method: 'PUT',
       body: JSON.stringify({ clubId }),
+    }),
+
+  renewPlayerContract: (playerId: string, data: { additional_seasons: number; proposed_wage: number; club_id?: string }) =>
+    request<{ success: boolean; message: string; contract: any }>(`/transfers/players/${playerId}/renew-contract`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  terminatePlayerContract: (playerId: string, data?: { club_id?: string }) =>
+    request<{ success: boolean; message: string }>(`/transfers/players/${playerId}/terminate-contract`, {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    }),
+
+  renewStaffContract: (staffId: string, data: { additional_seasons: number; proposed_wage: number; club_id?: string }) =>
+    request<{ success: boolean; message: string; contract: any }>(`/transfers/staff/${staffId}/renew-contract`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  terminateStaffContract: (staffId: string, data?: { club_id?: string }) =>
+    request<{ success: boolean; message: string }>(`/transfers/staff/${staffId}/terminate-contract`, {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
     }),
 };

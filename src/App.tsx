@@ -335,6 +335,7 @@ export function App() {
         />
         <Route path="/competitions/league" element={<LeagueView />} />
         <Route path="/competitions/cup" element={<KnockoutCupView />} />
+        <Route path="/competitions/youth" element={<GroupKnockoutView />} />
         <Route path="/competitions/continental" element={<GroupKnockoutView />} />
         <Route path="/competitions/international" element={<GroupKnockoutView />} />
         <Route path="/standings" element={<LeagueView />} />

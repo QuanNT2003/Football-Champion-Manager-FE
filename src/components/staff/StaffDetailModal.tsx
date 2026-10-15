@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Sparkles,
   Briefcase,
+  FileText,
 } from 'lucide-react';
 import {
   transfersApi,
@@ -20,14 +21,16 @@ import { StaffAvatar } from '../common/StaffAvatar';
 import { StaffSkillsTab } from './StaffSkillsTab';
 import { StaffHistoryTab } from './StaffHistoryTab';
 import { StaffOfferTab } from './StaffOfferTab';
-import { getFacepackUrl } from '../../utils/formatters';
+import { StaffContractTab } from './StaffContractTab';
+import { RenewContractModal } from '../common/RenewContractModal';
+import { getFacepackUrl, formatCurrency } from '../../utils/formatters';
 
 export interface Props {
   staff: StaffMarketItem;
   staffList?: StaffMarketItem[];
   currentClubId?: string;
   cashBalance?: number;
-  initialTab?: 'skills' | 'history' | 'offer';
+  initialTab?: 'skills' | 'history' | 'offer' | 'contract';
   onClose: () => void;
   onSelectStaff?: (staff: StaffMarketItem) => void;
   onOfferSuccess?: () => void;
@@ -43,7 +46,7 @@ export const StaffDetailModal: React.FC<Props> = ({
   onOfferSuccess,
 }) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'skills' | 'history' | 'offer'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'skills' | 'history' | 'offer' | 'contract'>(initialTab);
   const [detail, setDetail] = useState<StaffDetailResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -59,6 +62,45 @@ export const StaffDetailModal: React.FC<Props> = ({
   // Cancel Offer Confirm Modal
   const [showCancelConfirm, setShowCancelConfirm] = useState<boolean>(false);
   const [cancellingOffer, setCancellingOffer] = useState<boolean>(false);
+
+  // Contract Renewal & Termination Modal States
+  const [showRenewModal, setShowRenewModal] = useState<boolean>(false);
+  const [renewingContract, setRenewingContract] = useState<boolean>(false);
+  const [showTerminateModal, setShowTerminateModal] = useState<boolean>(false);
+  const [terminatingContract, setTerminatingContract] = useState<boolean>(false);
+
+  const handleRenewStaffContract = async (data: { additionalSeasons: number; proposedWage: number }) => {
+    try {
+      setRenewingContract(true);
+      const res = await transfersApi.renewStaffContract(staff.id, {
+        additional_seasons: data.additionalSeasons,
+        proposed_wage: data.proposedWage,
+        club_id: currentClubId,
+      });
+      setShowRenewModal(false);
+      await loadDetail(staff.id);
+      alert(res.message || t('contract.renew_success', 'Gia hạn hợp đồng thành công!'));
+    } catch (err: any) {
+      alert(err.response?.data?.message || err.message || t('contract.renew_failed', 'Gia hạn hợp đồng thất bại.'));
+    } finally {
+      setRenewingContract(false);
+    }
+  };
+
+  const handleTerminateStaffContract = async () => {
+    try {
+      setTerminatingContract(true);
+      const res = await transfersApi.terminateStaffContract(staff.id, { club_id: currentClubId });
+      setShowTerminateModal(false);
+      alert(res.message || t('contract.terminate_success', 'Chấm dứt hợp đồng thành công!'));
+      onOfferSuccess?.();
+      onClose();
+    } catch (err: any) {
+      alert(err.response?.data?.message || err.message || t('contract.terminate_failed', 'Chấm dứt hợp đồng thất bại.'));
+    } finally {
+      setTerminatingContract(false);
+    }
+  };
 
   const loadDetail = async (staffId: string) => {
     try {
@@ -188,7 +230,7 @@ export const StaffDetailModal: React.FC<Props> = ({
     <div className="player-modal-overlay" onClick={onClose}>
       <div
         className="player-modal-dialog"
-        style={{ maxWidth: '920px', width: '95%' }}
+        style={{ maxWidth: '960px', width: '95%' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Control Bar */}
@@ -347,10 +389,18 @@ export const StaffDetailModal: React.FC<Props> = ({
             <Sparkles size={15} />
             <span>{t('staff.tab_offer')}</span>
           </button>
+          <button
+            type="button"
+            className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
+            onClick={() => setActiveTab('contract')}
+          >
+            <FileText size={15} />
+            <span>{t('staff.tab_contract', 'Hợp đồng')}</span>
+          </button>
         </div>
 
         {/* Modal Body Content */}
-        <div className="pm-body" style={{ maxHeight: 'calc(90vh - 240px)', overflowY: 'auto', padding: '1.25rem' }}>
+        <div className="pm-body" style={{ maxHeight: 'calc(90vh - 240px)', overflowY: 'auto', overflowX: 'hidden', padding: '1.25rem' }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '3.5rem', color: '#64748b' }}>
               <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.75rem' }} />
@@ -381,6 +431,15 @@ export const StaffDetailModal: React.FC<Props> = ({
                   onOpenCancelConfirm={() => setShowCancelConfirm(true)}
                 />
               )}
+              {activeTab === 'contract' && (
+                <StaffContractTab
+                  staff={staff}
+                  detail={detail}
+                  isCurrentOwnStaff={isCurrentOwnStaff}
+                  onOpenRenewModal={() => setShowRenewModal(true)}
+                  onOpenTerminateModal={() => setShowTerminateModal(true)}
+                />
+              )}
             </>
           )}
         </div>
@@ -395,6 +454,31 @@ export const StaffDetailModal: React.FC<Props> = ({
           variant="danger"
           onConfirm={handleCancelOffer}
           onClose={() => setShowCancelConfirm(false)}
+        />
+
+        {/* RENEW CONTRACT MODAL */}
+        <RenewContractModal
+          isOpen={showRenewModal}
+          onClose={() => setShowRenewModal(false)}
+          title={t('contract.renew_staff_title', 'Gia Hạn Hợp Đồng Nhân Sự')}
+          name={staff.name}
+          currentWage={detail?.currentContract?.weekly_wage || detail?.currentContract?.salary || staff.wage || 5000}
+          currentEndSeason={detail?.currentContract?.end_season_id || detail?.currentContract?.current_season || 1}
+          isLoading={renewingContract}
+          onConfirm={handleRenewStaffContract}
+        />
+
+        {/* TERMINATE CONTRACT CONFIRM MODAL */}
+        <ConfirmModal
+          isOpen={showTerminateModal}
+          title={t('contract.confirm_terminate_staff_title', 'Xác Nhận Sa Thải / Chấm Dứt Hợp Đồng')}
+          message={t('contract.confirm_terminate_staff_msg', 'Bạn có chắc chắn muốn sa thải nhân sự "{name}"? Hợp đồng sẽ được chấm dứt ngay lập tức và nhân sự sẽ rời khỏi CLB.').replace('{name}', staff.name)}
+          confirmText={terminatingContract ? t('common.processing', 'Đang xử lý...') : t('contract.confirm_terminate_staff_btn', 'Xác Nhận Sa Thải')}
+          cancelText={t('common.cancel', 'Hủy Bỏ')}
+          variant="danger"
+          isLoading={terminatingContract}
+          onConfirm={handleTerminateStaffContract}
+          onClose={() => !terminatingContract && setShowTerminateModal(false)}
         />
       </div>
     </div>

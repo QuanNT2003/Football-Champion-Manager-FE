@@ -213,7 +213,8 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
     : null;
 
   // Group competitions by category for optgroup
-  const domesticComps = competitions.filter((c) => c.scope === 'DOMESTIC');
+  const domesticComps = competitions.filter((c) => c.scope === 'DOMESTIC' && c.type !== 'YOUTH_CUP' && c.code !== 'DOMESTIC_YOUTH_CUP_U21' && !c.name?.toLowerCase().includes('u21'));
+  const youthComps = competitions.filter((c) => c.type === 'YOUTH_CUP' || c.code === 'DOMESTIC_YOUTH_CUP_U21' || (c.name && c.name.toLowerCase().includes('u21')));
   const continentalComps = competitions.filter((c) => c.scope === 'CONTINENTAL' || c.scope === 'REGIONAL');
   const internationalComps = competitions.filter((c) => c.scope === 'INTERNATIONAL');
 
@@ -440,6 +441,16 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ club, currentClubI
                   {domesticComps.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.tier ? `[Tier ${c.tier}] ` : ''}{comp(c.displayName || c.name)}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+
+              {youthComps.length > 0 && (
+                <optgroup label={t('standings.youth_optgroup', '🌟 Giải Trẻ U21 ({country})').replace('{country}', viewingCountryName)}>
+                  {youthComps.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {comp(c.displayName || c.name)}
                     </option>
                   ))}
                 </optgroup>

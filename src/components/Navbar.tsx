@@ -260,7 +260,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               const isLeagueActive = location.pathname === '/competitions/league' || location.pathname === '/standings';
               const isNatCupActive = location.pathname === '/competitions/cup' && currentCompId === String(federationMenu?.domestic?.nationalCup?.id);
               const isSuperCupActive = location.pathname === '/competitions/cup' && currentCompId === String(federationMenu?.domestic?.superCup?.id);
-              const isYouthCupActive = location.pathname === '/competitions/cup' && currentCompId === String(federationMenu?.domestic?.youthCup?.id);
+              const isYouthCupActive = (location.pathname === '/competitions/youth' || location.pathname === '/competitions/cup') && currentCompId === String(federationMenu?.domestic?.youthCup?.id);
               const isContinentalActive = (cId: string | number) => location.pathname === '/competitions/continental' && currentCompId === String(cId);
               const isInternationalActive = (cId: string | number) => location.pathname === '/competitions/international' && currentCompId === String(cId);
 
@@ -538,7 +538,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                             type="button"
                             onClick={() => {
                               setShowFederationMenu(false);
-                              navigate(`/competitions/cup?id=${federationMenu.domestic.youthCup?.id}`);
+                              navigate(`/competitions/youth?id=${federationMenu.domestic.youthCup?.id}`);
                             }}
                             style={{
                               display: 'flex',
@@ -586,7 +586,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                                   {federationMenu.domestic.youthCup.name}
                                 </div>
                                 <div style={{ fontSize: '0.72rem', color: isYouthCupActive ? '#16a34a' : '#64748b' }}>
-                                  Cúp Trẻ U21 Toàn Quốc
+                                  Vòng Bảng & Knockout (32 Đội U21)
                                 </div>
                               </div>
                             </div>

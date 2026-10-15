@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Trophy, Globe, RotateCcw, Swords, LayoutGrid } from 'lucide-react';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { Trophy, Globe, RotateCcw, Swords, LayoutGrid, Flag } from 'lucide-react';
 import {
   competitionsApi,
   CompetitionCountry,
@@ -20,14 +20,17 @@ export const GroupKnockoutView: React.FC = () => {
   const { t } = useTranslation();
   const { comp, group } = useTournamentLocale();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const isYouth = location.pathname.includes('/youth') || searchParams.get('type') === 'youth';
   const userClubCountryId = currentClub?.country_id?.toString() || '1';
   const queryCountryId = searchParams.get('countryId');
   const viewingCountryId = queryCountryId || userClubCountryId;
 
-  // Comp ID: 8 (C1), 9 (C2), 10 (C3), 11 (World Cup), 12 (Euro)
-  const compId = searchParams.get('id') || '8';
+  // Comp ID: 8 (C1), 9 (C2), 10 (C3), 11 (World Cup), 12 (Euro), 13 (U21 Cup)
+  const queryCompId = searchParams.get('id');
+  const compId = queryCompId || (isYouth ? '13' : '8');
 
   const [activeTab, setActiveTab] = useState<'groups' | 'bracket' | 'teams' | 'stats'>('groups');
   const [loading, setLoading] = useState<boolean>(true);
@@ -64,11 +67,24 @@ export const GroupKnockoutView: React.FC = () => {
         // 1. Comp detail
         const comps = await competitionsApi.getAll(viewingCountryId);
         const compList: Competition[] = Array.isArray(comps) ? comps : (comps as any)?.items || [];
-        const found = compList.find((c) => c.id === compId) || null;
+        
+        let effectiveCompId = queryCompId;
+        if (isYouth) {
+          if (!effectiveCompId || effectiveCompId === '8') {
+            const youthComp = compList.find(
+              (c) => c.type === 'YOUTH_CUP' || c.code === 'DOMESTIC_YOUTH_CUP_U21' || c.name?.toLowerCase().includes('u21')
+            );
+            effectiveCompId = youthComp ? youthComp.id.toString() : '13';
+          }
+        } else if (!effectiveCompId) {
+          effectiveCompId = '8';
+        }
+
+        const found = compList.find((c) => c.id.toString() === effectiveCompId.toString()) || null;
         setCurrentComp(found);
 
         // 2. Standings & Groups
-        const res = await competitionsApi.getStandings(compId, viewingCountryId);
+        const res = await competitionsApi.getStandings(effectiveCompId, viewingCountryId);
         if (res && 'groups' in res && res.groups) {
           setGroups(res.groups);
           if (res.groups.length > 0 && !selectedGroupId) {
@@ -79,20 +95,20 @@ export const GroupKnockoutView: React.FC = () => {
         }
 
         // 3. Knockout bracket
-        const bracket = await competitionsApi.getKnockoutBracket(compId, viewingCountryId);
+        const bracket = await competitionsApi.getKnockoutBracket(effectiveCompId, viewingCountryId);
         setKnockoutBracket(bracket);
         if (bracket?.rounds && bracket.rounds.length > 0) {
           setSelectedRoundName(bracket.rounds[bracket.rounds.length - 1].roundName);
         }
 
         // 4. Teams
-        const teamsData = await competitionsApi.getTeams(compId, viewingCountryId);
+        const teamsData = await competitionsApi.getTeams(effectiveCompId, viewingCountryId);
         setTeams(Array.isArray(teamsData) ? teamsData : []);
 
         // 5. Stats
         const [scorers, assists] = await Promise.all([
-          competitionsApi.getTopScorers(compId, viewingCountryId, 10),
-          competitionsApi.getTopAssists(compId, viewingCountryId, 10),
+          competitionsApi.getTopScorers(effectiveCompId, viewingCountryId, 10),
+          competitionsApi.getTopAssists(effectiveCompId, viewingCountryId, 10),
         ]);
         setTopScorers(Array.isArray(scorers) ? scorers : []);
         setTopAssists(Array.isArray(assists) ? assists : []);
@@ -105,7 +121,7 @@ export const GroupKnockoutView: React.FC = () => {
     };
 
     loadData();
-  }, [compId, viewingCountryId]);
+  }, [compId, viewingCountryId, isYouth, queryCompId]);
 
   const allKnockoutRounds = useMemo(() => {
     return knockoutBracket?.rounds || [];
@@ -129,7 +145,7 @@ export const GroupKnockoutView: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
               <Trophy size={24} color="#15803d" />
-              <span>{comp(currentComp?.displayName || currentComp?.name || 'Continental Champions League')}</span>
+              <span>{comp(currentComp?.displayName || currentComp?.name || (isYouth ? `${viewingCountryName} U21 Cup` : 'Continental Champions League'))}</span>
             </h2>
 
             {/* Badge Format */}
@@ -146,8 +162,34 @@ export const GroupKnockoutView: React.FC = () => {
               }}
             >
               <LayoutGrid size={14} />
-              <span>{t('standings.format_group_knockout', 'Vòng Bảng & Loại Trực Tiếp (Knockout)')}</span>
+              <span>{isYouth ? t('standings.format_youth_group_ko', 'Cúp Trẻ U21 (Vòng Bảng & Knockout 16 Đội)') : t('standings.format_group_knockout', 'Vòng Bảng & Loại Trực Tiếp (Knockout)')}</span>
             </span>
+
+            {/* Country Selector Button for Youth Cup */}
+            {isYouth && (
+              <button
+                type="button"
+                onClick={() => setShowCountryModal(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '5px 12px',
+                  borderRadius: '10px',
+                  backgroundColor: '#ffffff',
+                  color: '#15803d',
+                  border: '1.5px solid #bbf7d0',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <Flag size={14} />
+                <span>{viewingCountryName} (96 Quốc Gia)</span>
+              </button>
+            )}
           </div>
 
           {/* 4 Tabs */}
@@ -167,7 +209,7 @@ export const GroupKnockoutView: React.FC = () => {
               }}
               onClick={() => setActiveTab('groups')}
             >
-              {t('standings.group_stage', 'Vòng Bảng')} ({groups.length || 8})
+              {isYouth ? t('standings.group_stage_youth', 'Vòng Bảng U21') : t('standings.group_stage', 'Vòng Bảng')} ({groups.length || 8})
             </button>
 
             <button
@@ -234,6 +276,30 @@ export const GroupKnockoutView: React.FC = () => {
         </div>
       ) : activeTab === 'groups' ? (
         <div>
+          {/* Banner Thể thức đi tiếp */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              color: '#166534',
+              fontSize: '0.88rem',
+              marginBottom: '1.25rem',
+              fontWeight: 600,
+            }}
+          >
+            <span style={{ fontSize: '1.2rem' }}>📌</span>
+            <span>
+              {isYouth
+                ? t('standings.youth_progression_banner', 'Thể thức Cúp Trẻ U21: 32 CLB tranh tài qua 8 bảng (A - H). Đội Nhất & Nhì mỗi bảng (16 đội) sẽ giành vé vào vòng Knockout 1/8 (Round of 16).')
+                : t('standings.group_progression_banner', 'Thể thức Vòng Bảng: Top 2 đội dẫn đầu mỗi bảng giành vé bước tiếp vào vòng đấu loại trực tiếp Knockout.')}
+            </span>
+          </div>
+
           {/* Group Grid: Hiển thị các bảng A..H */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.25rem' }}>
             {groups.map((grp) => (
@@ -289,6 +355,12 @@ export const GroupKnockoutView: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+
+                {/* Footer Chú thích Bảng */}
+                <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
+                  <span>🟢 Top 1 - 2: Vào Vòng 1/8</span>
+                  <span style={{ color: '#94a3b8', fontWeight: 500 }}>Đá vòng tròn 1 lượt</span>
+                </div>
               </div>
             ))}
           </div>
@@ -311,6 +383,21 @@ export const GroupKnockoutView: React.FC = () => {
         <LeagueStatsView
           topScorers={topScorers}
           topAssists={topAssists}
+        />
+      )}
+
+      {/* Country Selection Modal */}
+      {showCountryModal && (
+        <CountrySelectModal
+          isOpen={showCountryModal}
+          onClose={() => setShowCountryModal(false)}
+          allCountries={countries}
+          viewingCountryId={viewingCountryId}
+          loading={false}
+          onSelectCountry={(c) => {
+            setSearchParams({ countryId: c.id });
+            setShowCountryModal(false);
+          }}
         />
       )}
     </div>

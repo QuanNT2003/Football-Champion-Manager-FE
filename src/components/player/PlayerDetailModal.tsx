@@ -6,6 +6,8 @@ import { PlayerStatsTab } from './PlayerStatsTab';
 import { PlayerTransfersTab } from './PlayerTransfersTab';
 import { PlayerInjuriesTab } from './PlayerInjuriesTab';
 import { PlayerOfferTab } from './PlayerOfferTab';
+import { PlayerContractTab } from './PlayerContractTab';
+import { RenewContractModal } from '../common/RenewContractModal';
 import React, { useState, useEffect } from 'react';
 import { Player, PlayerDetailData } from '../../types';
 import { formatCurrency, formatNumber, getFacepackUrl } from '../../utils/formatters';
@@ -28,6 +30,7 @@ import {
   Activity,
   HeartPulse,
   CheckCircle2,
+  FileText,
 } from 'lucide-react';
 
 export interface Props {
@@ -35,7 +38,7 @@ export interface Props {
   playersList?: Player[];
   currentClubId?: string;
   cashBalance?: number;
-  initialTab?: 'skills' | 'matches' | 'statistics' | 'transfers' | 'injuries' | 'offer';
+  initialTab?: 'skills' | 'matches' | 'statistics' | 'transfers' | 'injuries' | 'offer' | 'contract';
   onClose: () => void;
   onSelectPlayer?: (player: Player) => void;
   onPlayerUpdated?: () => void;
@@ -92,7 +95,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
   // Chỉ hiển thị tab Offer khi: Cầu thủ KHÔNG thuộc CLB của mình VÀ đang trong diện chuyển nhượng
   const isEligibleForOffer = !isOwnClub && (isTransferListed || isLoanListed || isFreeAgent);
 
-  const [activeTab, setActiveTab] = useState<'skills' | 'matches' | 'statistics' | 'transfers' | 'injuries' | 'offer'>(() => {
+  const [activeTab, setActiveTab] = useState<'skills' | 'matches' | 'statistics' | 'transfers' | 'injuries' | 'offer' | 'contract'>(() => {
     if (initialTab === 'offer') {
       return isEligibleForOffer ? 'offer' : 'skills';
     }
@@ -249,6 +252,57 @@ export const PlayerDetailModal: React.FC<Props> = ({
     }
   };
 
+  // Contract Renewal & Termination Modal States
+  const [showRenewModal, setShowRenewModal] = useState<boolean>(false);
+  const [renewingContract, setRenewingContract] = useState<boolean>(false);
+  const [showTerminateModal, setShowTerminateModal] = useState<boolean>(false);
+  const [terminatingContract, setTerminatingContract] = useState<boolean>(false);
+
+  const fetchPlayerDetail = async (id: string) => {
+    try {
+      setLoading(true);
+      const data: any = await playersApi.getPlayerById(id);
+      setDetail(data);
+    } catch (err) {
+      console.error('Failed to load player detail:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRenewContract = async (data: { additionalSeasons: number; proposedWage: number }) => {
+    try {
+      setRenewingContract(true);
+      const res = await transfersApi.renewPlayerContract(player.id, {
+        additional_seasons: data.additionalSeasons,
+        proposed_wage: data.proposedWage,
+        club_id: currentClubId,
+      });
+      setShowRenewModal(false);
+      await fetchPlayerDetail(player.id);
+      alert(res.message || t('contract.renew_success', 'Gia hạn hợp đồng thành công!'));
+    } catch (err: any) {
+      alert(err.response?.data?.message || err.message || t('contract.renew_failed', 'Gia hạn hợp đồng thất bại.'));
+    } finally {
+      setRenewingContract(false);
+    }
+  };
+
+  const handleTerminateContract = async () => {
+    try {
+      setTerminatingContract(true);
+      const res = await transfersApi.terminatePlayerContract(player.id, { club_id: currentClubId });
+      setShowTerminateModal(false);
+      alert(res.message || t('contract.terminate_success', 'Chấm dứt hợp đồng thành công!'));
+      onOfferSuccess?.();
+      onClose();
+    } catch (err: any) {
+      alert(err.response?.data?.message || err.message || t('contract.terminate_failed', 'Chấm dứt hợp đồng thất bại.'));
+    } finally {
+      setTerminatingContract(false);
+    }
+  };
+
   // Load detailed player info from API
   useEffect(() => {
     let isMounted = true;
@@ -371,7 +425,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
   const pMarketValue = detail?.market_value ?? player.market_value;
   const pWorth = formatCurrency(pMarketValue);
 
-  const pWeeklyWage = (detail as any)?.weekly_wage ?? (player.contract?.salary ? Math.round(Number(player.contract.salary) / 52) : null);
+  const pWeeklyWage = detail?.weekly_wage ?? (player.contract?.salary ? Number(player.contract.salary) : null);
   const pWages = pWeeklyWage && pWeeklyWage > 0 
     ? `${formatCurrency(pWeeklyWage)} ${t('player_modal.per_week', '/ tuần')}` 
     : (detail?.weekly_wages_display || t('player_modal.no_contract', 'Chưa ký HĐ'));
@@ -578,6 +632,13 @@ export const PlayerDetailModal: React.FC<Props> = ({
             <HeartPulse size={15} />
             <span>{t('player.tab_injuries')}</span>
           </button>
+          <button
+            className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
+            onClick={() => setActiveTab('contract')}
+          >
+            <FileText size={15} />
+            <span>{t('player.tab_contract', 'Hợp đồng')}</span>
+          </button>
           {isEligibleForOffer && (
             <button
               className={`pm-tab-btn ${activeTab === 'offer' ? 'active' : ''}`}
@@ -658,6 +719,16 @@ export const PlayerDetailModal: React.FC<Props> = ({
                   cancellingOffer={cancellingOffer}
                 />
               )}
+              {/* TAB 7: CONTRACT */}
+              {activeTab === 'contract' && (
+                <PlayerContractTab
+                  player={player}
+                  detail={detail}
+                  isOwnClub={isOwnClub}
+                  onOpenRenewModal={() => setShowRenewModal(true)}
+                  onOpenTerminateModal={() => setShowTerminateModal(true)}
+                />
+              )}
             </>
           )}
         </div>
@@ -699,6 +770,52 @@ export const PlayerDetailModal: React.FC<Props> = ({
                 <div>{t('player_modal.player_label', 'Cầu thủ:')} <strong style={{ color: '#0f172a' }}>{player.name || player.common_name || (player.first_name ? player.first_name + ' ' + (player.last_name || '') : 'Cầu thủ')}</strong></div>
                 <div>{t('player_modal.type_label', 'Hình thức:')} <strong>{existingOffer && existingOffer.is_loan ? t('player_modal.type_loan', 'Cho Mượn') : t('player_modal.type_buy', 'Mua Đứt')}</strong></div>
                 <div>{t('player_modal.refund_fee_label', 'Mức phí hoàn trả:')} <strong style={{ color: '#dc2626' }}>{existingOffer && existingOffer.is_loan ? '€0 (Mượn)' : '€' + Number(existingOffer ? existingOffer.offer_amount : 0).toLocaleString()}</strong></div>
+              </div>
+            </div>
+          }
+        />
+
+        {/* MODAL GIA HẠN HỢP ĐỒNG */}
+        <RenewContractModal
+          isOpen={showRenewModal}
+          onClose={() => setShowRenewModal(false)}
+          title={t('contract.renew_player_title', 'Gia Hạn Hợp Đồng Cầu Thủ')}
+          name={`${player.first_name || ''} ${player.last_name || ''}`.trim() || player.name || 'Cầu thủ'}
+          currentWage={detail?.contract?.weekly_wage || detail?.contract?.salary || (player.contract?.salary ? Number(player.contract.salary) : 5000)}
+          currentEndSeason={detail?.contract?.end_season_id || detail?.contract?.current_season || 1}
+          isLoading={renewingContract}
+          onConfirm={handleRenewContract}
+        />
+
+        {/* MODAL XÁC NHẬN SA THẢI / CHẤM DỨT HỢP ĐỒNG */}
+        <ConfirmModal
+          isOpen={showTerminateModal}
+          title={t('contract.confirm_terminate_title', 'Xác Nhận Sa Thải / Thanh Lý Hợp Đồng')}
+          variant="danger"
+          confirmText={t('contract.confirm_terminate_btn', 'Xác Nhận Sa Thải')}
+          cancelText={t('common.cancel', 'Hủy Bỏ')}
+          isLoading={terminatingContract}
+          onConfirm={handleTerminateContract}
+          onClose={() => !terminatingContract && setShowTerminateModal(false)}
+          message={
+            <div>
+              <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
+                {t('contract.confirm_terminate_player_msg', 'Bạn có chắc chắn muốn kết thúc hợp đồng với cầu thủ này? Cầu thủ sẽ rời khỏi đội bóng ngay lập tức và trở thành cầu thủ tự do.')}
+              </p>
+              <div
+                style={{
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '10px',
+                  padding: '0.85rem 1rem',
+                  fontSize: '0.86rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.4rem',
+                }}
+              >
+                <div>{t('player_modal.player_label', 'Cầu thủ:')} <strong style={{ color: '#0f172a' }}>{player.name || player.common_name || (player.first_name ? player.first_name + ' ' + (player.last_name || '') : 'Cầu thủ')}</strong></div>
+                <div>{t('contract.weekly_wage_label', 'Mức Lương Tuần:')} <strong>{formatCurrency(detail?.contract?.weekly_wage || detail?.contract?.salary || 0)} / {t('common.week', 'tuần')}</strong></div>
               </div>
             </div>
           }
