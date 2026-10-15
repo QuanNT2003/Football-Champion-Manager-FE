@@ -282,7 +282,7 @@ export const LeagueView: React.FC = () => {
               }}
             >
               <Trophy size={14} />
-              <span>{t('standings.format_league', 'Vòng tròn tính điểm (League)')}</span>
+              <span>{t('standings.format_league_long', 'Vòng tròn tính điểm (League)')}</span>
             </span>
           </div>
 

@@ -213,7 +213,31 @@ export const StaffDetailModal: React.FC<Props> = ({
               <ChevronRight size={20} />
             </button>
             <h2 className="pm-player-title">{staff.name}</h2>
-            <RoleBadge role={staff.staffType} />
+            {/* OVR Chip */}
+            {(() => {
+              const staffOvr = detail?.ovr || detail?.overall_rating || staff.ovr || staff.overall_rating || 60;
+              const ovrColor = staffOvr >= 65 ? '#10b981' : staffOvr >= 55 ? '#0284c7' : '#64748b';
+              const ovrBg = staffOvr >= 65 ? 'rgba(16, 185, 129, 0.15)' : staffOvr >= 55 ? 'rgba(2, 132, 199, 0.15)' : 'rgba(100, 116, 139, 0.15)';
+              return (
+                <span
+                  className="ovr-chip"
+                  title={t('staff.ovr', 'Chỉ số OVR')}
+                  style={{
+                    background: ovrBg,
+                    color: ovrColor,
+                    border: `1.5px solid ${ovrColor}`,
+                    fontWeight: 900,
+                    fontSize: '1.05rem',
+                    padding: '2px 10px',
+                    borderRadius: '8px',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  {staffOvr}
+                </span>
+              );
+            })()}
+            <RoleBadge role={detail?.currentContract?.role || staff.role || staff.staffType} />
             <LicenseBadge license={staff.coachingLicense} size="sm" />
           </div>
 
@@ -233,14 +257,14 @@ export const StaffDetailModal: React.FC<Props> = ({
           <div className="pm-avatar-container">
             <StaffAvatar
               name={staff.name}
-              role={staff.staffType}
+              role={detail?.currentContract?.role || staff.role || staff.staffType}
               photoUrl={staff.photoUrl || detail?.photoUrl}
               size={96}
               style={{ borderRadius: '16px' }}
             />
           </div>
 
-          {/* Column 1: Nationality, Tactical Style, Preferred Formation */}
+          {/* Column 1: Nationality, Age & Birthday, Tactical Style */}
           <div className="pm-info-col">
             <div className="pm-info-row">
               <span className="pm-label">{t('staff.nationality_label', 'Quốc tịch:')}</span>
@@ -252,9 +276,18 @@ export const StaffDetailModal: React.FC<Props> = ({
               </span>
             </div>
             <div className="pm-info-row">
+              <span className="pm-label">{t('staff.age_label', 'Tuổi & Ngày sinh:')}</span>
+              <span className="pm-value pm-val-bold" style={{ color: '#0f172a' }}>
+                {t('staff.age_format', '{age} tuổi').replace('{age}', String(detail?.age || staff.age || 40))}
+                <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500, marginLeft: '6px' }}>
+                  ({t('common.date', 'Ngày')} {detail?.birth_season_day || staff.birth_season_day || 1})
+                </span>
+              </span>
+            </div>
+            <div className="pm-info-row">
               <span className="pm-label">{t('staff.philosophy_label', 'Triết lý:')}</span>
               <span className="pm-value pm-val-bold" style={{ color: '#16a34a' }}>
-                {staff.tacticalStyle || 'BALANCED'}
+                {staff.tacticalStyle ? t(`staff.style_${staff.tacticalStyle.toLowerCase()}`, staff.tacticalStyle) : t('staff.style_balanced', 'Cân bằng')}
               </span>
             </div>
             <div className="pm-info-row">

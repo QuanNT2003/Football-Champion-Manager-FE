@@ -92,11 +92,15 @@ export const ClubStaffView: React.FC<Props> = ({
 
   // Filtered staff
   const filteredStaff = staffList.filter((s) => {
-    if (roleFilter !== 'ALL' && s.staffType !== roleFilter) return false;
+    if (roleFilter !== 'ALL') {
+      const matchRole = s.role === roleFilter;
+      const matchType = s.staffType === roleFilter;
+      if (!matchRole && !matchType) return false;
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       const matchName = s.name.toLowerCase().includes(q);
-      const matchRole = s.staffType.toLowerCase().includes(q);
+      const matchRole = (s.role || '').toLowerCase().includes(q) || s.staffType.toLowerCase().includes(q);
       const matchNat = s.nationality?.toLowerCase().includes(q);
       if (!matchName && !matchRole && !matchNat) return false;
     }
@@ -105,7 +109,7 @@ export const ClubStaffView: React.FC<Props> = ({
 
   // Calculate telemetry
   const totalWage = staffList.reduce((acc, cur) => acc + (cur.wage || 0), 0);
-  const headCoach = staffList.find((s) => s.staffType === 'HEAD_COACH' || s.staffType === 'HEAD_COACH_YOUTH') || staffList[0];
+  const headCoach = staffList.find((s) => s.role === 'HEAD_COACH' || s.staffType === 'HEAD_COACH' || s.staffType === 'COACH') || staffList[0];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -279,18 +283,41 @@ export const ClubStaffView: React.FC<Props> = ({
                 fontWeight: 600,
                 color: '#334155',
                 background: '#ffffff',
+                maxWidth: '260px',
               }}
             >
-              <option value="ALL">{t('staff.role_all', 'Tất cả vai trò')}</option>
-              <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
-              <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ Lý HLV')}</option>
-              <option value="HEAD_COACH_YOUTH">{t('staff.head_coach_youth', 'HLV Trưởng Đội Trẻ U21')}</option>
-              <option value="ASSISTANT_COACH_YOUTH">{t('staff.assistant_coach_youth', 'Trợ Lý HLV Đội Trẻ U21')}</option>
-              <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể Lực')}</option>
-              <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ Môn')}</option>
-              <option value="SCOUT">{t('staff.scout_short', 'Tuyển Trạch Viên')}</option>
-              <option value="PHYSIO">{t('staff.physio_short', 'Bác Sĩ / Trị Liệu')}</option>
-              <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'GĐ Đào Tạo Trẻ')}</option>
+              <option value="ALL">{t('staff.role_all', 'Tất cả vai trò & phân loại')}</option>
+              <optgroup label={t('staff.category_all', '4 Nhóm Chuyên Môn')}>
+                <option value="COACH">{t('staff.type_coach', 'Huấn Luyện Viên (Coach)')}</option>
+                <option value="SCOUT">{t('staff.type_scout', 'Tuyển Trạch Viên (Scout)')}</option>
+                <option value="PHYSIO">{t('staff.type_physio', 'Bác Sĩ / Trị Liệu (Physio)')}</option>
+                <option value="DIRECTOR">{t('staff.type_director', 'Giám Đốc / Quản Lý (Director)')}</option>
+              </optgroup>
+              <optgroup label={t('staff.optgroup_coaching', 'Ban Huấn Luyện Đội Một (First Team)')}>
+                <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
+                <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ Lý HLV')}</option>
+                <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể Lực')}</option>
+                <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ Môn')}</option>
+              </optgroup>
+              <optgroup label={t('staff.optgroup_youth_team', 'Đội Trẻ U21 & Học Viện (Youth Team)')}>
+                <option value="HEAD_COACH_YOUTH">{t('staff.head_coach_youth', 'HLV Trưởng Đội Trẻ U21')}</option>
+                <option value="ASSISTANT_COACH_YOUTH">{t('staff.assistant_coach_youth', 'Trợ Lý HLV Đội Trẻ U21')}</option>
+                <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'Giám Đốc Đào Tạo Trẻ')}</option>
+              </optgroup>
+              <optgroup label={t('staff.optgroup_scouting', 'Tuyển Trạch (Scouting)')}>
+                <option value="HEAD_SCOUT">{t('staff.head_scout', 'Trưởng Ban Tuyển Trạch')}</option>
+                <option value="SCOUT">{t('staff.scout', 'Tuyển Trạch Viên')}</option>
+              </optgroup>
+              <optgroup label={t('staff.optgroup_medical', 'Y Tế & Thể Trạng (Medical)')}>
+                <option value="CHIEF_PHYSIO">{t('staff.chief_physio', 'Trưởng Ban Y Tế')}</option>
+                <option value="PHYSIO">{t('staff.physio', 'Bác Sĩ / Trị Liệu')}</option>
+              </optgroup>
+              <optgroup label={t('staff.optgroup_director', 'Ban Giám Đốc (Board & Directors)')}>
+                <option value="TECHNICAL_DIRECTOR">{t('staff.technical_director', 'Giám Đốc Kỹ Thuật')}</option>
+                <option value="SCOUT_DIRECTOR">{t('staff.scout_director', 'Giám Đốc Tuyển Trạch')}</option>
+                <option value="PHYSIO_DIRECTOR">{t('staff.physio_director', 'Giám Đốc Y Tế')}</option>
+                <option value="FINANCIAL_DIRECTOR">{t('staff.financial_director', 'Giám Đốc Tài Chính')}</option>
+              </optgroup>
             </select>
           </div>
         </div>
@@ -347,6 +374,9 @@ export const ClubStaffView: React.FC<Props> = ({
             const licenseBadge = getLicenseBadge(st.coachingLicense);
             const styleKey = st.tacticalStyle ? st.tacticalStyle.toLowerCase() : '';
             const styleLabel = styleKey ? t(`staff.style_${styleKey}`, st.tacticalStyle) : (st.tacticalStyle || 'BALANCED');
+            const staffOvr = st.ovr || st.overall_rating || 60;
+            const ovrColor = staffOvr >= 65 ? '#10b981' : staffOvr >= 55 ? '#0284c7' : '#64748b';
+            const ovrBg = staffOvr >= 65 ? 'rgba(16, 185, 129, 0.12)' : staffOvr >= 55 ? 'rgba(2, 132, 199, 0.12)' : 'rgba(100, 116, 139, 0.12)';
 
             return (
               <div
@@ -380,7 +410,7 @@ export const ClubStaffView: React.FC<Props> = ({
                   <div style={{ position: 'relative' }}>
                     <StaffAvatar
                       name={st.name}
-                      role={st.staffType}
+                      role={st.role || st.staffType}
                       photoUrl={st.photoUrl || (st as any).photo_url}
                       size={52}
                       style={{ borderRadius: '12px' }}
@@ -404,23 +434,40 @@ export const ClubStaffView: React.FC<Props> = ({
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontWeight: 800,
-                        fontSize: '0.96rem',
-                        color: '#0f172a',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {st.name}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                      <div
+                        style={{
+                          fontWeight: 800,
+                          fontSize: '0.96rem',
+                          color: '#0f172a',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {st.name}
+                      </div>
+                      <span
+                        className="ovr-chip"
+                        style={{
+                          background: ovrBg,
+                          color: ovrColor,
+                          border: `1px solid ${ovrColor}`,
+                          fontWeight: 900,
+                          fontSize: '0.8rem',
+                          padding: '1px 6px',
+                          borderRadius: '5px',
+                        }}
+                      >
+                        {staffOvr}
+                      </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-                      <RoleBadge role={st.staffType} size="sm" />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
+                      <RoleBadge role={st.role || st.staffType} size="sm" />
 
-                      <span style={{ fontSize: '0.76rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span style={{ fontSize: '0.74rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        {st.age && <span>{t('staff.age_format', '{age} tuổi').replace('{age}', String(st.age))}</span>}
                         {st.countryFlag && <img src={st.countryFlag} alt="" style={{ width: 14, height: 10, borderRadius: 2 }} />}
                         <span>{st.countryCode || st.nationality}</span>
                       </span>

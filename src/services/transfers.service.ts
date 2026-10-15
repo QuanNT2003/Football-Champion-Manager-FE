@@ -4,10 +4,15 @@ import { TransferOffer } from '../types';
 export interface StaffMarketItem {
   id: string;
   name: string;
-  staffType: 'HEAD_COACH' | 'ASSISTANT_COACH' | 'FITNESS_COACH' | 'SCOUT' | 'PHYSIO' | 'HEAD_COACH_YOUTH';
-  coachingLicense: 'PRO' | 'A' | 'B' | 'C';
+  staffType: string;
+  role?: string;
+  coachingLicense: string;
   tacticalStyle: string;
   reputation: number;
+  ovr?: number;
+  overall_rating?: number;
+  age?: number;
+  birth_season_day?: number;
   nationality: string;
   countryCode: string;
   countryFlag?: string;
@@ -67,6 +72,10 @@ export interface StaffDetailResponse {
   coachingLicense: string;
   tacticalStyle: string;
   reputation: number;
+  ovr?: number;
+  overall_rating?: number;
+  age?: number;
+  birth_season_day?: number;
   photoUrl?: string;
   nationality?: {
     id: string;
@@ -95,6 +104,7 @@ export interface StaffDetailResponse {
   currentContract?: {
     id: string;
     club?: { id: string; name: string; logo_url?: string } | null;
+    role?: string;
     salary: number;
     startDate: string;
     endDate?: string | null;

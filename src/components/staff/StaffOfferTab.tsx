@@ -1,4 +1,4 @@
-﻿import { useTranslation } from '../../i18n';
+import { useTranslation } from '../../i18n';
 import React from 'react';
 import { UserCheck, Clock, CheckCircle2, AlertTriangle, Send } from 'lucide-react';
 import { StaffDetailResponse } from '../../services/transfers.service';
@@ -150,18 +150,28 @@ export const StaffOfferTab: React.FC<Props> = ({
               onChange={(e) => setRoleOffered(e.target.value)}
               style={{ width: '100%', padding: '0.6rem 0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.88rem', background: '#ffffff', fontWeight: 600 }}
             >
-              <optgroup label={t('staff.optgroup_first_team', 'Đội Một (First Team)')}>
+              <optgroup label={t('staff.optgroup_coaching', 'Ban Huấn Luyện Đội Một (First Team)')}>
                 <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
                 <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ Lý HLV')}</option>
                 <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể Lực')}</option>
                 <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ Môn')}</option>
-                <option value="SCOUT">{t('staff.scout_short', 'Tuyển Trạch Viên')}</option>
-                <option value="PHYSIO">{t('staff.physio_short', 'Bác Sĩ / Trị Liệu')}</option>
-                <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'GĐ Đào Tạo Trẻ')}</option>
               </optgroup>
-              <optgroup label={t('staff.optgroup_youth_team', 'Đội Trẻ U21 (Youth Team)')}>
+              <optgroup label={t('staff.optgroup_youth_team', 'Đội Trẻ U21 & Học Viện (Youth Team)')}>
                 <option value="HEAD_COACH_YOUTH">{t('staff.head_coach_youth', 'HLV Trưởng Đội Trẻ U21')}</option>
                 <option value="ASSISTANT_COACH_YOUTH">{t('staff.assistant_coach_youth', 'Trợ Lý HLV Đội Trẻ U21')}</option>
+                <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'Giám Đốc Đào Tạo Trẻ')}</option>
+              </optgroup>
+              <optgroup label={t('staff.optgroup_scouting', 'Bộ Phận Tuyển Trạch (Scouting)')}>
+                <option value="SCOUT_DIRECTOR">{t('staff.scout_director', 'Giám Đốc Tuyển Trạch')}</option>
+                <option value="SCOUT">{t('staff.scout', 'Tuyển Trạch Viên')}</option>
+              </optgroup>
+              <optgroup label={t('staff.optgroup_medical', 'Bộ Phận Y Tế & Thể Trạng (Medical)')}>
+                <option value="PHYSIO_DIRECTOR">{t('staff.physio_director', 'Giám Đốc Y Tế')}</option>
+                <option value="PHYSIO">{t('staff.physio', 'Bác Sĩ / Trị Liệu')}</option>
+              </optgroup>
+              <optgroup label={t('staff.optgroup_director', 'Ban Giám Đốc (Board & Directors)')}>
+                <option value="TECHNICAL_DIRECTOR">{t('staff.technical_director', 'Giám Đốc Kỹ Thuật')}</option>
+                <option value="FINANCIAL_DIRECTOR">{t('staff.financial_director', 'Giám Đốc Tài Chính')}</option>
               </optgroup>
             </select>
           </div>

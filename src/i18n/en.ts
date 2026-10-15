@@ -1,9 +1,6 @@
 import { Translations } from './types';
 
 export const en: Translations = {
-  // ==========================================
-  // COMMON & SHARED
-  // ==========================================
   'common.loading': 'Loading...',
   'common.confirm': 'Confirm',
   'common.cancel': 'Cancel',
@@ -35,10 +32,6 @@ export const en: Translations = {
   'common.refresh': 'Refresh',
   'common.no_data': 'No data available',
   'common.share': 'Share',
-
-  // ==========================================
-  // NAVIGATION (LEFT DOCK & HEADER)
-  // ==========================================
   'nav.dock.dashboard': 'Club Dashboard',
   'nav.dock.squad': 'Team Squad',
   'nav.dock.tactics': 'Tactics & Formation',
@@ -47,17 +40,12 @@ export const en: Translations = {
   'nav.dock.facilities': 'Club Facilities',
   'nav.dock.finances': 'Club Finances',
   'nav.dock.matches': 'Match Fixtures',
-
   'nav.ext.federation': 'FEDERATION',
   'nav.ext.markets': 'MARKETS',
   'nav.ext.world': 'WORLD',
   'nav.ext.rankings': 'RANKINGS',
   'nav.ext.partners': 'PARTNERS & SHOP',
   'nav.ext.community': 'COMMUNITY',
-
-  // ==========================================
-  // COCKPIT HUD TOP BAR
-  // ==========================================
   'cockpit.search_placeholder': 'Search players, staff, clubs...',
   'cockpit.season': 'SEASON',
   'cockpit.day': 'DAY',
@@ -72,23 +60,17 @@ export const en: Translations = {
   'cockpit.switch_lang': 'Switch Language',
   'cockpit.login': 'LOG IN',
   'cockpit.head_coach': 'Head Coach',
-
-  // ==========================================
-  // DASHBOARD VIEW
-  // ==========================================
   'dashboard.hero.popularity': 'Club Popularity',
   'dashboard.hero.morale': 'Team Morale',
   'dashboard.hero.next_match_in': 'Next match in',
   'dashboard.hero.hours': 'hours',
   'dashboard.hero.ready': 'Ready for match',
   'dashboard.hero.share_toast': 'Share club info',
-
   'dashboard.match.next_match': 'Next Match',
   'dashboard.match.league_match': 'National League Tier 1',
   'dashboard.match.details_btn': 'Full Match Details →',
   'dashboard.match.tactics_btn': 'Tactics',
   'dashboard.match.last_match': 'Last Match',
-
   'dashboard.comp.title': 'Active Competitions',
   'dashboard.comp.tab_competitions': 'Competitions',
   'dashboard.comp.tab_friends': 'Friends & Rivalries',
@@ -101,10 +83,6 @@ export const en: Translations = {
   'dashboard.comp.players_count': 'Squad Players',
   'dashboard.comp.team_morale': 'Team Morale',
   'dashboard.friends.connect_prompt': 'Connect with online managers to play friendlies and share tactics!',
-
-  // ==========================================
-  // SQUAD VIEW
-  // ==========================================
   'squad.title': 'CLUB SQUAD ROSTER',
   'squad.filter_all': 'All',
   'squad.filter_gk': 'Goalkeepers',
@@ -125,10 +103,6 @@ export const en: Translations = {
   'squad.empty_filter': 'No players match the selected filter.',
   'squad.view_tooltip': 'Click to view player details',
   'squad.international': 'International',
-
-  // ==========================================
-  // TACTICS VIEW
-  // ==========================================
   'tactics.title': 'Tactics & Formation',
   'tactics.formation': 'Formation',
   'tactics.style': 'Play Style',
@@ -145,10 +119,6 @@ export const en: Translations = {
   'tactics.drag_hint': 'Drag and drop players on the pitch to reposition.',
   'tactics.chemistry': 'Team Chemistry',
   'tactics.fitness': 'Fitness',
-
-  // ==========================================
-  // FACILITIES VIEW
-  // ==========================================
   'facilities.title': 'Club Facilities & Infrastructure',
   'facilities.subtitle': 'Upgrade facilities to increase matchday revenue, youth recruitment quality, and player recovery speed.',
   'facilities.stadium': 'Main Stadium',
@@ -165,10 +135,6 @@ export const en: Translations = {
   'facilities.type_youth': 'Youth Academy',
   'facilities.type_medical': 'Medical & Rehab Center',
   'facilities.type_scouting': 'Scouting Network',
-
-  // ==========================================
-  // FINANCES VIEW
-  // ==========================================
   'finances.title': 'Club Finances & Revenue',
   'finances.subtitle': 'Manage cash flow, weekly wage bill, purchase equipment, and exchange tokens in the club shop.',
   'finances.cash_balance': 'Cash Balance',
@@ -184,10 +150,6 @@ export const en: Translations = {
   'finances.no_transactions': 'No financial transactions recorded yet.',
   'finances.shop_buy_btn': 'Exchange Item',
   'finances.shop_insufficient_gold': 'Insufficient Gold for this transaction!',
-
-  // ==========================================
-  // TRAINING VIEW
-  // ==========================================
   'training.title': 'Training Ground & Player Growth',
   'training.subtitle': 'Schedule focused drills to boost team OVR, stamina, and tactical sharpness.',
   'training.select_type': 'Select Training Focus',
@@ -199,10 +161,6 @@ export const en: Translations = {
   'training.scheduling': 'Scheduling...',
   'training.history_title': 'Session History & Progress',
   'training.no_sessions': 'No training sessions scheduled yet.',
-
-  // ==========================================
-  // MATCH CENTER & FIXTURES
-  // ==========================================
   'matches.title': 'Match Fixtures & Match Center',
   'matches.filter_all': 'All Matches',
   'matches.filter_scheduled': 'Upcoming',
@@ -219,10 +177,6 @@ export const en: Translations = {
   'matches.event_yellow_card': 'Yellow Card',
   'matches.event_red_card': 'Red Card',
   'matches.event_sub': 'Substitution',
-
-  // ==========================================
-  // STANDINGS & COMPETITIONS
-  // ==========================================
   'standings.title': 'League Standings & Tournaments',
   'standings.tab_table': 'League Table',
   'standings.tab_teams': 'Teams Directory',
@@ -244,10 +198,6 @@ export const en: Translations = {
   'standings.select_country': 'Select Country',
   'standings.top_scorers': 'Top Scorers',
   'standings.top_assists': 'Top Assists',
-
-  // ==========================================
-  // TRANSFERS & MARKET
-  // ==========================================
   'transfers.tab_market': 'Player Market',
   'transfers.tab_staff': 'Staff Market',
   'transfers.tab_offers': 'Transfer Bids & Offers',
@@ -263,36 +213,28 @@ export const en: Translations = {
   'transfers.my_bids_title': 'Ongoing Negotiations & Bids',
   'transfers.no_offers': 'No ongoing transfer offers at this time.',
   'transfers.title': 'Tranfer Market',
-
-  // ==========================================
-  // CLUB STAFF
-  // ==========================================
   'staff.title': 'Club Coaching Staff & Officials',
   'staff.manager': 'Head Manager',
   'staff.assistant': 'Assistant Manager',
-  'staff.physio': 'Physiotherapist',
-  'staff.scout': 'Chief Scout',
-  'staff.head_coach': 'Head Coach',
-  'staff.assistant_coach': 'Assistant Coach',
-  'staff.head_coach_youth': 'Youth Head Coach (U21)',
-  'staff.assistant_coach_youth': 'Youth Assistant Coach (U21)',
-  'staff.fitness_coach': 'Fitness Coach',
-  'staff.gk_coach': 'Goalkeeping Coach',
-  'staff.scout_short': 'Scout',
-  'staff.physio_short': 'Physiotherapist',
-  'staff.youth_director': 'Head of Youth Development',
+  'staff.physio': "Physiotherapist",
+  'staff.scout': "Scout",
+  'staff.head_coach': "Head Coach",
+  'staff.assistant_coach': "Assistant Coach",
+  'staff.head_coach_youth': "U21 Youth Head Coach",
+  'staff.assistant_coach_youth': "U21 Assistant Coach",
+  'staff.fitness_coach': "Fitness Coach",
+  'staff.gk_coach': "Goalkeeping Coach",
+  'staff.scout_short': "Scout",
+  'staff.physio_short': "Physio",
+  'staff.youth_director': "Head of Youth Development",
   'staff.optgroup_first_team': 'First Team',
   'staff.optgroup_youth_team': 'Youth Team (U21)',
   'staff.role_label': 'Role:',
-  'staff.signing_bonus_item': 'Signing bonus:',
+  'staff.signing_bonus_item': 'Signing Bonus:',
   'staff.hire_staff': 'Recruit Staff Member',
   'staff.fire_staff': 'Terminate Contract',
   'staff.salary': 'Weekly Wage',
   'staff.contract': 'Contract Length',
-
-  // ==========================================
-  // AUTH & ONBOARDING
-  // ==========================================
   'auth.login_title': 'SYSTEM LOGIN',
   'auth.register_title': 'CREATE NEW ACCOUNT',
   'auth.username': 'Username',
@@ -303,23 +245,21 @@ export const en: Translations = {
   'auth.register_btn': 'Create Account',
   'auth.no_account': "Don't have an account? Sign up now",
   'auth.has_account': 'Already have an account? Log in',
-
   'onboarding.title': 'Manager Appointment & Club Registration',
   'onboarding.club_name': 'Club Name',
   'onboarding.short_name': 'Short Code (3-4 chars)',
   'onboarding.country': 'Starting Country',
   'onboarding.city': 'City / Province',
   'onboarding.submit_btn': 'Establish Club & Start Season',
-  // Player & Staff Modals
   'player.tab_skills': 'Skills',
   'player.tab_matches': 'Matches',
   'player.tab_stats': 'Statistics',
   'player.tab_transfers': 'Transfers',
   'player.tab_injuries': 'Injury History',
   'player.tab_offer': 'Contract Offer',
-  'staff.tab_skills': 'Staff Attributes',
-  'staff.tab_history': 'Club History',
-  'staff.tab_offer': 'Recruitment Offer',
+  'staff.tab_skills': 'Skills & Attributes',
+  'staff.tab_history': 'Career History',
+  'staff.tab_offer': 'Make Contract Offer',
   'tactics.coach_card': 'HEAD COACH',
   'tactics.license': 'LICENSE',
   'tactics.philosophy': 'Philosophy',
@@ -391,7 +331,7 @@ export const en: Translations = {
   'player.no_transfers': 'No transfer records in database yet.',
   'player.core_skills': 'Position Core (10)',
   'player.physical_skills': 'Physical & Stamina',
-  'staff.no_skills': 'No coaching attributes data available.',
+  'staff.no_skills': 'No attribute data available',
   'staff.history_title': 'Career History & Contract Records',
   'staff.current_role': 'Present',
   'common.you': 'YOU',
@@ -693,9 +633,9 @@ export const en: Translations = {
   'staff.per_week': '/ week',
   'staff.current_head_coach': 'Current Head Coach',
   'staff.no_head_coach': 'No Head Coach Appointed!',
-  'staff.search_placeholder': 'Search staff name, country...',
-  'staff.role_all': 'All Roles',
-  'staff.hire_more_btn': 'Hire More Staff',
+  'staff.search_placeholder': 'Search by name, role, nationality...',
+  'staff.role_all': "All Roles & Categories",
+  'staff.hire_more_btn': 'Recruit More Staff',
   'staff.loading_list': 'Loading coaching staff list...',
   'staff.no_staff_match_title': 'No staff matching filter',
   'staff.no_staff_in_club': 'Your club currently has no coaching staff. Scout and hire from free market!',
@@ -707,8 +647,8 @@ export const en: Translations = {
   'staff.reputation_label': 'Reputation:',
   'staff.official_contract': 'Official Contract',
   'staff.view_profile': 'View Profile',
-  'staff.need_club_to_hire': 'You need to manage a club to make a hire offer',
-  'staff.offer_success': 'Recruitment offer sent successfully!',
+  'staff.need_club_to_hire': 'You need to manage a club to send contract offers',
+  'staff.offer_success': 'Contract offer submitted successfully!',
   'staff.offer_failed': 'Failed to send recruitment offer, please try again',
   'staff.cancel_offer_success': 'Recruitment offer cancelled!',
   'staff.prev_tooltip': 'Previous Staff',
@@ -729,32 +669,84 @@ export const en: Translations = {
   'staff.status_active': 'Active',
   'staff.status_ended': 'Ended',
   'staff.no_history': 'No prior employment history found',
-  'staff.belongs_to_you': 'This Staff Member Belongs To Your Club',
-  'staff.contract_active_wage': 'Current contract active at {wage} / week.',
+  'staff.belongs_to_you': 'This Staff Member Belongs to Your Club',
+  'staff.contract_active_wage': 'Current contract is active with {wage} / week salary.',
   'staff.has_pending_offer': 'Pending offer awaiting response',
-  'staff.proposed_wage_label': 'Proposed Wage:',
-  'staff.duration_label': 'Duration:',
+  'staff.proposed_wage_label': 'Offered Wage:',
+  'staff.duration_label': 'Contract Length:',
   'staff.years_count': '{count} years',
   'staff.cancel_this_offer': 'Cancel This Offer',
-  'staff.update_offer_title': 'Update Recruitment Offer',
-  'staff.send_new_offer_title': 'Send New Recruitment Offer',
-  'staff.role_assign_label': 'Appointed Role',
+  'staff.update_offer_title': 'Update Contract Offer',
+  'staff.send_new_offer_title': 'Send New Contract Offer',
+  'staff.role_assign_label': 'Offered Role',
   'staff.proposed_weekly_wage_label': 'Proposed Weekly Wage (€)',
-  'staff.estimated_wage_label': 'Estimated Wage: {wage} / week',
-  'staff.contract_duration_label': 'Contract Duration',
+  'staff.estimated_wage_label': 'Estimated wage: {wage} / week',
+  'staff.contract_duration_label': 'Contract Length',
   'staff.year_n': '{n} Year(s)',
-  'staff.signing_bonus_label': 'Signing Fee (€)',
+  'staff.signing_bonus_label': 'Signing Bonus (€)',
   'staff.sending': 'Sending...',
   'staff.update_offer_btn': 'Update Offer',
-  'staff.send_offer_btn': 'Send Recruitment Offer',
+  'staff.send_offer_btn': 'Send Contract Offer',
   'staff.skills_coaching': 'Coaching',
-  'staff.no_coaching_skills': 'No coaching attribute data available',
-  'staff.skills_mental': 'Mental & Work Ethic',
-  'staff.no_mental_skills': 'No mental attribute data available',
-  'staff.skills_scouting': 'Scouting & Judging',
-  'staff.no_scouting_skills': 'No scouting attribute data available',
+  'staff.no_coaching_skills': 'No coaching data available',
+  'staff.skills_mental': 'Mental & Leadership',
+  'staff.no_mental_skills': 'No mental data available',
+  'staff.skills_scouting': 'Scouting & Analysis',
+  'staff.no_scouting_skills': 'No scouting data available',
   'staff.skills_medical': 'Medical & Fitness',
-  'staff.no_medical_skills': 'No medical attribute data available',
+  'staff.no_medical_skills': 'No medical data available',
+  'staff.attr_attacking': "Attacking Coaching",
+  'staff.attr_desc_attacking': 'Ability to coach attacking plays, team movement, finishing, and off-the-ball runs.',
+  'staff.attr_defending': "Defending Coaching",
+  'staff.attr_desc_defending': 'Ability to organize defensive cover, 1v1 marking, offside traps, and set-piece defending.',
+  'staff.attr_tactical': "Tactical Coaching",
+  'staff.attr_desc_tactical': 'Game reading, ability to adapt formations and communicate tactical ideas to players.',
+  'staff.attr_technical': "Technical Coaching",
+  'staff.attr_desc_technical': 'Drills for first touch, ball control, passing accuracy, and refined technique.',
+  'staff.attr_fitness': 'Fitness Coaching',
+  'staff.attr_desc_fitness': 'Designs physical conditioning programs for stamina, pace, strength, and match fitness.',
+  'staff.attr_gk_stopping': 'Goalkeeping Coaching',
+  'staff.attr_desc_gk_stopping': 'Training shot-stopping reflexes, aerial command, positioning, and 1v1 handling.',
+  'staff.attr_youth_dev': 'Working With Youngsters',
+  'staff.attr_desc_youth_dev': 'Ability to nurture, mentor, and maximize potential ability (PA) in academy prospects.',
+  'staff.attr_man_management': "Man Management",
+  'staff.attr_desc_man_management': 'Dressing room harmony, ego management, team morale, and conflict resolution.',
+  'staff.attr_motivating': "Motivating",
+  'staff.attr_desc_motivating': 'Ability to inspire, ignite competitive spirit, and instill winning hunger.',
+  'staff.attr_discipline': "Level of Discipline",
+  'staff.attr_desc_discipline': 'Enforces professional work ethic, strict team rules, and reduces misconduct.',
+  'staff.attr_determination': "Determination",
+  'staff.attr_desc_determination': 'Resilience under adversity, never-say-die attitude when trailing or during a slump.',
+  'staff.attr_adaptability': "Adaptability",
+  'staff.attr_desc_adaptability': 'Speed of adjusting to new leagues, cultures, languages, and playing environments.',
+  'staff.attr_judge_ability': 'Judging Player Ability',
+  'staff.attr_desc_judge_ability': 'Accuracy in evaluating current skill level and performance capacity (OVR).',
+  'staff.attr_judge_potential': 'Judging Player Potential',
+  'staff.attr_desc_judge_potential': 'Accuracy in scouting and estimating future development ceiling (POT).',
+  'staff.attr_tac_knowledge': 'Tactical Knowledge',
+  'staff.attr_desc_tac_knowledge': 'Opposition tactical breakdown, discovering vulnerabilities, and advising gameplans.',
+  'staff.attr_scout_network': 'Scouting Network',
+  'staff.attr_desc_scout_network': 'Breadth of global football connections and market scouting intelligence.',
+  'staff.attr_physiotherapy': "Physiotherapy",
+  'staff.attr_desc_physiotherapy': 'Diagnosing and treating muscular, tendon, and joint injuries.',
+  'staff.attr_sports_science': "Sports Science",
+  'staff.attr_desc_sports_science': 'Applies sports analytics and biomonitoring to identify fatigue and burnout risks.',
+  'staff.attr_injury_prevent': 'Injury Prevention',
+  'staff.attr_desc_injury_prevent': 'Injury prevention regimens and minimizing recurrence of severe trauma.',
+  'staff.attr_rehabilitation': "Rehabilitation",
+  'staff.attr_desc_rehabilitation': 'Accelerates rehabilitation programs to help players regain full competitive form.',
+  'staff.style_tiki_taka': 'Modern Tiki-Taka',
+  'staff.style_tiki_taka_control': 'Control Possession (Tiki-Taka)',
+  'staff.style_vertical_tiki_taka': 'Vertical Tiki-Taka',
+  'staff.style_gegenpress': 'Gegenpressing',
+  'staff.style_gegenpressing': 'Gegenpressing',
+  'staff.style_counter_attack': 'Counter Attack',
+  'staff.style_fluid_counter_attack': 'Fluid Counter-Attack',
+  'staff.style_catenaccio': 'Catenaccio',
+  'staff.style_park_the_bus': 'Disciplined Low Block',
+  'staff.style_wing_play': 'Wing Play',
+  'staff.style_route_one': 'Route One',
+  'staff.style_balanced': 'Balanced',
   'confed.tab_all': 'All (96)',
   'confed.tab_uefa': 'Europe - UEFA (32)',
   'confed.tab_afc': 'Asia - AFC (32)',
@@ -1087,9 +1079,6 @@ export const en: Translations = {
   'bids.btn_accept_now': 'Accept Now',
   'bids.btn_confirm_reject': 'Confirm Rejection',
   'bids.btn_back': 'Go Back',
-  // ==========================================
-  // TROPHY CABINET & HONORS (TROPHY ROOM)
-  // ==========================================
   'trophies.cabinet_title': '🏛️ CLUB TROPHY ROOM',
   'trophies.cabinet_subtitle': 'Glory trophy cabinet commemorating illustrious milestones, championship titles, and the pride of the club.',
   'trophies.founded_year': 'Founded {year}',
@@ -1137,4 +1126,53 @@ export const en: Translations = {
   'tactics.swap_banner_bench': 'Selected bench #{slot} ({name}). Click a starter to sub in, another bench seat to reorder, or a reserve to replace!',
   'tactics.swap_banner_reserve': 'Selected player {name}. Click a bench seat or a starter to put them into the squad!',
   'player_modal.experience': 'Experience (EXP)',
+  'staff.type_coach': "Coach",
+  'staff.type_scout': "Scout",
+  'staff.type_physio': "Physiotherapist / Doctor",
+  'staff.type_director': "Director / Manager",
+  'staff.head_scout': "Chief Scout",
+  'staff.chief_physio': "Chief Doctor / Physio",
+  'staff.technical_director': "Technical Director",
+  'staff.scout_director': "Director of Scouting",
+  'staff.physio_director': "Medical Director",
+  'staff.financial_director': "Financial Director",
+  'staff.youth_coach': "Youth Coach",
+  'staff.category_all': "4 Professional Categories",
+  'staff.total_members': 'Total Staff',
+  'staff.member_unit': 'members',
+  'staff.head_coach_label': 'Head Coach:',
+  'staff.head_coach_unassigned': 'No Head Coach Assigned',
+  'staff.loading_club_staff': 'Loading club coaching staff...',
+  'staff.empty_club_staff': 'No Staff Appointed Yet',
+  'staff.empty_club_staff_desc': 'Visit the Recruitment Market to sign contracts with world-class football specialists.',
+  'staff.go_to_market_btn': 'Go to Staff Market',
+  'staff.age_label': "Age & Birthday:",
+  'staff.age_format': "{age} yrs",
+  'staff.birth_day_format': "Born Day {day} (Season)",
+  'staff.age_with_day': "{age} yrs (Day {day})",
+  'staff.ovr': "Overall Rating (OVR)",
+  'staff.ovr_short': "OVR",
+  'staff.attr_mental': "Mental Guidance",
+  'staff.attr_physical': "Physical Training",
+  'staff.attr_goalkeeping': "Goalkeeping Coaching",
+  'staff.attr_set_pieces': "Set Pieces",
+  'staff.attr_youth_development': "Youth Development",
+  'staff.attr_working_with_youth': "Working with Youngsters",
+  'staff.attr_leadership': "Leadership",
+  'staff.attr_judging_player_ability': "Judging Player Ability",
+  'staff.attr_judging_player_potential': "Judging Player Potential",
+  'staff.attr_tactical_knowledge': "Tactical Knowledge",
+  'staff.attr_negotiating': "Negotiating",
+  'staff.attr_injury_prevention': "Injury Prevention",
+  'staff.style_possession': 'Possession Control',
+  'staff.style_counter_attacking': 'Fast Counter-Attack',
+  'staff.style_direct_counter': 'Direct Attacking',
+  'staff.optgroup_coaching': "Coaching Staff",
+  'staff.optgroup_scouting': "Scouting Department",
+  'staff.optgroup_medical': "Medical Department",
+  'staff.optgroup_director': "Board & Directors",
+  'staff_market.th_ovr': "OVR",
+  'staff_market.th_age': "Age",
+  'hire_modal.ovr_label': "Overall Rating (OVR):",
+  'hire_modal.age_label': "Age & Birthday:",
 };

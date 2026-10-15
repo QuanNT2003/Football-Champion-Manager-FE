@@ -2,6 +2,7 @@ import { useTranslation } from '../../i18n';
 import React from 'react';
 import { StaffMarketItem } from '../../services/transfers.service';
 import { Briefcase, X, ShieldAlert } from 'lucide-react';
+import { RoleBadge } from '../common/RoleBadge';
 
 interface StaffHireModalProps {
   staff: StaffMarketItem | null;
@@ -22,6 +23,8 @@ export const StaffHireModal: React.FC<StaffHireModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
+
   if (!staff) return null;
 
   const formatMoney = (val: number) => {
@@ -30,18 +33,10 @@ export const StaffHireModal: React.FC<StaffHireModalProps> = ({
     return `€${val.toLocaleString()}`;
   };
 
-  const getStaffRoleLabel = (role: string) => {
-    switch (role) {
-      case 'HEAD_COACH': return { label: t('staff.head_coach', 'HLV Trưởng'), class: 'badge-role-head' };
-      case 'ASSISTANT_COACH': return { label: t('staff.assistant_coach', 'Trợ lý HLV'), class: 'badge-role-assistant' };
-      case 'FITNESS_COACH': return { label: t('staff.fitness_coach', 'HLV Thể lực'), class: 'badge-role-fitness' };
-      case 'SCOUT': return { label: t('staff.scout', 'Tuyển trạch viên'), class: 'badge-role-scout' };
-      case 'PHYSIO': return { label: t('staff.physio', 'Bác sĩ / Y tế'), class: 'badge-role-physio' };
-      default: return { label: role, class: 'badge-outline' };
-    }
-  };
+  const staffOvr = staff.ovr || staff.overall_rating || 60;
+  const ovrColor = staffOvr >= 65 ? '#10b981' : staffOvr >= 55 ? '#0284c7' : '#64748b';
+  const ovrBg = staffOvr >= 65 ? 'rgba(16, 185, 129, 0.12)' : staffOvr >= 55 ? 'rgba(2, 132, 199, 0.12)' : 'rgba(100, 116, 139, 0.12)';
 
-  const { t } = useTranslation();
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
@@ -64,10 +59,34 @@ export const StaffHireModal: React.FC<StaffHireModalProps> = ({
             <span style={{ fontWeight: 700, color: '#0f172a' }}>{staff.name}</span>
           </div>
           <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span className="text-muted">{t('hire_modal.role_label', 'Vai Trò:')}</span>
-            <span className={`badge-role ${getStaffRoleLabel(staff.staffType).class}`}>
-              {getStaffRoleLabel(staff.staffType).label}
+            <span className="text-muted">{t('hire_modal.ovr_label', 'Chỉ Số OVR:')}</span>
+            <span
+              className="ovr-chip"
+              style={{
+                background: ovrBg,
+                color: ovrColor,
+                border: `1px solid ${ovrColor}`,
+                fontWeight: 900,
+                fontSize: '0.85rem',
+                padding: '1px 8px',
+                borderRadius: '5px',
+              }}
+            >
+              {staffOvr}
             </span>
+          </div>
+          <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <span className="text-muted">{t('hire_modal.age_label', 'Độ Tuổi & Sinh Nhật:')}</span>
+            <span style={{ fontWeight: 600, color: '#334155', fontSize: '0.88rem' }}>
+              {t('staff.age_format', '{age} tuổi').replace('{age}', String(staff.age || 40))}
+              <span style={{ fontSize: '0.78rem', color: '#64748b', marginLeft: '4px' }}>
+                ({t('common.date', 'Ngày')} {staff.birth_season_day || 1})
+              </span>
+            </span>
+          </div>
+          <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <span className="text-muted">{t('hire_modal.role_label', 'Vai Trò:')}</span>
+            <RoleBadge role={staff.role || staff.staffType} />
           </div>
           <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
             <span className="text-muted">{t('hire_modal.license_label', 'Bằng Cấp Huấn Luyện:')}</span>
@@ -75,7 +94,9 @@ export const StaffHireModal: React.FC<StaffHireModalProps> = ({
           </div>
           <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
             <span className="text-muted">{t('hire_modal.philosophy_label', 'Triết Lý:')}</span>
-            <span className="tactical-style-tag">{staff.tacticalStyle || 'BALANCED'}</span>
+            <span className="tactical-style-tag">
+              {staff.tacticalStyle ? t(`staff.style_${staff.tacticalStyle.toLowerCase()}`, staff.tacticalStyle) : t('staff.style_balanced', 'Cân bằng')}
+            </span>
           </div>
           {staff.preferredFormation && (
             <div className="flex-center" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
@@ -111,7 +132,7 @@ export const StaffHireModal: React.FC<StaffHireModalProps> = ({
           </div>
         </div>
 
-        {staff.staffType === 'HEAD_COACH' && (
+        {(staff.role === 'HEAD_COACH' || staff.staffType === 'HEAD_COACH') && (
           <div
             style={{
               background: '#fffbeb',

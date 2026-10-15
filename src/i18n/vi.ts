@@ -1,9 +1,6 @@
 import { Translations } from './types';
 
 export const vi: Translations = {
-  // ==========================================
-  // COMMON & SHARED
-  // ==========================================
   'common.loading': 'Đang tải...',
   'common.confirm': 'Xác nhận',
   'common.cancel': 'Hủy bỏ',
@@ -35,10 +32,6 @@ export const vi: Translations = {
   'common.refresh': 'Làm mới',
   'common.no_data': 'Không có dữ liệu',
   'common.share': 'Chia sẻ',
-
-  // ==========================================
-  // NAVIGATION (LEFT DOCK & HEADER)
-  // ==========================================
   'nav.dock.dashboard': 'Tổng quan CLB',
   'nav.dock.squad': 'Đội hình thi đấu',
   'nav.dock.tactics': 'Chiến thuật & Sơ đồ',
@@ -47,17 +40,12 @@ export const vi: Translations = {
   'nav.dock.facilities': 'Cơ sở vật chất',
   'nav.dock.finances': 'Tài chính & Doanh thu',
   'nav.dock.matches': 'Lịch thi đấu CLB',
-
   'nav.ext.federation': 'GIẢI ĐẤU (FEDERATION)',
   'nav.ext.markets': 'CHUYỂN NHƯỢNG (MARKETS)',
   'nav.ext.world': 'THẾ GIỚI (WORLD)',
   'nav.ext.rankings': 'BẢNG XẾP HẠNG (RANKINGS)',
   'nav.ext.partners': 'ĐỐI TÁC & SHOP (PARTNERS)',
   'nav.ext.community': 'CỘNG ĐỒNG (COMMUNITY)',
-
-  // ==========================================
-  // COCKPIT HUD TOP BAR
-  // ==========================================
   'cockpit.search_placeholder': 'Tìm cầu thủ, HLV, CLB...',
   'cockpit.season': 'MÙA',
   'cockpit.day': 'NGÀY',
@@ -72,23 +60,17 @@ export const vi: Translations = {
   'cockpit.switch_lang': 'Đổi ngôn ngữ',
   'cockpit.login': 'ĐĂNG NHẬP',
   'cockpit.head_coach': 'HLV Trưởng',
-
-  // ==========================================
-  // DASHBOARD VIEW
-  // ==========================================
   'dashboard.hero.popularity': 'Độ nổi tiếng CLB',
   'dashboard.hero.morale': 'Tinh thần đội bóng',
   'dashboard.hero.next_match_in': 'Trận đấu tiếp theo sau',
   'dashboard.hero.hours': 'giờ',
   'dashboard.hero.ready': 'Sẵn sàng thi đấu',
   'dashboard.hero.share_toast': 'Chia sẻ thông tin CLB',
-
   'dashboard.match.next_match': 'Trận đấu tiếp theo',
   'dashboard.match.league_match': 'Giải VĐQG Hạng 1 (Tier 1)',
   'dashboard.match.details_btn': 'Chi tiết trận đấu →',
   'dashboard.match.tactics_btn': 'Chiến thuật',
   'dashboard.match.last_match': 'Trận gần nhất',
-
   'dashboard.comp.title': 'Mặt trận tham gia',
   'dashboard.comp.tab_competitions': 'Giải đấu',
   'dashboard.comp.tab_friends': 'Giao hữu & Bạn bè',
@@ -101,10 +83,6 @@ export const vi: Translations = {
   'dashboard.comp.players_count': 'Cầu thủ đội hình',
   'dashboard.comp.team_morale': 'Tinh thần đội bóng',
   'dashboard.friends.connect_prompt': 'Kết nối thêm với các HLV trực tuyến để giao hữu và chia sẻ chiến thuật!',
-
-  // ==========================================
-  // SQUAD VIEW
-  // ==========================================
   'squad.title': 'DANH SÁCH CẦU THỦ CÂU LẠC BỘ',
   'squad.filter_all': 'Tất Cả',
   'squad.filter_gk': 'Thủ Môn',
@@ -125,10 +103,6 @@ export const vi: Translations = {
   'squad.empty_filter': 'Không tìm thấy cầu thủ nào phù hợp với bộ lọc.',
   'squad.view_tooltip': 'Bấm để xem chi tiết cầu thủ',
   'squad.international': 'Quốc tế',
-
-  // ==========================================
-  // TACTICS VIEW
-  // ==========================================
   'tactics.title': 'Chiến thuật & Sơ đồ',
   'tactics.formation': 'Sơ đồ thi đấu',
   'tactics.style': 'Lối chơi',
@@ -145,10 +119,6 @@ export const vi: Translations = {
   'tactics.drag_hint': 'Kéo thả cầu thủ vào vị trí trên sân để đổi chỗ.',
   'tactics.chemistry': 'Độ ăn ý',
   'tactics.fitness': 'Thể lực',
-
-  // ==========================================
-  // FACILITIES VIEW
-  // ==========================================
   'facilities.title': 'Cơ Sở Vật Chất & Hạ Tầng CLB',
   'facilities.subtitle': 'Nâng cấp cơ sở vật chất để tăng doanh thu, chất lượng đào tạo trẻ và khả năng hồi phục của cầu thủ.',
   'facilities.stadium': 'Sân Vận Động Chính',
@@ -165,10 +135,6 @@ export const vi: Translations = {
   'facilities.type_youth': 'Học Viện Bóng Đá Trẻ',
   'facilities.type_medical': 'Trung Tâm Y Tế & Phục Hồi',
   'facilities.type_scouting': 'Mạng Lưới Tuyển Trạch',
-
-  // ==========================================
-  // FINANCES VIEW
-  // ==========================================
   'finances.title': 'Tài Chính & Doanh Thu Câu Lạc Bộ',
   'finances.subtitle': 'Quản lý thu chi, quỹ lương, mua sắm vật phẩm và đổi tài nguyên trong cửa hàng câu lạc bộ.',
   'finances.cash_balance': 'Số Dư Tiền Mặt',
@@ -184,10 +150,6 @@ export const vi: Translations = {
   'finances.no_transactions': 'Chưa có giao dịch tài chính nào được ghi nhận.',
   'finances.shop_buy_btn': 'Đổi Vật Phẩm',
   'finances.shop_insufficient_gold': 'Không đủ vàng để thực hiện giao dịch!',
-
-  // ==========================================
-  // TRAINING VIEW
-  // ==========================================
   'training.title': 'Trung Tâm Huấn Luyện & Phát Triển Cầu Thủ',
   'training.subtitle': 'Lên lịch các buổi tập chuyên sâu để cải thiện chỉ số OVR, thể lực và tinh thần toàn đội.',
   'training.select_type': 'Chọn Chuyên Đề Huấn Luyện',
@@ -199,10 +161,6 @@ export const vi: Translations = {
   'training.scheduling': 'Đang xếp lịch...',
   'training.history_title': 'Lịch Sử & Tiến Độ Các Buổi Tập',
   'training.no_sessions': 'Chưa có buổi huấn luyện nào được lên lịch.',
-
-  // ==========================================
-  // MATCH CENTER & FIXTURES
-  // ==========================================
   'matches.title': 'Lịch Thi Đấu & Trung Tâm Trận Đấu',
   'matches.filter_all': 'Tất cả trận đấu',
   'matches.filter_scheduled': 'Sắp diễn ra',
@@ -219,10 +177,6 @@ export const vi: Translations = {
   'matches.event_yellow_card': 'Thẻ vàng',
   'matches.event_red_card': 'Thẻ đỏ',
   'matches.event_sub': 'Thay người',
-
-  // ==========================================
-  // STANDINGS & COMPETITIONS
-  // ==========================================
   'standings.title': 'Bảng Xếp Hạng & Giải Đấu Thể Thao',
   'standings.tab_table': 'Bảng Xếp Hạng',
   'standings.tab_teams': 'Danh Sách Đội Bóng',
@@ -244,10 +198,6 @@ export const vi: Translations = {
   'standings.select_country': 'Chọn Quốc Gia',
   'standings.top_scorers': 'Vua Phá Lưới',
   'standings.top_assists': 'Vua Kiến Tạo',
-
-  // ==========================================
-  // TRANSFERS & MARKET
-  // ==========================================
   'transfers.tab_market': 'Thị Trường Cầu Thủ',
   'transfers.tab_staff': 'Thị Trường Ban Huấn Luyện',
   'transfers.tab_offers': 'Đề Nghị Chuyển Nhượng',
@@ -262,24 +212,20 @@ export const vi: Translations = {
   'transfers.hire_btn': 'Tuyển Dụng',
   'transfers.my_bids_title': 'Các Đề Nghị Đang Đàm Phán',
   'transfers.no_offers': 'Không có đề nghị chuyển nhượng nào đang diễn ra.',
-
-  // ==========================================
-  // CLUB STAFF
-  // ==========================================
   'staff.title': 'Ban Huấn Luyện & Cán Bộ Câu Lạc Bộ',
   'staff.manager': 'Huấn Luyện Viên Trưởng (Manager)',
   'staff.assistant': 'Trợ Lý HLV (Assistant Manager)',
-  'staff.physio': 'Bác Sĩ / Chuyên Gia Thể Lực (Physio)',
-  'staff.scout': 'Tuyển Trạch Viên (Scout)',
-  'staff.head_coach': 'HLV Trưởng',
-  'staff.assistant_coach': 'Trợ Lý HLV',
-  'staff.head_coach_youth': 'HLV Trưởng Đội Trẻ U21',
-  'staff.assistant_coach_youth': 'Trợ Lý HLV Đội Trẻ U21',
-  'staff.fitness_coach': 'HLV Thể Lực',
-  'staff.gk_coach': 'HLV Thủ Môn',
-  'staff.scout_short': 'Tuyển Trạch Viên',
-  'staff.physio_short': 'Bác Sĩ / Trị Liệu',
-  'staff.youth_director': 'GĐ Đào Tạo Trẻ',
+  'staff.physio': "Bác Sĩ / Trị Liệu",
+  'staff.scout': "Tuyển Trạch Viên",
+  'staff.head_coach': "HLV Trưởng",
+  'staff.assistant_coach': "Trợ Lý HLV",
+  'staff.head_coach_youth': "HLV Trưởng Đội Trẻ U21",
+  'staff.assistant_coach_youth': "Trợ Lý HLV Đội Trẻ U21",
+  'staff.fitness_coach': "HLV Thể Lực",
+  'staff.gk_coach': "HLV Thủ Môn",
+  'staff.scout_short': "Tuyển Trạch Viên",
+  'staff.physio_short': "Bác Sĩ / Trị Liệu",
+  'staff.youth_director': "Giám Đốc Đào Tạo Trẻ",
   'staff.optgroup_first_team': 'Đội Một (First Team)',
   'staff.optgroup_youth_team': 'Đội Trẻ U21 (Youth Team)',
   'staff.role_label': 'Vai trò:',
@@ -288,10 +234,6 @@ export const vi: Translations = {
   'staff.fire_staff': 'Chấm Dứt Hợp Đồng',
   'staff.salary': 'Mức lương tuần',
   'staff.contract': 'Thời hạn hợp đồng',
-
-  // ==========================================
-  // AUTH & ONBOARDING
-  // ==========================================
   'auth.login_title': 'ĐĂNG NHẬP HỆ THỐNG',
   'auth.register_title': 'ĐĂNG KÝ TÀI KHOẢN MỚI',
   'auth.username': 'Tên đăng nhập',
@@ -302,22 +244,20 @@ export const vi: Translations = {
   'auth.register_btn': 'Tạo Tài Khoản',
   'auth.no_account': 'Chưa có tài khoản? Đăng ký ngay',
   'auth.has_account': 'Đã có tài khoản? Đăng nhập ngay',
-
   'onboarding.title': 'Bổ Nhiệm Huấn Luyện Viên & Nhận CLB',
   'onboarding.club_name': 'Tên câu lạc bộ',
   'onboarding.short_name': 'Tên viết tắt (3-4 ký tự)',
   'onboarding.country': 'Quốc gia khởi đầu',
   'onboarding.city': 'Thành phố / Tỉnh thành',
   'onboarding.submit_btn': 'Khởi Tạo Câu Lạc Bộ & Bắt Đầu Mùa Giải',
-  // Player & Staff Modals
   'player.tab_skills': 'Kỹ Năng',
   'player.tab_matches': 'Trận Đấu',
   'player.tab_stats': 'Thống Kê',
   'player.tab_transfers': 'Chuyển Nhượng',
   'player.tab_injuries': 'Lịch Sử Chấn Thương',
   'player.tab_offer': 'Đề Nghị Hợp Đồng',
-  'staff.tab_skills': 'Chỉ Số Kỹ Năng',
-  'staff.tab_history': 'Lịch Sử CLB',
+  'staff.tab_skills': 'Bộ Kỹ Năng & Chỉ Số',
+  'staff.tab_history': 'Lịch Sử Sự Nghiệp',
   'staff.tab_offer': 'Đề Nghị Tuyển Mộ',
   'tactics.coach_card': 'HLV TRƯỞNG (HEAD COACH)',
   'tactics.license': 'BẰNG',
@@ -391,7 +331,7 @@ export const vi: Translations = {
   'player.no_transfers': 'Chưa có dữ liệu chuyển nhượng trong cơ sở dữ liệu.',
   'player.core_skills': 'Cốt lõi vị trí (10)',
   'player.physical_skills': 'Thể chất & Sức mạnh',
-  'staff.no_skills': 'Chưa có dữ liệu chỉ số huấn luyện.',
+  'staff.no_skills': 'Chưa có dữ liệu chỉ số',
   'staff.history_title': 'Quá Trình Công Tác & Lịch Sử Hợp Đồng',
   'staff.current_role': 'Hiện tại',
   'common.you': 'BẠN',
@@ -693,8 +633,8 @@ export const vi: Translations = {
   'staff.per_week': '/ tuần',
   'staff.current_head_coach': 'HLV Trưởng Hiện Tại',
   'staff.no_head_coach': 'Chưa Có HLV Trưởng!',
-  'staff.search_placeholder': 'Tìm theo tên nhân sự, quốc gia...',
-  'staff.role_all': 'Tất cả vai trò',
+  'staff.search_placeholder': 'Tìm theo tên nhân sự, vai trò, quốc gia...',
+  'staff.role_all': "Tất cả vai trò & phân loại",
   'staff.hire_more_btn': 'Tuyển Thêm Nhân Sự',
   'staff.loading_list': 'Đang tải danh sách ban huấn luyện CLB...',
   'staff.no_staff_match_title': 'Chưa có nhân sự nào phù hợp',
@@ -755,6 +695,58 @@ export const vi: Translations = {
   'staff.no_scouting_skills': 'Chưa có dữ liệu chỉ số tuyển trạch',
   'staff.skills_medical': 'Y Tế & Thể Lực (Medical)',
   'staff.no_medical_skills': 'Chưa có dữ liệu chỉ số y tế',
+  'staff.attr_attacking': "Huấn luyện Tấn công",
+  'staff.attr_desc_attacking': 'Khả năng chỉ đạo và rèn luyện các bài tập tấn công, phối hợp nhóm, dứt điểm và chạy chỗ.',
+  'staff.attr_defending': "Huấn luyện Phòng ngự",
+  'staff.attr_desc_defending': 'Khả năng huấn luyện hệ thống bọc lót, kèm người 1v1, bẫy việt vị và phòng ngự bóng chết.',
+  'staff.attr_tactical': "Huấn luyện Chiến thuật",
+  'staff.attr_desc_tactical': 'Đọc trận đấu, khả năng biến chuyển sơ đồ và truyền đạt ý đồ chiến thuật cho học trò.',
+  'staff.attr_technical': "Huấn luyện Kỹ thuật",
+  'staff.attr_desc_technical': 'Rèn giũa kỹ năng xử lý bóng 1 chạm, kiểm soát bóng, chuyền bóng và sút bóng tinh tế.',
+  'staff.attr_fitness': 'Huấn luyện Thể lực',
+  'staff.attr_desc_fitness': 'Xây dựng giáo án thể lực, sức bền, tốc độ, sức mạnh tranh chấp và duy trì thể trạng thi đấu.',
+  'staff.attr_gk_stopping': 'Huấn luyện Thủ môn',
+  'staff.attr_desc_gk_stopping': 'Rèn luyện phản xạ, chọn vị trí cản phá, bắt bóng bổng và kỹ năng đối mặt 1v1 cho thủ môn.',
+  'staff.attr_youth_dev': 'Phát triển Cầu thủ trẻ',
+  'staff.attr_desc_youth_dev': 'Khả năng phát hiện, uốn nắn và nâng cao tiềm năng phát triển (PA) cho các mầm non học viện.',
+  'staff.attr_man_management': "Quản lý Nhân sự",
+  'staff.attr_desc_man_management': 'Kiểm soát nội bộ, duy trì hòa khí, quản trị cái tôi của các ngôi sao và giải quyết xung đột.',
+  'staff.attr_motivating': "Truyền Lửa & Động lực",
+  'staff.attr_desc_motivating': 'Truyền cảm hứng, thúc đẩy tinh thần chiến đấu và khát khao chiến thắng cho toàn đội.',
+  'staff.attr_discipline': "Kỷ luật & Tác phong",
+  'staff.attr_desc_discipline': 'Thiết lập kỷ luật thép, thái độ tập luyện chuyên nghiệp và hạn chế tình trạng vô kỷ luật.',
+  'staff.attr_determination': "Quyết tâm & Ý chí",
+  'staff.attr_desc_determination': 'Bản lĩnh vượt khó, tinh thần không bao giờ bỏ cuộc khi đội bóng bị dẫn trước hoặc khủng hoảng.',
+  'staff.attr_adaptability': "Thích ứng Môi trường",
+  'staff.attr_desc_adaptability': 'Tốc độ hòa nhập và làm quen với nền bóng đá, ngôn ngữ, văn hóa và giải đấu mới.',
+  'staff.attr_judge_ability': 'Đánh giá Năng lực',
+  'staff.attr_desc_judge_ability': 'Độ chính xác khi thẩm định trình độ, đẳng cấp hiện tại (Current Ability - OVR) của cầu thủ.',
+  'staff.attr_judge_potential': 'Đánh giá Tiềm năng',
+  'staff.attr_desc_judge_potential': 'Độ chính xác khi dự đoán trần phát triển trong tương lai (Potential Ability) của cầu thủ.',
+  'staff.attr_tac_knowledge': 'Kiến thức Chiến thuật Trinh sát',
+  'staff.attr_desc_tac_knowledge': 'Phân tích điểm mạnh, điểm yếu chiến thuật của đối thủ để tư vấn phương án đối phó.',
+  'staff.attr_scout_network': 'Mạng lưới Tuyển trạch',
+  'staff.attr_desc_scout_network': 'Độ rộng của các mối quan hệ và khả năng tiếp cận các thị trường chuyển nhượng trên toàn cầu.',
+  'staff.attr_physiotherapy': "Vật lý Trị liệu",
+  'staff.attr_desc_physiotherapy': 'Chẩn đoán và trị liệu các chấn thương cơ, gân, khớp trong và sau trận đấu.',
+  'staff.attr_sports_science': "Khoa học Thể thao",
+  'staff.attr_desc_sports_science': 'Ứng dụng số liệu sinh học để theo dõi quá tải, phát hiện sớm nguy cơ suy kiệt thể lực.',
+  'staff.attr_injury_prevent': 'Phòng ngừa Chấn thương',
+  'staff.attr_desc_injury_prevent': 'Giáo trình giảm thiểu rủi ro xảy ra các chấn thương nghiêm trọng cho cầu thủ.',
+  'staff.attr_rehabilitation': "Phục hồi Chấn thương",
+  'staff.attr_desc_rehabilitation': 'Đẩy nhanh tiến độ bình phục và giúp cầu thủ lấy lại 100% phong độ sau chấn thương dài hạn.',
+  'staff.style_tiki_taka': 'Tiki-Taka Hiện Đại',
+  'staff.style_tiki_taka_control': 'Kiểm soát bóng ngắn (Tiki-taka)',
+  'staff.style_vertical_tiki_taka': 'Tiki-taka trực diện',
+  'staff.style_gegenpress': 'Gegenpressing',
+  'staff.style_gegenpressing': 'Gegenpressing',
+  'staff.style_counter_attack': 'Phản công nhanh',
+  'staff.style_fluid_counter_attack': 'Phản công cơ động',
+  'staff.style_catenaccio': 'Phòng ngự Catenaccio',
+  'staff.style_park_the_bus': 'Phòng Ngự Kỷ Luật',
+  'staff.style_wing_play': 'Tấn Công Biên',
+  'staff.style_route_one': 'Bóng dài trực diện',
+  'staff.style_balanced': 'Cân Bằng',
   'confed.tab_all': 'Tất Cả (96)',
   'confed.tab_uefa': 'Châu Âu - UEFA (32)',
   'confed.tab_afc': 'Châu Á - AFC (32)',
@@ -1039,14 +1031,14 @@ export const vi: Translations = {
   'hire_modal.processing': 'Đang Xử Lý...',
   'hire_modal.confirm_btn': 'Xác Nhận Ký Hợp Đồng',
   'staff_market.th_staff': 'Nhân Viên',
-  'staff_market.th_role': 'Vai Trò',
+  'staff_market.th_role': 'Vai Trò / Phân Loại',
   'staff_market.th_license': 'Bằng Cấp',
   'staff_market.th_philosophy': 'Triết Lý',
-  'staff_market.th_formation': 'Sơ Đồ Sở Trường',
+  'staff_market.th_formation': 'Sơ Đồ',
   'staff_market.th_reputation': 'Danh Tiếng',
   'staff_market.th_wage_fee': 'Lương / Phí Tuyển',
   'staff_market.th_actions': 'Thao Tác',
-  'staff_market.searching': 'Đang tìm kiếm danh sách ban huấn luyện và nhân sự...',
+  'staff_market.searching': 'Tìm kiếm theo tên nhân viên, HLV, quốc tịch...',
   'staff_market.no_results': 'Không tìm thấy nhân sự phù hợp với tiêu chí tìm kiếm.',
   'staff_market.default_formation': 'Mặc định',
   'staff_market.fee_prefix': 'Phí:',
@@ -1087,9 +1079,6 @@ export const vi: Translations = {
   'bids.btn_accept_now': 'Chấp Nhận Ngay',
   'bids.btn_confirm_reject': 'Xác Nhận Từ Chối',
   'bids.btn_back': 'Quay Lại',
-  // ==========================================
-  // TROPHY CABINET & HONORS (PHÒNG TRUYỀN THỐNG)
-  // ==========================================
   'trophies.cabinet_title': '🏛️ PHÒNG TRUYỀN THỐNG CLB',
   'trophies.cabinet_subtitle': 'Tủ cúp vinh quang lưu danh những mốc son chói lọi, danh hiệu vô địch và niềm kiêu hãnh của CLB.',
   'trophies.founded_year': 'Thành lập {year}',
@@ -1137,4 +1126,53 @@ export const vi: Translations = {
   'tactics.swap_banner_bench': 'Đang chọn ghế dự bị {slot} ({name}). Click cầu thủ trên sân để thay người, click ghế khác để đổi thứ tự, hoặc click cầu thủ ngoài danh sách để thế chỗ!',
   'tactics.swap_banner_reserve': 'Đang chọn cầu thủ {name}. Click một ghế dự bị hoặc vị trí trên sân để đưa cầu thủ này vào!',
   'player_modal.experience': 'Kinh nghiệm (EXP)',
+  'staff.type_coach': "Huấn Luyện Viên",
+  'staff.type_scout': "Tuyển Trạch Viên",
+  'staff.type_physio': "Bác Sĩ / Trị Liệu",
+  'staff.type_director': "Giám Đốc / Quản Lý",
+  'staff.head_scout': "Trưởng Ban Tuyển Trạch",
+  'staff.chief_physio': "Trưởng Ban Y Tế",
+  'staff.technical_director': "Giám Đốc Kỹ Thuật",
+  'staff.scout_director': "Giám Đốc Tuyển Trạch",
+  'staff.physio_director': "Giám Đốc Y Tế",
+  'staff.financial_director': "Giám Đốc Tài Chính",
+  'staff.youth_coach': "HLV Tuyến Trẻ",
+  'staff.category_all': "4 Nhóm Chuyên Môn",
+  'staff.total_members': 'Quy Mô Nhân Sự',
+  'staff.member_unit': 'thành viên',
+  'staff.head_coach_label': 'HLV Trưởng:',
+  'staff.head_coach_unassigned': 'Chưa bổ nhiệm HLV Trưởng',
+  'staff.loading_club_staff': 'Đang nạp dữ liệu ban huấn luyện CLB...',
+  'staff.empty_club_staff': 'Chưa Có Nhân Sự Nào',
+  'staff.empty_club_staff_desc': 'Hãy ghé qua Thị trường Tuyển mộ để ký hợp đồng với những chuyên gia bóng đá hàng đầu.',
+  'staff.go_to_market_btn': 'Đến Thị Trường Tuyển Mộ',
+  'staff.age_label': "Tuổi & Ngày sinh:",
+  'staff.age_format': "{age} tuổi",
+  'staff.birth_day_format': "Sinh Ngày {day} (Mùa giải)",
+  'staff.age_with_day': "{age} tuổi (Ngày {day})",
+  'staff.ovr': "Chỉ số OVR",
+  'staff.ovr_short': "OVR",
+  'staff.attr_mental': "Tâm lý & Ý chí",
+  'staff.attr_physical': "Rèn luyện Thể lực",
+  'staff.attr_goalkeeping': "Huấn luyện Thủ môn",
+  'staff.attr_set_pieces': "Bóng chết & Cố định",
+  'staff.attr_youth_development': "Phát triển Trẻ",
+  'staff.attr_working_with_youth': "Làm việc với Cầu thủ trẻ",
+  'staff.attr_leadership': "Khả năng Lãnh đạo",
+  'staff.attr_judging_player_ability': "Đánh giá Năng lực Cầu thủ",
+  'staff.attr_judging_player_potential': "Đánh giá Tiềm năng Cầu thủ",
+  'staff.attr_tactical_knowledge': "Kiến thức Chiến thuật",
+  'staff.attr_negotiating': "Kỹ năng Đàm phán",
+  'staff.attr_injury_prevention': "Phòng ngừa Chấn thương",
+  'staff.style_possession': 'Kiểm Soát Bóng',
+  'staff.style_counter_attacking': 'Phản Công Thần Tốc',
+  'staff.style_direct_counter': 'Tấn Công Trực Diện',
+  'staff.optgroup_coaching': "Ban Huấn Luyện (Coaching)",
+  'staff.optgroup_scouting': "Bộ Phận Tuyển Trạch (Scouting)",
+  'staff.optgroup_medical': "Bộ Phận Y Tế & Thể Trạng (Medical)",
+  'staff.optgroup_director': "Ban Giám Đốc (Board & Directors)",
+  'staff_market.th_ovr': "OVR",
+  'staff_market.th_age': "Tuổi",
+  'hire_modal.ovr_label': "Chỉ Số OVR:",
+  'hire_modal.age_label': "Độ Tuổi & Sinh Nhật:",
 };

@@ -80,16 +80,40 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
             className="input-select"
             value={roleFilter}
             onChange={(e) => onRoleFilterChange(e.target.value)}
-            style={{ width: '220px' }}
+            style={{ width: '250px' }}
           >
-            <option value="">{t('staff.role_all', 'Tất cả vai trò')}</option>
-            <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
-            <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ Lý HLV')}</option>
-            <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể Lực')}</option>
-            <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ Môn')}</option>
-            <option value="SCOUT">{t('staff.scout_short', 'Tuyển Trạch Viên')}</option>
-            <option value="PHYSIO">{t('staff.physio_short', 'Bác Sĩ / Trị Liệu')}</option>
-            <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'GĐ Đào Tạo Trẻ')}</option>
+            <option value="">{t('staff.role_all', 'Tất cả vai trò & phân loại')}</option>
+            <optgroup label={t('staff.category_all', '4 Nhóm Chuyên Môn')}>
+              <option value="COACH">{t('staff.type_coach', 'Huấn Luyện Viên (Coach)')}</option>
+              <option value="SCOUT">{t('staff.type_scout', 'Tuyển Trạch Viên (Scout)')}</option>
+              <option value="PHYSIO">{t('staff.type_physio', 'Bác Sĩ / Trị Liệu (Physio)')}</option>
+              <option value="DIRECTOR">{t('staff.type_director', 'Giám Đốc / Quản Lý (Director)')}</option>
+            </optgroup>
+            <optgroup label={t('staff.optgroup_coaching', 'Ban Huấn Luyện Đội Một (First Team)')}>
+              <option value="HEAD_COACH">{t('staff.head_coach', 'HLV Trưởng')}</option>
+              <option value="ASSISTANT_COACH">{t('staff.assistant_coach', 'Trợ Lý HLV')}</option>
+              <option value="FITNESS_COACH">{t('staff.fitness_coach', 'HLV Thể Lực')}</option>
+              <option value="GOALKEEPING_COACH">{t('staff.gk_coach', 'HLV Thủ Môn')}</option>
+            </optgroup>
+            <optgroup label={t('staff.optgroup_youth_team', 'Đội Trẻ U21 & Học Viện (Youth Team)')}>
+              <option value="HEAD_COACH_YOUTH">{t('staff.head_coach_youth', 'HLV Trưởng Đội Trẻ U21')}</option>
+              <option value="ASSISTANT_COACH_YOUTH">{t('staff.assistant_coach_youth', 'Trợ Lý HLV Đội Trẻ U21')}</option>
+              <option value="YOUTH_DIRECTOR">{t('staff.youth_director', 'Giám Đốc Đào Tạo Trẻ')}</option>
+            </optgroup>
+            <optgroup label={t('staff.optgroup_scouting', 'Tuyển Trạch (Scouting)')}>
+              <option value="HEAD_SCOUT">{t('staff.head_scout', 'Trưởng Ban Tuyển Trạch')}</option>
+              <option value="SCOUT">{t('staff.scout', 'Tuyển Trạch Viên')}</option>
+            </optgroup>
+            <optgroup label={t('staff.optgroup_medical', 'Y Tế & Thể Trạng (Medical)')}>
+              <option value="CHIEF_PHYSIO">{t('staff.chief_physio', 'Trưởng Ban Y Tế')}</option>
+              <option value="PHYSIO">{t('staff.physio', 'Bác Sĩ / Trị Liệu')}</option>
+            </optgroup>
+            <optgroup label={t('staff.optgroup_director', 'Ban Giám Đốc (Board & Directors)')}>
+              <option value="TECHNICAL_DIRECTOR">{t('staff.technical_director', 'Giám Đốc Kỹ Thuật')}</option>
+              <option value="SCOUT_DIRECTOR">{t('staff.scout_director', 'Giám Đốc Tuyển Trạch')}</option>
+              <option value="PHYSIO_DIRECTOR">{t('staff.physio_director', 'Giám Đốc Y Tế')}</option>
+              <option value="FINANCIAL_DIRECTOR">{t('staff.financial_director', 'Giám Đốc Tài Chính')}</option>
+            </optgroup>
           </select>
 
           <button type="submit" className="btn btn-primary btn-sm flex-center" style={{ gap: '0.4rem' }}>
@@ -104,12 +128,12 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
           <thead>
             <tr>
               <th className="th-left" style={{ width: '24%' }}>{t('staff_market.th_staff', 'Nhân Viên')}</th>
-              <th className="th-center" style={{ width: '13%' }}>{t('staff_market.th_role', 'Vai Trò')}</th>
+              <th className="th-center" style={{ width: '7%' }}>{t('staff_market.th_ovr', 'OVR')}</th>
+              <th className="th-center" style={{ width: '14%' }}>{t('staff_market.th_role', 'Vai Trò')}</th>
               <th className="th-center" style={{ width: '8%' }}>{t('staff_market.th_license', 'Bằng Cấp')}</th>
-              <th className="th-left" style={{ width: '13%' }}>{t('staff_market.th_philosophy', 'Triết Lý')}</th>
+              <th className="th-left" style={{ width: '12%' }}>{t('staff_market.th_philosophy', 'Triết Lý')}</th>
               <th className="th-left" style={{ width: '12%' }}>{t('staff_market.th_formation', 'Sơ Đồ Sở Trường')}</th>
-              <th className="th-center" style={{ width: '8%' }}>{t('staff_market.th_reputation', 'Danh Tiếng')}</th>
-              <th className="th-right" style={{ width: '11%' }}>{t('staff_market.th_wage_fee', 'Lương / Phí Tuyển')}</th>
+              <th className="th-right" style={{ width: '12%' }}>{t('staff_market.th_wage_fee', 'Lương / Phí Tuyển')}</th>
               <th className="th-center" style={{ width: '11%' }}>{t('staff_market.th_actions', 'Thao Tác')}</th>
             </tr>
           </thead>
@@ -132,6 +156,9 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                 const isOwnClub = st.currentClub?.id === currentClubId;
                 const styleKey = st.tacticalStyle ? st.tacticalStyle.toLowerCase() : '';
                 const styleLabel = styleKey ? t(`staff.style_${styleKey}`, st.tacticalStyle) : (st.tacticalStyle || 'BALANCED');
+                const staffOvr = st.ovr || st.overall_rating || 60;
+                const ovrColor = staffOvr >= 65 ? '#10b981' : staffOvr >= 55 ? '#0284c7' : '#64748b';
+                const ovrBg = staffOvr >= 65 ? 'rgba(16, 185, 129, 0.12)' : staffOvr >= 55 ? 'rgba(2, 132, 199, 0.12)' : 'rgba(100, 116, 139, 0.12)';
 
                 return (
                   <tr
@@ -145,9 +172,9 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                       <div className="staff-info-cell">
                         <StaffAvatar
                           name={st.name}
-                          role={st.staffType}
+                          role={st.role || st.staffType}
                           photoUrl={st.photoUrl || (st as any).photo_url}
-                          size={38}
+                          size={40}
                         />
                         <div style={{ minWidth: 0, overflow: 'hidden' }}>
                           <div
@@ -162,16 +189,42 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                           >
                             {st.name}
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            {st.nationality || t('common.international', 'Quốc tế')} {st.countryCode ? `(${st.countryCode})` : ''}
+                          <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'nowrap' }}>
+                            {st.age && (
+                              <span style={{ fontWeight: 600, color: '#334155' }}>
+                                {t('staff.age_format', '{age} tuổi').replace('{age}', String(st.age))}
+                              </span>
+                            )}
+                            {st.birth_season_day && (
+                              <span>• {t('common.date', 'Ngày')} {st.birth_season_day}</span>
+                            )}
+                            <span>• {st.nationality || t('common.international', 'Quốc tế')} {st.countryCode ? `(${st.countryCode})` : ''}</span>
                           </div>
                         </div>
                       </div>
                     </td>
 
+                    {/* OVR */}
+                    <td className="td-center">
+                      <span
+                        className="ovr-chip"
+                        style={{
+                          background: ovrBg,
+                          color: ovrColor,
+                          border: `1px solid ${ovrColor}`,
+                          fontWeight: 900,
+                          fontSize: '0.88rem',
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                        }}
+                      >
+                        {staffOvr}
+                      </span>
+                    </td>
+
                     {/* Vai Trò */}
                     <td className="td-center">
-                      <RoleBadge role={st.staffType} size="sm" />
+                      <RoleBadge role={st.role || st.staffType} size="sm" />
                     </td>
 
                     {/* Bằng Cấp */}
@@ -195,13 +248,6 @@ export const StaffMarketTable: React.FC<StaffMarketTableProps> = ({
                       ) : (
                         <span className="text-muted" style={{ fontSize: '0.8rem' }}>{t('staff_market.default_formation', 'Mặc định')}</span>
                       )}
-                    </td>
-
-                    {/* Danh Tiếng */}
-                    <td className="td-center">
-                      <span className="ovr-chip" style={{ background: '#1e293b', color: '#f59e0b', border: '1px solid #f59e0b' }}>
-                        {Math.round(st.reputation / 100) || 75}
-                      </span>
                     </td>
 
                     {/* Lương / Phí */}
