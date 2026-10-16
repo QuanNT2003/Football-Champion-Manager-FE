@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Club, Player, TimelineData, User } from '../types';
 import { Navbar } from '../components/Navbar';
 import { LeftDockRail } from '../components/LeftDockRail';
-import { PlayerDetailModal } from '../components/PlayerDetailModal';
+import { PlayerDetailModal } from '../components/player';
 
 interface Props {
   club: Club | null;

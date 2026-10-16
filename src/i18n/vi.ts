@@ -1249,4 +1249,5 @@ export const vi: Translations = {
   'standings.group_stage_youth': 'Vòng Bảng U21',
   'standings.youth_progression_banner': 'Thể thức Cúp Trẻ U21: 32 CLB tranh tài qua 8 bảng (A - H). Đội Nhất & Nhì mỗi bảng (16 đội) sẽ giành vé vào vòng Knockout 1/8 (Round of 16).',
   'standings.group_progression_banner': 'Thể thức Vòng Bảng: Top 2 đội dẫn đầu mỗi bảng giành vé bước tiếp vào vòng đấu loại trực tiếp Knockout.',
+  'standings.your_club_badge': 'CLB CỦA BẠN',
 };

@@ -1249,4 +1249,5 @@ export const en: Translations = {
   'standings.group_stage_youth': 'U21 Group Stage',
   'standings.youth_progression_banner': 'U21 Youth Cup Format: 32 clubs divided into 8 groups (A - H). Top 1 & Top 2 from each group (16 teams) advance to the Knockout Round of 16.',
   'standings.group_progression_banner': 'Group Stage Format: Top 2 teams from each group qualify for the Knockout Stage.',
+  'standings.your_club_badge': 'YOUR CLUB',
 };

@@ -12,7 +12,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { transfersApi, StaffMarketItem } from '../services/transfers.service';
-import { StaffDetailModal } from './StaffDetailModal';
+import { StaffDetailModal } from './staff';
 import { StaffAvatar } from './common/StaffAvatar';
 import { RoleBadge } from './common/RoleBadge';
 

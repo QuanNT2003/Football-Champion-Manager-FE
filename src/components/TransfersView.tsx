@@ -1,5 +1,4 @@
 import { useTranslation } from '../i18n';
-import { StaffDetailModal } from './StaffDetailModal';
 import React, { useState, useEffect, useMemo } from 'react';
 import { transfersApi, StaffMarketItem, FilterOptionsResponse } from '../services/transfers.service';
 import { Player, TransferOffer } from '../types';
@@ -9,8 +8,8 @@ import { PlayerMarketTable } from './transfers/PlayerMarketTable';
 import { StaffMarketTable } from './transfers/StaffMarketTable';
 import { ClubStaffView } from './ClubStaffView';
 import { TransferBidsView } from './transfers/TransferBidsView';
-import { PlayerDetailModal } from './PlayerDetailModal';
-import { StaffHireModal } from './transfers/StaffHireModal';
+import { PlayerDetailModal } from './player';
+import { StaffDetailModal } from './staff';
 import { PlayerSkillFilterModal, SkillFilterValues } from './transfers/PlayerSkillFilterModal';
 
 interface TransfersViewProps {
@@ -60,9 +59,6 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   const [staffTotalPages, setStaffTotalPages] = useState(1);
   const [selectedStaffForHire, setSelectedStaffForHire] = useState<StaffMarketItem | null>(null);
   const [staffDetailInitialTab, setStaffDetailInitialTab] = useState<'skills' | 'history' | 'offer'>('skills');
-  const [hiringStaff, setHiringStaff] = useState(false);
-  const [hireSuccess, setHireSuccess] = useState('');
-  const [hireError, setHireError] = useState('');
 
   // Transfer Offers States
   const [incomingOffers, setIncomingOffers] = useState<TransferOffer[]>([]);
@@ -236,47 +232,13 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   const handleOpenStaffDetail = (staff: StaffMarketItem) => {
     setSelectedStaffForHire(staff);
     setStaffDetailInitialTab('skills');
-    setHireError('');
-    setHireSuccess('');
   };
 
   const handleOpenStaffOffer = (staff: StaffMarketItem) => {
     setSelectedStaffForHire(staff);
     setStaffDetailInitialTab('offer');
-    setHireError('');
-    setHireSuccess('');
   };
 
-  const openHireStaffModal = (staff: StaffMarketItem) => {
-    handleOpenStaffOffer(staff);
-  };
-
-  const handleHireStaff = async () => {
-    if (!selectedStaffForHire) return;
-    if (selectedStaffForHire.signingFee > cashBalance) {
-      setHireError(t('transfers.hire_insufficient_budget', 'Ngân sách CLB không đủ chi trả phí ký hợp đồng này!'));
-      return;
-    }
-    try {
-      setHiringStaff(true);
-      setHireError('');
-      await transfersApi.hireStaff({
-        clubId: currentClubId,
-        staffId: selectedStaffForHire.id
-      });
-      setHireSuccess(t('transfers.hire_success_msg', 'Tuyển dụng thành công {name}!').replace('{name}', selectedStaffForHire.name));
-      onRefreshFinance();
-      setTimeout(() => {
-        setSelectedStaffForHire(null);
-        setHireSuccess('');
-        loadStaff();
-      }, 1500);
-    } catch (err: any) {
-      setHireError(err.response?.data?.message || err.message || t('transfers.hire_failed_msg', 'Tuyển dụng nhân viên thất bại.'));
-    } finally {
-      setHiringStaff(false);
-    }
-  };
 
   const formatMoney = (val: number) => {
     if (val >= 1000000) return `€${(val / 1000000).toFixed(1)}M`;

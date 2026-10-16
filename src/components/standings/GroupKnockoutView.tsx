@@ -302,67 +302,128 @@ export const GroupKnockoutView: React.FC = () => {
 
           {/* Group Grid: Hiển thị các bảng A..H */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.25rem' }}>
-            {groups.map((grp) => (
-              <div key={grp.id} className="card" style={{ padding: '1rem', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
-                  <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#1e293b' }}>
-                    {group(grp.name)}
-                  </h4>
-                  <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>4 Đội</span>
-                </div>
+            {groups.map((grp) => {
+              const hasMyClub = grp.standings?.some((st: any) => {
+                const cId = st.club?.id || st.club_id;
+                return cId && cId.toString() === currentClubId;
+              });
 
-                <table style={{ width: '100%', fontSize: '0.82rem', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ color: '#64748b', textAlign: 'left', borderBottom: '1px solid #f1f5f9' }}>
-                      <th style={{ padding: '4px' }}>#</th>
-                      <th style={{ padding: '4px' }}>CLB</th>
-                      <th style={{ padding: '4px', textAlign: 'center' }}>Tr</th>
-                      <th style={{ padding: '4px', textAlign: 'center' }}>+/-</th>
-                      <th style={{ padding: '4px', textAlign: 'center', fontWeight: 800 }}>Đ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {grp.standings.map((st, idx) => (
-                      <tr
-                        key={st.id}
-                        style={{
-                          borderBottom: '1px solid #f8fafc',
-                          backgroundColor: idx < 2 ? 'rgba(22, 163, 74, 0.06)' : 'transparent',
-                          fontWeight: st.club?.id === currentClubId ? 800 : 500,
-                        }}
-                      >
-                        <td style={{ padding: '6px 4px', color: idx < 2 ? '#16a34a' : '#64748b', fontWeight: 700 }}>
-                          {idx + 1}
-                        </td>
-                        <td style={{ padding: '6px 4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          {st.club?.logo_url ? (
-                            <img src={st.club.logo_url} alt="" style={{ width: 16, height: 16, borderRadius: '50%' }} />
-                          ) : (
-                            <span style={{ width: 16, height: 16, borderRadius: '50%', background: '#cbd5e1', display: 'inline-block' }} />
-                          )}
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
-                            {st.club?.short_name || st.club?.name}
-                          </span>
-                        </td>
-                        <td style={{ padding: '6px 4px', textAlign: 'center', color: '#64748b' }}>{st.played}</td>
-                        <td style={{ padding: '6px 4px', textAlign: 'center', color: st.goal_difference > 0 ? '#16a34a' : st.goal_difference < 0 ? '#dc2626' : '#64748b' }}>
-                          {st.goal_difference > 0 ? `+${st.goal_difference}` : st.goal_difference}
-                        </td>
-                        <td style={{ padding: '6px 4px', textAlign: 'center', fontWeight: 800, color: '#0f172a' }}>
-                          {st.points}
-                        </td>
+              return (
+                <div
+                  key={grp.id}
+                  className="card"
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '14px',
+                    border: hasMyClub ? '2px solid #16a34a' : '1px solid #e2e8f0',
+                    boxShadow: hasMyClub ? '0 6px 20px rgba(22, 163, 74, 0.16)' : '0 1px 3px rgba(0,0,0,0.05)',
+                    position: 'relative',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: hasMyClub ? '#15803d' : '#1e293b' }}>
+                        {group(grp.name)}
+                      </h4>
+                      {hasMyClub && (
+                        <span
+                          style={{
+                            fontSize: '0.68rem',
+                            fontWeight: 800,
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            background: '#16a34a',
+                            color: '#fef08a',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                          }}
+                        >
+                          <span>⭐</span> BẢNG CỦA BẠN
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>4 Đội</span>
+                  </div>
+
+                  <table style={{ width: '100%', fontSize: '0.82rem', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ color: '#64748b', textAlign: 'left', borderBottom: '1px solid #f1f5f9' }}>
+                        <th style={{ padding: '4px' }}>#</th>
+                        <th style={{ padding: '4px' }}>CLB</th>
+                        <th style={{ padding: '4px', textAlign: 'center' }}>Tr</th>
+                        <th style={{ padding: '4px', textAlign: 'center' }}>+/-</th>
+                        <th style={{ padding: '4px', textAlign: 'center', fontWeight: 800 }}>Đ</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {grp.standings.map((st, idx) => {
+                        const isMyTeam = st.club?.id === currentClubId;
+                        return (
+                          <tr
+                            key={st.id}
+                            style={{
+                              borderBottom: '1px solid #f8fafc',
+                              backgroundColor: isMyTeam
+                                ? 'rgba(34, 197, 94, 0.14)'
+                                : idx < 2
+                                ? 'rgba(22, 163, 74, 0.06)'
+                                : 'transparent',
+                              borderLeft: isMyTeam ? '4px solid #16a34a' : '4px solid transparent',
+                              fontWeight: isMyTeam ? 800 : 500,
+                            }}
+                          >
+                            <td style={{ padding: '6px 4px', color: isMyTeam ? '#15803d' : idx < 2 ? '#16a34a' : '#64748b', fontWeight: 700 }}>
+                              {idx + 1}
+                            </td>
+                            <td style={{ padding: '6px 4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              {st.club?.logo_url ? (
+                                <img src={st.club.logo_url} alt="" style={{ width: 16, height: 16, borderRadius: '50%' }} />
+                              ) : (
+                                <span style={{ width: 16, height: 16, borderRadius: '50%', background: '#cbd5e1', display: 'inline-block' }} />
+                              )}
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px', color: isMyTeam ? '#15803d' : '#0f172a' }}>
+                                {st.club?.short_name || st.club?.name}
+                              </span>
+                              {isMyTeam && (
+                                <span
+                                  style={{
+                                    fontSize: '0.62rem',
+                                    fontWeight: 800,
+                                    padding: '1px 5px',
+                                    borderRadius: '4px',
+                                    backgroundColor: '#15803d',
+                                    color: '#ffffff',
+                                  }}
+                                >
+                                  BẠN
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ padding: '6px 4px', textAlign: 'center', color: '#64748b' }}>{st.played}</td>
+                            <td style={{ padding: '6px 4px', textAlign: 'center', color: st.goal_difference > 0 ? '#16a34a' : st.goal_difference < 0 ? '#dc2626' : '#64748b' }}>
+                              {st.goal_difference > 0 ? `+${st.goal_difference}` : st.goal_difference}
+                            </td>
+                            <td style={{ padding: '6px 4px', textAlign: 'center', fontWeight: 800, color: isMyTeam ? '#15803d' : '#0f172a' }}>
+                              {st.points}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
 
-                {/* Footer Chú thích Bảng */}
-                <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
-                  <span>🟢 Top 1 - 2: Vào Vòng 1/8</span>
-                  <span style={{ color: '#94a3b8', fontWeight: 500 }}>Đá vòng tròn 1 lượt</span>
+                  {/* Footer Chú thích Bảng */}
+                  <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
+                    <span>🟢 Top 1 - 2: Vào Vòng 1/8</span>
+                    <span style={{ color: hasMyClub ? '#15803d' : '#94a3b8', fontWeight: hasMyClub ? 800 : 500 }}>
+                      {hasMyClub ? '⭐ Bảng của bạn' : 'Đá vòng tròn 1 lượt'}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ) : activeTab === 'bracket' ? (

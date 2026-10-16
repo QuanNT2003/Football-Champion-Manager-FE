@@ -23,6 +23,8 @@ import { CountrySelectModal } from './CountrySelectModal';
 
 export const LeagueView: React.FC = () => {
   const currentClub = JSON.parse(localStorage.getItem('fc_club') || '{}');
+  const currentClubId = currentClub?.id?.toString() || '';
+  const clubCompId = currentClub?.current_competition_id?.toString();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -82,8 +84,20 @@ export const LeagueView: React.FC = () => {
         );
         setDomesticComps(domesticList);
 
+        // Mặc định chọn giải đấu:
+        // Nếu người dùng đang xem quốc gia của CLB mình và không có queryTier trên URL:
+        // Tự động tìm giải League mà CLB của người dùng đang tham gia!
+        let targetTier = currentTier;
+        if (!queryTier && viewingCountryId === userClubCountryId && clubCompId) {
+          const myComp = domesticList.find((c) => c.id.toString() === clubCompId.toString());
+          if (myComp && myComp.tier) {
+            targetTier = myComp.tier;
+            setCurrentTier(myComp.tier);
+          }
+        }
+
         // Find current tier competition
-        const foundComp = domesticList.find((c) => c.tier === currentTier) || domesticList[0] || null;
+        const foundComp = domesticList.find((c) => c.tier === targetTier) || domesticList[0] || null;
         setCurrentComp(foundComp);
       } catch (err) {
         console.error('Failed to load domestic competitions:', err);
@@ -93,7 +107,7 @@ export const LeagueView: React.FC = () => {
     };
 
     loadDomesticComps();
-  }, [viewingCountryId, currentTier]);
+  }, [viewingCountryId, currentTier, clubCompId, queryTier, userClubCountryId]);
 
   // Load standings, teams, stats for current competition and selected group
   useEffect(() => {
@@ -115,11 +129,22 @@ export const LeagueView: React.FC = () => {
           const fetchedGroups = res.groups || [];
           setGroups(fetchedGroups);
 
-          // If there are groups and no group selected, select first group
+          // Tự động chọn Group có CLB của người dùng nếu có:
           let effectiveGroup = selectedGroupId;
-          if (fetchedGroups.length > 0 && (!selectedGroupId || !fetchedGroups.some(g => g.id === selectedGroupId))) {
-            effectiveGroup = fetchedGroups[0].id;
-            setSelectedGroupId(effectiveGroup);
+          if (fetchedGroups.length > 0) {
+            const myGroup = fetchedGroups.find((g: any) =>
+              g.standings?.some((s: any) => {
+                const cId = s.club?.id || s.club_id;
+                return cId && cId.toString() === currentClubId;
+              })
+            );
+
+            // Nếu chưa có group hợp lệ được chọn, hoặc nếu vừa đổi tier:
+            // ƯU TIÊN CHỌN BẢNG CỦA CLB MÌNH!
+            if (!effectiveGroup || !fetchedGroups.some(g => g.id === effectiveGroup)) {
+              effectiveGroup = myGroup ? myGroup.id : fetchedGroups[0].id;
+              setSelectedGroupId(effectiveGroup);
+            }
           }
 
           if (fetchedGroups.length > 0 && effectiveGroup) {
@@ -157,7 +182,7 @@ export const LeagueView: React.FC = () => {
     };
 
     loadLeagueData();
-  }, [currentComp?.id, viewingCountryId, selectedGroupId]);
+  }, [currentComp?.id, viewingCountryId, selectedGroupId, currentClubId]);
 
   // Switch Tier
   const handleSwitchTier = (tierNum: number) => {
@@ -178,7 +203,11 @@ export const LeagueView: React.FC = () => {
   // Current country info
   const viewingCountry = countries.find((c) => c.id === viewingCountryId);
   const viewingCountryName = viewingCountry?.name || currentComp?.country?.name || 'Vietnam';
-  const currentClubId = currentClub?.id?.toString() || '';
+  const myClubTier = domesticComps.find((c) => c.id.toString() === clubCompId)?.tier;
+  const isMyClubInCurrentTable = currentTableRows.some((s: any) => {
+    const cId = s.club?.id || s.club_id;
+    return cId && cId.toString() === currentClubId;
+  });
 
   return (
     <div className="standings-page" style={{ padding: '1.5rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -358,7 +387,7 @@ export const LeagueView: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#15803d', letterSpacing: '0.5px' }}>
-              TIER NAVIGATION:
+              {t('standings.tier_nav')}
             </span>
 
             {/* Nút Thăng Hạng (Promote) */}
@@ -408,35 +437,6 @@ export const LeagueView: React.FC = () => {
             </button>
           </div>
 
-          {/* 4 Nút Tiers lấy thẳng tên giải từ Database */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-            {[1, 2, 3, 4].map((tNum) => {
-              const compInTier = domesticComps.find((c) => c.tier === tNum);
-              const isAct = currentTier === tNum;
-              const label = compInTier?.displayName || compInTier?.name || `${viewingCountryName} League ${tNum}`;
-
-              return (
-                <button
-                  key={tNum}
-                  type="button"
-                  onClick={() => handleSwitchTier(tNum)}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    fontSize: '0.84rem',
-                    fontWeight: 700,
-                    border: 'none',
-                    cursor: 'pointer',
-                    backgroundColor: isAct ? '#15803d' : '#f1f5f9',
-                    color: isAct ? '#ffffff' : '#334155',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {/* KHOANH ĐỎ 4: THANH CHỌN BẢNG (Group: Main Table hoặc Bảng A, B, C...) */}
@@ -473,30 +473,106 @@ export const LeagueView: React.FC = () => {
           ) : (
             groups.map((grp) => {
               const isSelected = selectedGroupId === grp.id;
+              const hasMyClub = grp.standings?.some((s: any) => {
+                const cId = s.club?.id || s.club_id;
+                return cId && cId.toString() === currentClubId;
+              });
+
               return (
                 <button
                   key={grp.id}
                   type="button"
                   onClick={() => handleSwitchGroup(grp.id)}
                   style={{
-                    padding: '5px 12px',
-                    borderRadius: '6px',
+                    padding: '5px 14px',
+                    borderRadius: '8px',
                     fontSize: '0.82rem',
                     fontWeight: 700,
-                    border: isSelected ? '1px solid #15803d' : '1px solid #cbd5e1',
-                    backgroundColor: isSelected ? '#15803d' : '#ffffff',
-                    color: isSelected ? '#ffffff' : '#334155',
+                    border: isSelected
+                      ? '1.5px solid #15803d'
+                      : hasMyClub
+                      ? '1.5px solid #eab308'
+                      : '1px solid #cbd5e1',
+                    backgroundColor: isSelected
+                      ? '#15803d'
+                      : hasMyClub
+                      ? '#fefce8'
+                      : '#ffffff',
+                    color: isSelected
+                      ? '#ffffff'
+                      : hasMyClub
+                      ? '#854d0e'
+                      : '#334155',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: hasMyClub ? '0 2px 6px rgba(234, 179, 8, 0.2)' : 'none',
                   }}
+                  title={hasMyClub ? 'Bảng đấu có câu lạc bộ của bạn' : undefined}
                 >
-                  {grp.name} {isSelected ? '★' : ''}
+                  {hasMyClub && <span>⭐</span>}
+                  <span>{grp.name}</span>
+                  {hasMyClub && (
+                    <span
+                      style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 800,
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                        backgroundColor: isSelected ? 'rgba(255,255,255,0.25)' : '#fef08a',
+                        color: isSelected ? '#ffffff' : '#854d0e',
+                      }}
+                    >
+                      Bảng của bạn
+                    </span>
+                  )}
                 </button>
               );
             })
           )}
         </div>
       </div>
+
+      {/* Banner xác nhận bảng đấu của CLB người dùng */}
+      {activeTab === 'table' && isMyClubInCurrentTable && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 16px',
+            backgroundColor: '#f0fdf4',
+            border: '1.5px solid #86efac',
+            borderRadius: '12px',
+            marginBottom: '1rem',
+            color: '#166534',
+            fontSize: '0.88rem',
+            boxShadow: '0 2px 8px rgba(34, 197, 94, 0.08)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '1.25rem' }}>⭐</span>
+            <span>
+              Câu lạc bộ của bạn (<strong>{currentClub?.name}</strong>) đang tranh tài tại bảng đấu này!
+            </span>
+          </div>
+          <span
+            style={{
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              padding: '3px 10px',
+              borderRadius: '20px',
+              backgroundColor: '#16a34a',
+              color: '#ffffff',
+              letterSpacing: '0.5px',
+            }}
+          >
+            CLB CỦA BẠN Ở ĐÂY
+          </span>
+        </div>
+      )}
 
       {/* NỘI DUNG CHÍNH THEO TỪNG TAB */}
       {loading ? (
@@ -506,7 +582,7 @@ export const LeagueView: React.FC = () => {
       ) : activeTab === 'table' ? (
         <LeagueStandingsTable
           currentTableRows={currentTableRows}
-          
+          currentClubId={currentClubId}
           currentTier={currentTier}
         />
       ) : activeTab === 'teams' ? (

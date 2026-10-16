@@ -133,8 +133,11 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
                     key={row.id || idx}
                     style={{
                       borderBottom: '1px solid #f1f5f9',
-                      backgroundColor: isCurrent ? '#f0fdf4' : 'transparent',
-                      fontWeight: isCurrent ? 700 : 400,
+                      backgroundColor: isCurrent ? 'rgba(34, 197, 94, 0.12)' : 'transparent',
+                      borderLeft: isCurrent ? '5px solid #16a34a' : '5px solid transparent',
+                      boxShadow: isCurrent ? 'inset 0 0 0 1px rgba(34, 197, 94, 0.25), 0 2px 8px rgba(34, 197, 94, 0.08)' : 'none',
+                      fontWeight: isCurrent ? 800 : 400,
+                      transition: 'all 0.2s ease',
                     }}
                   >
                     <td style={{ textAlign: 'center', padding: '10px 8px' }}>
@@ -148,8 +151,9 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
                           borderRadius: '6px',
                           fontSize: '0.82rem',
                           fontWeight: 800,
-                          backgroundColor: posBg,
-                          color: posColor,
+                          backgroundColor: isCurrent ? '#15803d' : posBg,
+                          color: isCurrent ? '#fef08a' : posColor,
+                          boxShadow: isCurrent ? '0 1px 4px rgba(21, 128, 61, 0.3)' : 'none',
                         }}
                       >
                         {pos}
@@ -162,7 +166,8 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
                             width: '28px',
                             height: '28px',
                             borderRadius: '6px',
-                            background: '#f1f5f9',
+                            background: isCurrent ? '#dcfce7' : '#f1f5f9',
+                            border: isCurrent ? '1.5px solid #86efac' : 'none',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -180,12 +185,12 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
                             '⚽'
                           )}
                         </div>
-                        <div style={{ minWidth: 0 }}>
+                        <div style={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <span
                             style={{
                               color: isCurrent ? '#15803d' : '#0f172a',
                               fontWeight: isCurrent ? 800 : 600,
-                              fontSize: '0.9rem',
+                              fontSize: isCurrent ? '0.93rem' : '0.9rem',
                             }}
                           >
                             {row.club?.name || (row as any).club_name || `CLB #${clubId}`}
@@ -193,17 +198,22 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
                           {isCurrent && (
                             <span
                               style={{
-                                marginLeft: '8px',
-                                fontSize: '0.65rem',
-                                padding: '2px 6px',
-                                borderRadius: '4px',
-                                background: '#15803d',
-                                color: '#ffffff',
-                                fontWeight: 700,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                fontSize: '0.68rem',
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)',
+                                color: '#fef08a',
+                                fontWeight: 800,
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+                                letterSpacing: '0.3px',
                               }}
                             >
-                    {t('knockout.you_badge', 'BẠN')}
-                  </span>
+                              <span>⭐</span>
+                              <span>{t('standings.your_club_badge', 'CLB CỦA BẠN')}</span>
+                            </span>
                           )}
                         </div>
                       </div>
