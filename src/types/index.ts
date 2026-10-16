@@ -120,6 +120,12 @@ export interface Player {
   squad_type?: string;
   squad_number?: number;
   photo_url?: string;
+  is_on_loan?: boolean;
+  parent_club?: {
+    id: string;
+    name: string;
+    logo_url?: string;
+  } | null;
   player_positions?: PlayerPosition[];
   position?: {
     code: string;
@@ -154,6 +160,9 @@ export interface PlayerContractDetail {
   signing_bonus?: number;
   release_clause?: number;
   is_loan_contract?: boolean;
+  parent_club_id?: string | null;
+  parent_club_name?: string | null;
+  parent_club_logo?: string | null;
   current_season?: number;
   remaining_seasons?: number;
 }
@@ -528,6 +537,17 @@ export interface PlayerInjuriesData {
 export interface PlayerDetailData extends Player {
   is_own_club?: boolean;
   can_view_confidential?: boolean;
+  is_on_loan?: boolean;
+  on_loan?: {
+    is_loan: boolean;
+    borrowing_club_id?: string;
+    borrowing_club_name?: string;
+    borrowing_club_logo?: string;
+    parent_club_id?: string | null;
+    parent_club_name?: string | null;
+    parent_club_logo?: string | null;
+    end_season_id?: number;
+  } | null;
   date_of_birth?: string | Date | null;
   nationality_detail?: {
     id: string;

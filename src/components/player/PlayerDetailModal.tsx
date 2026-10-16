@@ -492,6 +492,24 @@ export const PlayerDetailModal: React.FC<Props> = ({
               <ChevronRight size={20} />
             </button>
             <h2 className="pm-player-title">{pName}</h2>
+            {(detail?.is_on_loan || detail?.contract?.is_loan_contract || player.is_on_loan) && (
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  background: '#fef3c7',
+                  border: '1px solid #fde68a',
+                  color: '#b45309',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                🤝 {t('player_modal.badge_loan', 'Mượn')}
+              </span>
+            )}
             <button className="pm-icon-btn" title={t('player_modal.edit_name_tooltip', 'Chỉnh sửa tên / biệt danh')}>
               <Edit2 size={16} />
             </button>
@@ -575,6 +593,21 @@ export const PlayerDetailModal: React.FC<Props> = ({
                 ) : null}
               </span>
             </div>
+            {(detail?.is_on_loan || detail?.contract?.is_loan_contract || player.is_on_loan) && (
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.parent_club_label', 'CLB Chủ Quản:')}</span>
+                <span className="pm-value pm-val-bold" style={{ color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  {(detail?.contract?.parent_club_logo || detail?.on_loan?.parent_club_logo || player.parent_club?.logo_url) && (
+                    <img
+                      src={detail?.contract?.parent_club_logo || detail?.on_loan?.parent_club_logo || player.parent_club?.logo_url}
+                      alt=""
+                      style={{ width: 16, height: 16, objectFit: 'contain' }}
+                    />
+                  )}
+                  {detail?.contract?.parent_club_name || detail?.on_loan?.parent_club_name || player.parent_club?.name || t('player_modal.owning_club', 'CLB Chủ Quản')}
+                </span>
+              </div>
+            )}
             <div className="pm-info-row">
               <span className="pm-label">Country:</span>
               <span className="pm-value">
@@ -812,12 +845,20 @@ export const PlayerDetailModal: React.FC<Props> = ({
           onConfirm={handleRenewContract}
         />
 
-        {/* MODAL XÁC NHẬN SA THẢI / CHẤM DỨT HỢP ĐỒNG */}
+        {/* MODAL XÁC NHẬN SA THẢI / CHẤM DỨT HỢP ĐỒNG / TRẢ MƯỢN */}
         <ConfirmModal
           isOpen={showTerminateModal}
-          title={t('contract.confirm_terminate_title', 'Xác Nhận Sa Thải / Thanh Lý Hợp Đồng')}
+          title={
+            (detail?.contract?.is_loan_contract || detail?.is_on_loan || player.is_on_loan)
+              ? t('contract.confirm_terminate_loan_title', 'Xác Nhận Chấm Dứt Mượn Cầu Thủ')
+              : t('contract.confirm_terminate_title', 'Xác Nhận Sa Thải / Thanh Lý Hợp Đồng')
+          }
           variant="danger"
-          confirmText={t('contract.confirm_terminate_btn', 'Xác Nhận Sa Thải')}
+          confirmText={
+            (detail?.contract?.is_loan_contract || detail?.is_on_loan || player.is_on_loan)
+              ? t('contract.confirm_terminate_loan_btn', 'Chấm Dứt Mượn & Hoàn Trả')
+              : t('contract.confirm_terminate_btn', 'Xác Nhận Sa Thải')
+          }
           cancelText={t('common.cancel', 'Hủy Bỏ')}
           isLoading={terminatingContract}
           onConfirm={handleTerminateContract}
@@ -825,7 +866,9 @@ export const PlayerDetailModal: React.FC<Props> = ({
           message={
             <div>
               <p style={{ margin: '0 0 1rem 0', color: '#475569' }}>
-                {t('contract.confirm_terminate_player_msg', 'Bạn có chắc chắn muốn kết thúc hợp đồng với cầu thủ này? Cầu thủ sẽ rời khỏi đội bóng ngay lập tức và trở thành cầu thủ tự do.')}
+                {(detail?.contract?.is_loan_contract || detail?.is_on_loan || player.is_on_loan)
+                  ? t('contract.confirm_terminate_loan_msg', 'Bạn có chắc chắn muốn chấm dứt hợp đồng mượn với cầu thủ này? Cầu thủ sẽ rời khỏi đội bóng ngay lập tức và được hoàn trả về CLB chủ quản gốc.')
+                  : t('contract.confirm_terminate_player_msg', 'Bạn có chắc chắn muốn kết thúc hợp đồng với cầu thủ này? Cầu thủ sẽ rời khỏi đội bóng ngay lập tức và trở thành cầu thủ tự do.')}
               </p>
               <div
                 style={{
@@ -840,6 +883,9 @@ export const PlayerDetailModal: React.FC<Props> = ({
                 }}
               >
                 <div>{t('player_modal.player_label', 'Cầu thủ:')} <strong style={{ color: '#0f172a' }}>{player.name || player.common_name || (player.first_name ? player.first_name + ' ' + (player.last_name || '') : 'Cầu thủ')}</strong></div>
+                {(detail?.contract?.is_loan_contract || detail?.is_on_loan || player.is_on_loan) && (
+                  <div>{t('contract.parent_club_label', 'CLB Chủ Quản (Gốc):')} <strong style={{ color: '#0369a1' }}>{detail?.contract?.parent_club_name || detail?.on_loan?.parent_club_name || player.parent_club?.name || t('player_modal.owning_club', 'CLB Chủ Quản')}</strong></div>
+                )}
                 <div>{t('contract.weekly_wage_label', 'Mức Lương Tuần:')} <strong>{formatCurrency(detail?.contract?.weekly_wage || detail?.contract?.salary || 0)} / {t('common.week', 'tuần')}</strong></div>
               </div>
             </div>

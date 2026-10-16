@@ -215,6 +215,49 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* Banner thông báo hợp đồng mượn cầu thủ */}
+      {contract.is_loan_contract && (
+        <div
+          style={{
+            background: '#eff6ff',
+            border: '1.5px solid #bfdbfe',
+            borderRadius: '12px',
+            padding: '1rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                background: '#dbeafe',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <ArrowRightLeft size={20} color="#1d4ed8" />
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, color: '#1e40af', fontSize: '0.92rem' }}>
+                {t('contract.loan_banner_title', 'Hợp Đồng Cầu Thủ Cho Mượn')}
+              </div>
+              <div style={{ fontSize: '0.82rem', color: '#1d4ed8', marginTop: '2px' }}>
+                {t('contract.loan_banner_desc', 'Cầu thủ thuộc quyền sở hữu của {parentClub}, đang thi đấu cho CLB theo diện cho mượn đến hết Mùa {endSeason}.')
+                  .replace('{parentClub}', contract.parent_club_name || t('player_modal.owning_club', 'CLB Chủ Quản'))
+                  .replace('{endSeason}', String(endSeason))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Expiration Banner Alert if <= 1 season */}
       {isExpiringSoon && (
         <div
@@ -252,13 +295,17 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
               </div>
               <div style={{ fontSize: '0.8rem', color: '#b45309', marginTop: '2px' }}>
                 {isOwnClub
-                  ? t('contract.renew_recommendation', 'Hãy gia hạn hợp đồng ngay để đảm bảo tương lai của cầu thủ tại đội bóng.')
+                  ? (contract.is_loan_contract
+                      ? t('contract.loan_banner_desc', 'Cầu thủ thuộc quyền sở hữu của {parentClub}, đang thi đấu cho CLB theo diện cho mượn đến hết Mùa {endSeason}.')
+                          .replace('{parentClub}', contract.parent_club_name || t('player_modal.owning_club', 'CLB Chủ Quản'))
+                          .replace('{endSeason}', String(endSeason))
+                      : t('contract.renew_recommendation', 'Hãy gia hạn hợp đồng ngay để đảm bảo tương lai của cầu thủ tại đội bóng.'))
                   : t('contract.expiring_soon_info', 'Cầu thủ sắp trở thành cầu thủ tự do hoặc có thể đàm phán hợp đồng.')}
               </div>
             </div>
           </div>
 
-          {isOwnClub && (
+          {isOwnClub && !contract.is_loan_contract && (
             <button
               type="button"
               className="btn btn-sm btn-primary"
@@ -302,12 +349,24 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{t('contract.club_label', 'Câu Lạc Bộ:')}</span>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                {contract.is_loan_contract ? t('contract.borrowing_club_label', 'CLB Mượn:') : t('contract.club_label', 'Câu Lạc Bộ:')}
+              </span>
               <span style={{ fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 {clubLogo && <img src={clubLogo} alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} />}
                 <span>{clubName}</span>
               </span>
             </div>
+
+            {contract.is_loan_contract && contract.parent_club_name && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{t('contract.parent_club_label', 'CLB Chủ Quản (Gốc):')}</span>
+                <span style={{ fontWeight: 700, color: '#0369a1', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  {contract.parent_club_logo && <img src={contract.parent_club_logo} alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} />}
+                  <span>{contract.parent_club_name}</span>
+                </span>
+              </div>
+            )}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{t('contract.status_label', 'Trạng Thái:')}</span>
@@ -334,8 +393,8 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{t('contract.loan_type_label', 'Hình Thức:')}</span>
-              <span style={{ fontWeight: 600, color: '#334155', fontSize: '0.88rem' }}>
-                {contract.is_loan_contract ? t('contract.loan_contract', 'Hợp Đồng Cho Mượn') : t('contract.official_contract', 'Hợp Đồng Chính Thức')}
+              <span style={{ fontWeight: 700, color: contract.is_loan_contract ? '#b45309' : '#334155', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {contract.is_loan_contract ? `🤝 ${t('contract.loan_contract', 'Hợp Đồng Cho Mượn')}` : t('contract.official_contract', 'Hợp Đồng Chính Thức')}
               </span>
             </div>
           </div>
@@ -437,7 +496,46 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
       </div>
 
       {/* CARD MỚI: TRẠNG THÁI THỊ TRƯỜNG CHUYỂN NHƯỢNG & CHO MƯỢN (CHỈ DÀNH CHO CLB CHỦ QUẢN) */}
-      {isOwnClub && (
+      {isOwnClub && (contract.is_loan_contract ? (
+        <div
+          style={{
+            background: '#f8fafc',
+            border: '1.5px dashed #cbd5e1',
+            borderRadius: '12px',
+            padding: '1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+          }}
+        >
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              background: '#f1f5f9',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <ShieldAlert size={22} color="#64748b" />
+          </div>
+          <div>
+            <div style={{ fontWeight: 800, color: '#334155', fontSize: '0.92rem' }}>
+              {t('contract.loan_no_transfer_market', 'Cầu thủ đang thi đấu theo diện cho mượn. CLB mượn không có quyền niêm yết bán hoặc cho mượn tiếp.')}
+            </div>
+            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '3px' }}>
+              {t('contract.parent_club_label', 'CLB Chủ Quản (Gốc):')}{' '}
+              <strong style={{ color: '#0369a1' }}>
+                {contract.parent_club_name || t('player_modal.owning_club', 'CLB Chủ Quản')}
+              </strong>
+            </div>
+          </div>
+        </div>
+      ) : (
         <div
           style={{
             background: '#ffffff',
@@ -613,9 +711,9 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
             )}
           </div>
         </div>
-      )}
+      ))}
 
-      {/* Contract Management Actions (Gia Hạn / Sa Thải) */}
+      {/* Contract Management Actions (Gia Hạn / Sa Thải / Trả Mượn) */}
       {isOwnClub && (
         <div
           style={{
@@ -632,18 +730,22 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
         >
           <div>
             <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.95rem' }}>
-              {t('contract.manage_actions_title', 'Thao Tác Hợp Đồng')}
+              {contract.is_loan_contract
+                ? t('contract.terminate_loan_title', 'Chấm Dứt Mượn / Trả Về CLB Gốc')
+                : t('contract.manage_actions_title', 'Thao Tác Hợp Đồng')}
             </div>
             <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
-              {isExpiringSoon
+              {contract.is_loan_contract
+                ? t('contract.terminate_loan_note', 'Chấm dứt mượn trước hạn sẽ hoàn trả cầu thủ về CLB chủ quản gốc.')
+                : isExpiringSoon
                 ? t('contract.manage_expiring_note', 'Hợp đồng sắp hết hạn. Bạn có thể gia hạn hoặc thanh lý hợp đồng.')
                 : t('contract.manage_standard_note', 'Thanh lý trước hạn sẽ giải phóng cầu thủ trở thành tự do.')}
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            {/* Button Gia hạn (chỉ hiện khi còn 1 mùa nữa hết hạn hoặc sắp hết hạn) */}
-            {isExpiringSoon && (
+            {/* Button Gia hạn (chỉ hiện khi hợp đồng chính thức và còn 1 mùa nữa hết hạn hoặc sắp hết hạn) */}
+            {!contract.is_loan_contract && isExpiringSoon && (
               <button
                 type="button"
                 className="btn btn-primary"
@@ -662,14 +764,14 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
               </button>
             )}
 
-            {/* Button Kết thúc hợp đồng / Sa thải */}
+            {/* Button Kết thúc hợp đồng / Sa thải / Trả cầu thủ mượn */}
             <button
               type="button"
               className="btn btn-danger"
               onClick={onOpenTerminateModal}
               style={{
-                background: '#dc2626',
-                borderColor: '#dc2626',
+                background: contract.is_loan_contract ? '#ea580c' : '#dc2626',
+                borderColor: contract.is_loan_contract ? '#ea580c' : '#dc2626',
                 color: '#ffffff',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -677,8 +779,12 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
                 fontWeight: 700,
               }}
             >
-              <UserMinus size={16} />
-              <span>{t('contract.terminate_btn', 'Kết Thúc HĐ / Sa Thải')}</span>
+              {contract.is_loan_contract ? <ArrowRightLeft size={16} /> : <UserMinus size={16} />}
+              <span>
+                {contract.is_loan_contract
+                  ? t('contract.terminate_loan_btn', 'Chấm Dứt Mượn / Trả Về CLB Gốc')
+                  : t('contract.terminate_btn', 'Kết Thúc HĐ / Sa Thải')}
+              </span>
             </button>
           </div>
         </div>

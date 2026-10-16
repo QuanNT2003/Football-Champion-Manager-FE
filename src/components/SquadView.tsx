@@ -215,6 +215,22 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <strong style={{ color: '#0f172a', fontSize: '0.95rem' }}>{playerName}</strong>
+                            {player.is_on_loan && (
+                              <span
+                                style={{
+                                  fontSize: '0.7rem',
+                                  padding: '2px 7px',
+                                  borderRadius: '4px',
+                                  background: '#fef3c7',
+                                  color: '#b45309',
+                                  border: '1px solid #fde68a',
+                                  fontWeight: 800,
+                                }}
+                                title={player.parent_club?.name ? `${t('player_modal.parent_club_label', 'CLB Chủ Quản:')} ${player.parent_club.name}` : undefined}
+                              >
+                                {t('squad.badge_loan', '🤝 Mượn')}
+                              </span>
+                            )}
                             {player.squad_type === 'YOUTH_U21' && (
                               <span style={{ fontSize: '0.7rem', padding: '2px 7px', borderRadius: '4px', background: '#dcfce7', color: '#15803d', fontWeight: 800 }}>
                                 {t('squad.badge_u21', '🌟 U21')}
