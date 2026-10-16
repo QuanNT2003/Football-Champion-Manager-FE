@@ -62,15 +62,17 @@ export const PlayerDetailModal: React.FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
-  // Kiểm tra cầu thủ có thuộc CLB của người dùng không
-  const isOwnClub = Boolean(
-    currentClubId && (
-      String(player.club_id) === String(currentClubId) ||
-      String((player as any).currentClub?.id) === String(currentClubId) ||
-      String((player as any).club?.id) === String(currentClubId) ||
-      (detail?.club?.id ? String(detail.club.id) === String(currentClubId) : false)
-    )
-  );
+  // Kiểm tra cầu thủ có thuộc CLB của người dùng không (ưu tiên cờ is_own_club từ BE nếu đã fetch detail)
+  const isOwnClub = detail?.is_own_club !== undefined
+    ? Boolean(detail.is_own_club)
+    : Boolean(
+        currentClubId && (
+          String(player.club_id) === String(currentClubId) ||
+          String((player as any).currentClub?.id) === String(currentClubId) ||
+          String((player as any).club?.id) === String(currentClubId) ||
+          (detail?.club?.id ? String(detail.club.id) === String(currentClubId) : false)
+        )
+      );
 
   // Kiểm tra cầu thủ có đang trong diện chuyển nhượng (bán / mượn / tự do) không
   const isTransferListed = Boolean(
@@ -101,6 +103,9 @@ export const PlayerDetailModal: React.FC<Props> = ({
     if (initialTab === 'contract') {
       return isOwnClub ? 'contract' : 'skills';
     }
+    if (initialTab === 'injuries') {
+      return isOwnClub ? 'injuries' : 'skills';
+    }
     return initialTab || 'skills';
   });
 
@@ -112,15 +117,24 @@ export const PlayerDetailModal: React.FC<Props> = ({
         setActiveTab('skills');
       }
     } else if (initialTab) {
-      setActiveTab(initialTab);
+      if (initialTab === 'contract' && !isOwnClub) {
+        setActiveTab('skills');
+      } else if (initialTab === 'injuries' && !isOwnClub) {
+        setActiveTab('skills');
+      } else {
+        setActiveTab(initialTab);
+      }
     }
-  }, [initialTab, isEligibleForOffer]);
+  }, [initialTab, isEligibleForOffer, isOwnClub]);
 
   useEffect(() => {
     if (activeTab === 'offer' && !isEligibleForOffer) {
       setActiveTab('skills');
     }
     if (activeTab === 'contract' && !isOwnClub) {
+      setActiveTab('skills');
+    }
+    if (activeTab === 'injuries' && !isOwnClub) {
       setActiveTab('skills');
     }
   }, [isEligibleForOffer, isOwnClub, activeTab]);
@@ -310,7 +324,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
   const fetchPlayerDetail = async (id: string) => {
     try {
       setLoading(true);
-      const data: any = await playersApi.getPlayerById(id);
+      const data: any = await playersApi.getPlayerById(id, currentClubId ? String(currentClubId) : undefined);
       setDetail(data);
     } catch (err) {
       console.error('Failed to load player detail:', err);
@@ -357,7 +371,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
     let isMounted = true;
     setLoading(true);
     playersApi
-      .getPlayerById(player.id)
+      .getPlayerById(player.id, currentClubId ? String(currentClubId) : undefined)
       .then((data: any) => {
         if (isMounted) {
           setDetail(data);
@@ -374,7 +388,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
     return () => {
       isMounted = false;
     };
-  }, [player.id]);
+  }, [player.id, currentClubId]);
 
   // Navigate to previous / next player in squad
   const currentIndex = playersList.findIndex((p) => p.id === player.id);
@@ -434,10 +448,12 @@ export const PlayerDetailModal: React.FC<Props> = ({
   const pMarketValue = detail?.market_value ?? player.market_value;
   const pWorth = formatCurrency(pMarketValue);
 
-  const pWeeklyWage = detail?.weekly_wage ?? (player.contract?.salary ? Number(player.contract.salary) : null);
-  const pWages = pWeeklyWage && pWeeklyWage > 0 
-    ? `${formatCurrency(pWeeklyWage)} ${t('player_modal.per_week', '/ tuần')}` 
-    : (detail?.weekly_wages_display || t('player_modal.no_contract', 'Chưa ký HĐ'));
+  const pWeeklyWage = detail?.weekly_wage ?? (isOwnClub && player.contract?.salary ? Number(player.contract.salary) : null);
+  const pWages = isOwnClub
+    ? (pWeeklyWage && pWeeklyWage > 0 
+        ? `${formatCurrency(pWeeklyWage)} ${t('player_modal.per_week', '/ tuần')}` 
+        : (detail?.weekly_wages_display || t('player_modal.no_contract', 'Chưa ký HĐ')))
+    : (detail?.weekly_wages_display || t('player_modal.confidential', 'Bảo mật'));
 
   // Hiển thị sao tiềm năng theo thang chuẩn 1-100 (mỗi 20 điểm = 1 sao)
   const renderStars = (pot: number) => {
@@ -634,13 +650,15 @@ export const PlayerDetailModal: React.FC<Props> = ({
             <Coins size={15} />
             <span>{t('player.tab_transfers')}</span>
           </button>
-          <button
-            className={`pm-tab-btn ${activeTab === 'injuries' ? 'active' : ''}`}
-            onClick={() => setActiveTab('injuries')}
-          >
-            <HeartPulse size={15} />
-            <span>{t('player.tab_injuries')}</span>
-          </button>
+          {isOwnClub && (
+            <button
+              className={`pm-tab-btn ${activeTab === 'injuries' ? 'active' : ''}`}
+              onClick={() => setActiveTab('injuries')}
+            >
+              <HeartPulse size={15} />
+              <span>{t('player.tab_injuries')}</span>
+            </button>
+          )}
           {isOwnClub && (
             <button
               className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
@@ -695,8 +713,8 @@ export const PlayerDetailModal: React.FC<Props> = ({
                 <PlayerTransfersTab detail={detail} />
               )}
 
-              {/* TAB 5: INJURIES */}
-              {activeTab === 'injuries' && (
+              {/* TAB 5: INJURIES (CHỈ HIỂN THỊ KHI LÀ CLB CHỦ QUẢN) */}
+              {isOwnClub && activeTab === 'injuries' && (
                 <PlayerInjuriesTab detail={detail} />
               )}
 

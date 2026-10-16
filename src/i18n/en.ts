@@ -258,6 +258,7 @@ export const en: Translations = {
   'player.tab_injuries': 'Injury History',
   'player.tab_offer': 'Contract Offer',
   'player.tab_contract': 'Contract',
+  'player_modal.confidential': 'Confidential',
   'staff.tab_skills': 'Skills & Attributes',
   'staff.tab_history': 'Career History',
   'staff.tab_offer': 'Make Contract Offer',

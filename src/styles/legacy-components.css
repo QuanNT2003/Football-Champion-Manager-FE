@@ -2891,6 +2891,26 @@ body {
   margin-right: 3px;
 }
 
+.pm-data-table th.text-right,
+.pm-data-table td.text-right,
+.pm-bid-cell {
+  text-align: right;
+}
+
+.pm-bid-inline-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.pm-bid-inline-wrap .pm-coin-inline {
+  margin: 0;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 .pm-potential-box {
   margin-top: 16px;
   padding: 12px;

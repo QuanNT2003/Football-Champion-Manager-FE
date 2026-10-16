@@ -257,6 +257,7 @@ export const vi: Translations = {
   'player.tab_injuries': 'Lịch Sử Chấn Thương',
   'player.tab_offer': 'Đề Nghị Hợp Đồng',
   'player.tab_contract': 'Hợp Đồng',
+  'player_modal.confidential': 'Bảo mật',
   'staff.tab_skills': 'Bộ Kỹ Năng & Chỉ Số',
   'staff.tab_history': 'Lịch Sử Sự Nghiệp',
   'staff.tab_offer': 'Đề Nghị Tuyển Mộ',

@@ -9,7 +9,10 @@ export const playersApi = {
     return request(url);
   },
 
-  getPlayerById: (id: string) => request<Player>(`/players/${id}`),
+  getPlayerById: (id: string, viewerClubId?: string) => {
+    const query = viewerClubId ? `?viewerClubId=${viewerClubId}` : '';
+    return request<Player>(`/players/${id}${query}`);
+  },
 
   getClubSquad: (clubId: string, squadType?: string) => {
     let url = `/players/club/${clubId}/squad`;

@@ -57,7 +57,8 @@ export const FmAttributeRow: React.FC<FmAttributeRowProps> = ({
       : 'none';
 
   const valColor = getAttributeValueColor(value, maxValue);
-  const diff = potentialValue !== undefined && potentialValue > value ? potentialValue - value : 0;
+  const growthText = growth ? (growth.startsWith('+') || growth.startsWith('-') ? growth : `+${growth}`) : null;
+  const isPositiveGrowth = growthText ? !growthText.startsWith('-') : true;
 
   const tooltipText = description
     ? `${name} ${code ? `[${code}]` : ''}: ${value}\n${description}`
@@ -84,13 +85,15 @@ export const FmAttributeRow: React.FC<FmAttributeRowProps> = ({
         <span className="fm-attr-val" style={{ color: valColor }}>
           {value}
         </span>
-        {diff > 0 ? (
-          <span className="fm-attr-growth" title={`Tiềm năng: +${diff}`}>
-            (+{diff})
+        {growthText && (
+          <span
+            className="fm-attr-growth"
+            style={{ color: isPositiveGrowth ? '#16a34a' : '#ef4444' }}
+            title={`Tăng trưởng trong mùa: ${growthText}`}
+          >
+            ({growthText})
           </span>
-        ) : growth ? (
-          <span className="fm-attr-growth">({growth})</span>
-        ) : null}
+        )}
       </div>
     </div>
   );

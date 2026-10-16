@@ -526,6 +526,8 @@ export interface PlayerInjuriesData {
 }
 
 export interface PlayerDetailData extends Player {
+  is_own_club?: boolean;
+  can_view_confidential?: boolean;
   date_of_birth?: string | Date | null;
   nationality_detail?: {
     id: string;
