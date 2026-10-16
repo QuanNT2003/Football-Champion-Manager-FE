@@ -929,7 +929,7 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
                     {t('contract.asking_price_input_label', 'Mức phí chuyển nhượng tối thiểu (Asking Price €):')}
                   </label>
                   <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                    Định giá: <strong>€{marketVal.toLocaleString()}</strong>
+                    {t('contract.valuation_label', 'Định giá:')} <strong>€{marketVal.toLocaleString()}</strong>
                   </span>
                 </div>
 
@@ -961,14 +961,14 @@ export const PlayerContractTab: React.FC<PlayerContractTabProps> = ({
                     className="btn btn-xs btn-outline"
                     onClick={() => setInputAskingPrice(Math.round(marketVal * 0.5))}
                   >
-                    Min (50%): €{Math.round(marketVal * 0.5 / 1000000 * 10) / 10}M
+                    {t('contract.quick_min', 'Tối thiểu (50%):')} €{Math.round(marketVal * 0.5 / 1000000 * 10) / 10}M
                   </button>
                   <button
                     type="button"
                     className="btn btn-xs btn-outline"
                     onClick={() => setInputAskingPrice(marketVal)}
                   >
-                    Chuẩn (100%): €{(marketVal / 1000000).toFixed(1)}M
+                    {t('contract.quick_standard', 'Chuẩn (100%):')} €{(marketVal / 1000000).toFixed(1)}M
                   </button>
                   <button
                     type="button"

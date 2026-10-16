@@ -556,29 +556,29 @@ export const PlayerDetailModal: React.FC<Props> = ({
           {/* Column 1: Core Physical & Technical Info */}
           <div className="pm-info-col">
             <div className="pm-info-row">
-              <span className="pm-label">Position:</span>
+              <span className="pm-label">{t('player_modal.col_position', 'Vị trí:')}</span>
               <span className="pm-value pm-val-bold">
                 {pPos} / {pPosCode}
               </span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Age:</span>
+              <span className="pm-label">{t('player_modal.col_age', 'Tuổi:')}</span>
               <span className="pm-value pm-val-bold">{pAge}</span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Height:</span>
+              <span className="pm-label">{t('player_modal.col_height', 'Chiều cao:')}</span>
               <span className="pm-value">{pHeight}</span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Weight:</span>
+              <span className="pm-label">{t('player_modal.col_weight', 'Cân nặng:')}</span>
               <span className="pm-value">{pWeight}</span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Preferred Foot:</span>
+              <span className="pm-label">{t('player_modal.col_foot', 'Chân thuận:')}</span>
               <span className="pm-value">{pFoot}</span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Average Quality:</span>
+              <span className="pm-label">{t('player_modal.col_quality', 'Chất lượng TB:')}</span>
               <span className="pm-value pm-val-bold pm-quality-val">{pQuality}</span>
             </div>
           </div>
@@ -586,7 +586,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
           {/* Column 2: Club, Reputation, Potential, Value & Wages */}
           <div className="pm-info-col">
             <div className="pm-info-row">
-              <span className="pm-label">Team:</span>
+              <span className="pm-label">{t('player_modal.col_team', 'Đội bóng:')}</span>
               <span className="pm-value pm-val-bold pm-team-link">
                 {pClubName} {(detail?.club as any)?.country_flag ? (
                   <img src={(detail?.club as any).country_flag} alt="" className="pm-flag-img" />
@@ -609,7 +609,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
               </div>
             )}
             <div className="pm-info-row">
-              <span className="pm-label">Country:</span>
+              <span className="pm-label">{t('player_modal.col_country', 'Quốc tịch:')}</span>
               <span className="pm-value">
                 {pCountry} {(detail?.nationality_detail?.flag_url || player.nationalityFlag) ? (
                   <img src={detail?.nationality_detail?.flag_url || player.nationalityFlag} alt="" className="pm-flag-img" />
@@ -617,14 +617,14 @@ export const PlayerDetailModal: React.FC<Props> = ({
               </span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Reputation:</span>
+              <span className="pm-label">{t('player_modal.col_reputation', 'Danh tiếng:')}</span>
               <span className="pm-value pm-reputation-val">
                 <Award size={14} className="pm-icon-badge" />
                 {formatNumber(pReputation)}
               </span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Potential:</span>
+              <span className="pm-label">{t('player_modal.col_potential', 'Tiềm năng:')}</span>
               <div className="pm-potential-wrap">
                 <span className="pm-val-bold" style={{ color: 'var(--color-navy-blue)' }}>{pPotential}</span>
                 <span className="pm-muted-note" style={{ fontSize: '0.75rem', marginRight: '6px' }}>/100</span>
@@ -632,20 +632,20 @@ export const PlayerDetailModal: React.FC<Props> = ({
               </div>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.experience', 'Kinh nghiệm (EXP):')}</span>
+              <span className="pm-label">{t('player_modal.experience', 'Kinh nghiệm:')}</span>
               <span className="pm-value pm-val-bold" style={{ color: '#d97706', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 <Zap size={14} fill="#f59e0b" color="#f59e0b" />
                 {formatNumber(pExperience)} EXP
               </span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Worth:</span>
+              <span className="pm-label">{t('player_modal.col_worth', 'Định giá:')}</span>
               <span className="pm-value pm-worth-val">
                 <Coins size={14} className="pm-coin-icon" /> {pWorth}
               </span>
             </div>
             <div className="pm-info-row">
-              <span className="pm-label">Weekly Wages:</span>
+              <span className="pm-label">{t('player_modal.col_wage', 'Lương tuần:')}</span>
               <span className="pm-value pm-val-bold" style={{ color: '#047857' }}>
                 {pWages}
               </span>
