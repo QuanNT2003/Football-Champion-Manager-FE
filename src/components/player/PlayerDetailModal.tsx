@@ -61,8 +61,6 @@ export const PlayerDetailModal: React.FC<Props> = ({
   const [detail, setDetail] = useState<PlayerDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const [compared, setCompared] = useState<boolean>(false);
-  const [skillCategory, setSkillCategory] = useState<'KEY' | 'ALL' | 'PHYSICAL' | 'TECHNICAL' | 'MENTAL' | 'GOALKEEPING'>('KEY');
 
   // Kiểm tra cầu thủ có thuộc CLB của người dùng không
   const isOwnClub = Boolean(
@@ -395,46 +393,6 @@ export const PlayerDetailModal: React.FC<Props> = ({
     onSelectPlayer(playersList[nextIdx]);
   };
 
-  // Get skills dynamically based on DB attributes & position key attributes
-  const getDisplayedSkills = () => {
-    if (!detail?.skills) {
-      return { left: [], right: [], total: 0, label: t('player_modal.core_skills', 'Chỉ số cốt lõi') };
-    }
-
-    let list: any[] = [];
-    let label = t('player_modal.core_skills_pos', 'Chỉ số cốt lõi vị trí (10)').replace('{count}', '10');
-
-    if (skillCategory === 'KEY') {
-      list = (detail.skills.key_attributes && detail.skills.key_attributes.length > 0)
-        ? detail.skills.key_attributes
-        : [...(detail.skills.left_column || []), ...(detail.skills.right_column || [])];
-      label = t('player_modal.core_skills_pos', 'Chỉ số cốt lõi vị trí ({count})').replace('{count}', String(list.length));
-    } else if (skillCategory === 'PHYSICAL') {
-      list = detail.skills.categories?.physical || [];
-      label = t('player_modal.attr_physical', 'Thể chất - Physical ({count})').replace('{count}', String(list.length));
-    } else if (skillCategory === 'TECHNICAL') {
-      list = detail.skills.categories?.technical || [];
-      label = t('player_modal.attr_technical', 'Kỹ thuật - Technical ({count})').replace('{count}', String(list.length));
-    } else if (skillCategory === 'MENTAL') {
-      list = detail.skills.categories?.mental || [];
-      label = t('player_modal.attr_mental', 'Tâm lý & Nhận thức - Mental ({count})').replace('{count}', String(list.length));
-    } else if (skillCategory === 'GOALKEEPING') {
-      list = detail.skills.categories?.goalkeeping || [];
-      label = t('player_modal.attr_gk', 'Kỹ năng Thủ môn - Goalkeeping ({count})').replace('{count}', String(list.length));
-    } else {
-      list = detail.skills.all_attributes || [];
-      label = t('player_modal.attr_all', 'Tất cả chỉ số ({count})').replace('{count}', String(list.length));
-    }
-
-    const half = Math.ceil(list.length / 2);
-    const left = list.slice(0, half);
-    const right = list.slice(half);
-    const total = list.reduce((acc: number, a: any) => acc + (Number(a.value) || 0), 0);
-
-    return { left, right, total, label };
-  };
-
-  const displayedSkills = getDisplayedSkills();
 
   // Basic info from DB
   const pName = detail?.name || `${player.first_name} ${player.last_name}`.trim();
@@ -719,11 +677,6 @@ export const PlayerDetailModal: React.FC<Props> = ({
                 <PlayerSkillsTab
                   detail={detail}
                   pPosCode={pPosCode}
-                  skillCategory={skillCategory}
-                  setSkillCategory={setSkillCategory}
-                  compared={compared}
-                  setCompared={setCompared}
-                  displayedSkills={displayedSkills}
                 />
               )}
 

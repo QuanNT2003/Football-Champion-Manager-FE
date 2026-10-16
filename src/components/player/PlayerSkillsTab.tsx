@@ -1,242 +1,174 @@
-import { useTranslation } from '../../i18n';
 import React from 'react';
-import { Plus } from 'lucide-react';
-import { PlayerDetailData } from '../../types';
+import { useTranslation } from '../../i18n';
+import { Shield, Dumbbell, Brain, Award } from 'lucide-react';
+import { PlayerDetailData, PlayerSkillItem } from '../../types';
+import { FmAttributeRow } from '../common/FmAttributeRow';
 
 interface Props {
   detail: PlayerDetailData | null;
   pPosCode: string;
-  skillCategory: 'KEY' | 'ALL' | 'PHYSICAL' | 'TECHNICAL' | 'MENTAL' | 'GOALKEEPING';
-  setSkillCategory: (cat: 'KEY' | 'ALL' | 'PHYSICAL' | 'TECHNICAL' | 'MENTAL' | 'GOALKEEPING') => void;
-  compared: boolean;
-  setCompared: (val: boolean) => void;
-  displayedSkills: { left: any[]; right: any[]; total: number; label: string };
+  compared?: boolean;
+  setCompared?: (val: boolean) => void;
+  skillCategory?: any;
+  setSkillCategory?: (cat: any) => void;
+  displayedSkills?: any;
 }
 
 export const PlayerSkillsTab: React.FC<Props> = ({
-
   detail,
   pPosCode,
-  skillCategory,
-  setSkillCategory,
-  compared,
-  setCompared,
-  displayedSkills,
 }) => {
   const { t } = useTranslation();
+
+  // Extract categories from detail with safe fallbacks
+  const categories = detail?.skills?.categories;
+  const allAttrs = detail?.skills?.all_attributes || [];
+
+  const technicalAttrs: PlayerSkillItem[] =
+    categories?.technical && categories.technical.length > 0
+      ? categories.technical
+      : allAttrs.filter((a) => a.category === 'TECHNICAL');
+
+  const mentalAttrs: PlayerSkillItem[] =
+    categories?.mental && categories.mental.length > 0
+      ? categories.mental
+      : allAttrs.filter((a) => a.category === 'MENTAL');
+
+  const physicalAttrs: PlayerSkillItem[] =
+    categories?.physical && categories.physical.length > 0
+      ? categories.physical
+      : allAttrs.filter((a) => a.category === 'PHYSICAL');
+
+  const goalkeepingAttrs: PlayerSkillItem[] =
+    categories?.goalkeeping && categories.goalkeeping.length > 0
+      ? categories.goalkeeping
+      : allAttrs.filter((a) => a.category === 'GOALKEEPING');
+
+  const isGK =
+    pPosCode === 'GK' ||
+    goalkeepingAttrs.some((g) => g.value > 0 || g.is_key);
+
+  // Helper to translate attribute name & description
+  const renderAttributeList = (items: PlayerSkillItem[]) => {
+    return items.map((sk) => {
+      const codeKey = (sk.code || '').toLowerCase();
+      const translatedName = t(`player.attr_${codeKey}`, sk.name);
+      const translatedDesc = t(`player.attr_desc_${codeKey}`, sk.description || '');
+
+      return (
+        <FmAttributeRow
+          key={sk.id || sk.code}
+          name={translatedName}
+          value={sk.value}
+          code={sk.code}
+          isKey={sk.is_key}
+          multiplier={sk.multiplier}
+          highlightType={sk.is_key ? 'primary' : sk.multiplier && sk.multiplier > 1 ? 'secondary' : 'none'}
+          description={translatedDesc}
+          potentialValue={sk.potential_value}
+          growth={sk.growth}
+        />
+      );
+    });
+  };
+
+  // Calculate totals
+  const totalTechnical = technicalAttrs.reduce((acc, a) => acc + (a.value || 0), 0);
+  const totalMental = mentalAttrs.reduce((acc, a) => acc + (a.value || 0), 0);
+  const totalPhysical = physicalAttrs.reduce((acc, a) => acc + (a.value || 0), 0);
+  const totalGk = goalkeepingAttrs.reduce((acc, a) => acc + (a.value || 0), 0);
+  const grandTotal = totalTechnical + totalMental + totalPhysical + (isGK ? totalGk : 0);
+
   return (
-                <div className="pm-skills-view">
-                  {/* Category Filter Sub-nav */}
-                  <div className="pm-skills-subnav">
-                    <button
-                      className={`pm-subnav-btn ${skillCategory === 'KEY' ? 'active' : ''}`}
-                      onClick={() => setSkillCategory('KEY')}
-                      title={t('skills.core_tooltip', '10 Chỉ số cốt lõi theo vị trí thi đấu (Hệ số x3 OVR)')}
-                    >
-                      {t('player.core_skills')}
-                    </button>
-                    <button
-                      className={`pm-subnav-btn ${skillCategory === 'PHYSICAL' ? 'active' : ''}`}
-                      onClick={() => setSkillCategory('PHYSICAL')}
-                      title="{t('player.physical_skills')}"
-                    >
-                      {t('skills.tab_physical', '🏃 Thể chất (10)')}
-                    </button>
-                    <button
-                      className={`pm-subnav-btn ${skillCategory === 'TECHNICAL' ? 'active' : ''}`}
-                      onClick={() => setSkillCategory('TECHNICAL')}
-                      title={t('skills.tech_tooltip', 'Chỉ số kỹ thuật xử lý bóng')}
-                    >
-                      {t('skills.tab_tech', '⚽ Kỹ thuật (10)')}
-                    </button>
-                    <button
-                      className={`pm-subnav-btn ${skillCategory === 'MENTAL' ? 'active' : ''}`}
-                      onClick={() => setSkillCategory('MENTAL')}
-                      title={t('skills.mental_tooltip', 'Chỉ số tâm lý & nhãn quan chiến thuật')}
-                    >
-                      {t('skills.tab_mental', '🧠 Tâm lý (10)')}
-                    </button>
-                    {(pPosCode === 'GK' || (detail?.skills?.categories?.goalkeeping?.some((g: any) => g.value > 0))) && (
-                      <button
-                        className={`pm-subnav-btn ${skillCategory === 'GOALKEEPING' ? 'active' : ''}`}
-                        onClick={() => setSkillCategory('GOALKEEPING')}
-                        title={t('skills.gk_tooltip', 'Chỉ số chuyên môn thủ môn')}
-                      >
-                        {t('skills.tab_gk', '🧤 Thủ môn (10)')}
-                      </button>
-                    )}
-                    <button
-                      className={`pm-subnav-btn ${skillCategory === 'ALL' ? 'active' : ''}`}
-                      onClick={() => setSkillCategory('ALL')}
-                      title={t('skills.all_tooltip', 'Toàn bộ 40 chỉ số trong CSDL')}
-                    >
-                      {t('skills.tab_all', '📋 Tất cả (40)')}
-                    </button>
-                  </div>
+    <div className="fm-skills-container">
+      {/* Legend Bar */}
+      <div className="fm-skills-legend-bar">
+        <span className="fm-legend-item">
+          <span className="fm-legend-bar fm-legend-primary" />
+          <span>{t('skills.legend_key', 'Chỉ số cốt lõi vị trí')}</span>
+        </span>
+        <span className="fm-legend-item">
+          <span className="fm-legend-bar fm-legend-secondary" />
+          <span>{t('skills.legend_preferred', 'Chỉ số bổ trợ')}</span>
+        </span>
+      </div>
 
-                  {/* 2-Column Skills Grid */}
-                  <div className="pm-skills-grid">
-                    {/* Left Column Skills */}
-                    <div className="pm-skills-col">
-                      {displayedSkills.left.map((sk: any) => (
-                        <div key={sk.id || sk.code} className="pm-skill-item" title={sk.description || `${sk.name} (${sk.code})`}>
-                          <span className="pm-skill-name">
-                            {sk.is_key && <span className="pm-key-star" title={t('skills.key_star_tooltip', 'Chỉ số cốt lõi vị trí')}>⭐ </span>}
-                            <strong className="pm-skill-code">[{sk.code}]</strong> {sk.name}
-                          </span>
-                          <div className="pm-skill-bar-wrap">
-                            <div className="pm-skill-bar-track">
-                              <div
-                                className="pm-skill-bar-fill"
-                                style={{ width: `${Math.min(100, Math.max(5, sk.value))}%` }}
-                              >
-                                <span className="pm-skill-num">{sk.value}</span>
-                              </div>
-                            </div>
-                            {sk.potential_value && sk.potential_value > sk.value ? (
-                              <span className="pm-growth-tag">(+{sk.potential_value - sk.value})</span>
-                            ) : sk.growth ? (
-                              <span className="pm-growth-tag">({sk.growth})</span>
-                            ) : null}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+      {/* Multi-Column Categories Layout */}
+      <div
+        className="fm-attr-columns-wrap"
+        style={{
+          gridTemplateColumns: isGK
+            ? 'repeat(auto-fit, minmax(220px, 1fr))'
+            : 'repeat(auto-fit, minmax(240px, 1fr))',
+        }}
+      >
+        {/* If Goalkeeper, put Goalkeeping Column first */}
+        {isGK && (
+          <div className="fm-attr-column">
+            <div className="fm-attr-col-header" style={{ color: '#db2777' }}>
+              <span className="fm-attr-col-title">
+                <Shield size={16} />
+                <span>{t('skills.col_goalkeeping', 'Thủ Môn')}</span>
+              </span>
+              <span className="fm-attr-col-count">{goalkeepingAttrs.length}</span>
+            </div>
+            <div className="fm-attr-rows-list">
+              {renderAttributeList(goalkeepingAttrs)}
+            </div>
+          </div>
+        )}
 
-                    {/* Right Column Skills */}
-                    <div className="pm-skills-col">
-                      {displayedSkills.right.map((sk: any) => (
-                        <div key={sk.id || sk.code} className="pm-skill-item" title={sk.description || `${sk.name} (${sk.code})`}>
-                          <span className="pm-skill-name">
-                            {sk.is_key && <span className="pm-key-star" title={t('skills.key_star_tooltip', 'Chỉ số cốt lõi vị trí')}>⭐ </span>}
-                            <strong className="pm-skill-code">[{sk.code}]</strong> {sk.name}
-                          </span>
-                          <div className="pm-skill-bar-wrap">
-                            <div className="pm-skill-bar-track">
-                              <div
-                                className="pm-skill-bar-fill"
-                                style={{ width: `${Math.min(100, Math.max(5, sk.value))}%` }}
-                              >
-                                <span className="pm-skill-num">{sk.value}</span>
-                              </div>
-                            </div>
-                            {sk.potential_value && sk.potential_value > sk.value ? (
-                              <span className="pm-growth-tag">(+{sk.potential_value - sk.value})</span>
-                            ) : sk.growth ? (
-                              <span className="pm-growth-tag">({sk.growth})</span>
-                            ) : null}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+        {/* 1. Technical Column */}
+        <div className="fm-attr-column">
+          <div className="fm-attr-col-header" style={{ color: '#d97706' }}>
+            <span className="fm-attr-col-title">
+              <Award size={16} />
+              <span>{t('skills.col_technical', 'Kỹ Thuật')}</span>
+            </span>
+            <span className="fm-attr-col-count">{technicalAttrs.length}</span>
+          </div>
+          <div className="fm-attr-rows-list">
+            {renderAttributeList(technicalAttrs)}
+          </div>
+        </div>
 
-                  <div className="pm-skills-total-row">
-                    <span className="pm-total-label">{t('skills.total_points', 'Tổng điểm {label}:').replace('{label}', displayedSkills.label)}</span>
-                    <span className="pm-total-val">{displayedSkills.total}</span>
-                    <span className="pm-calc-icon">🧮</span>
-                  </div>
+        {/* 2. Mental Column */}
+        <div className="fm-attr-column">
+          <div className="fm-attr-col-header" style={{ color: '#0284c7' }}>
+            <span className="fm-attr-col-title">
+              <Brain size={16} />
+              <span>{t('skills.col_mental', 'Tâm Lý')}</span>
+            </span>
+            <span className="fm-attr-col-count">{mentalAttrs.length}</span>
+          </div>
+          <div className="fm-attr-rows-list">
+            {renderAttributeList(mentalAttrs)}
+          </div>
+        </div>
 
-                  {/* Skills Bottom Row: Progress Chart & Comparison Tool */}
-                  <div className="pm-skills-bottom-row">
-                    {/* Quality Progress Chart */}
-                    <div className="pm-progress-chart-box">
-                      <h4 className="pm-sub-title">Average Quality Progress</h4>
-                      <div className="pm-svg-chart">
-                        {/* Render simple, clean SVG line chart */}
-                        {(() => {
-                          const pts = detail?.skills?.quality_progress || [];
-                          if (pts.length < 2) {
-                            return (
-                              <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.82rem' }}>
-                                {t('skills.no_growth_history', 'Chưa có dữ liệu lịch sử tăng trưởng trong CSDL')}
-                              </div>
-                            );
-                          }
-                          const minQ = Math.min(...pts.map((p) => p.quality)) - 0.5;
-                          const maxQ = Math.max(...pts.map((p) => p.quality)) + 0.5;
-                          const width = 320;
-                          const height = 110;
-                          const padX = 25;
-                          const padY = 20;
+        {/* 3. Physical Column */}
+        <div className="fm-attr-column">
+          <div className="fm-attr-col-header" style={{ color: '#16a34a' }}>
+            <span className="fm-attr-col-title">
+              <Dumbbell size={16} />
+              <span>{t('skills.col_physical', 'Thể Chất')}</span>
+            </span>
+            <span className="fm-attr-col-count">{physicalAttrs.length}</span>
+          </div>
+          <div className="fm-attr-rows-list">
+            {renderAttributeList(physicalAttrs)}
+          </div>
+        </div>
+      </div>
 
-                          const getX = (idx: number) =>
-                            padX + (idx / Math.max(1, pts.length - 1)) * (width - 2 * padX);
-                          const getY = (q: number) =>
-                            height - padY - ((q - minQ) / Math.max(0.1, maxQ - minQ)) * (height - 2 * padY);
-
-                          const polylinePts = pts
-                            .map((p, idx) => `${getX(idx)},${getY(p.quality)}`)
-                            .join(' ');
-
-                          return (
-                            <svg viewBox={`0 0 ${width} ${height}`} className="pm-chart-svg">
-                              {/* Grid lines */}
-                              <line
-                                x1={padX}
-                                y1={height - padY}
-                                x2={width - padX}
-                                y2={height - padY}
-                                stroke="#e2e8f0"
-                                strokeWidth="1"
-                              />
-                              <line
-                                x1={padX}
-                                y1={padY}
-                                x2={width - padX}
-                                y2={padY}
-                                stroke="#f1f5f9"
-                                strokeWidth="1"
-                                strokeDasharray="3 3"
-                              />
-
-                              {/* Progress curve line */}
-                              <polyline
-                                fill="none"
-                                stroke="#15803d"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                points={polylinePts}
-                              />
-
-                              {/* Points & Labels */}
-                              {pts.map((p, idx) => {
-                                const x = getX(idx);
-                                const y = getY(p.quality);
-                                return (
-                                  <g key={idx}>
-                                    <circle cx={x} cy={y} r="4" fill="#15803d" />
-                                    <text
-                                      x={x}
-                                      y={height - 4}
-                                      textAnchor="middle"
-                                      fontSize="10"
-                                      fill="#64748b"
-                                    >
-                                      {p.age}
-                                    </text>
-                                  </g>
-                                );
-                              })}
-                            </svg>
-                          );
-                        })()}
-                      </div>
-                    </div>
-
-                    {/* Comparison Tool */}
-                    <div className="pm-compare-box">
-                      <h4 className="pm-sub-title">Player Comparison Tool</h4>
-                      <button
-                        className={`pm-compare-btn ${compared ? 'added' : ''}`}
-                        onClick={() => setCompared(!compared)}
-                      >
-                        <Plus size={16} />
-                        <span>{compared ? t('skills.compare_added', 'Đã thêm (1/3)') : 'Add this Player (0/3)'}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+      {/* Summary Total Points */}
+      <div className="pm-skills-total-row">
+        <span className="pm-total-label">
+          {t('skills.total_points', 'Tổng điểm {label}:').replace('{label}', t('skills.all_attributes_title', 'Toàn bộ chỉ số'))}
+        </span>
+        <span className="pm-total-val">{grandTotal}</span>
+        <span className="pm-calc-icon">🧮</span>
+      </div>
+    </div>
   );
 };

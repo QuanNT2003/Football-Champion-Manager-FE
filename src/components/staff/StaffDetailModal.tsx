@@ -230,7 +230,7 @@ export const StaffDetailModal: React.FC<Props> = ({
     <div className="player-modal-overlay" onClick={onClose}>
       <div
         className="player-modal-dialog"
-        style={{ maxWidth: '960px', width: '95%' }}
+        style={{ maxWidth: '1080px', width: '95%' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Control Bar */}
