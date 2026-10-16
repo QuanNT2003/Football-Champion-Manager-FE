@@ -483,21 +483,28 @@ export interface PlayerMatchesData {
 export interface PlayerCareerSeasonItem {
   season: string;
   team: string;
-  avg_quality: number;
   matches: number;
-  tackles: number;
-  key_ass: string;
-  shot_goal: string;
+  minutes: number;
+  clean_sheets: number;
+  goals: number;
+  assists: number;
+  yellow_cards?: number;
+  red_cards?: number;
+  cards: string;
+  motm: number;
   rating: number;
+  avg_quality?: number;
 }
 
 export interface PlayerStatisticsData {
   career_totals: {
     matches: number;
-    caps: number;
-    tackles: number;
-    key_ass: string;
-    shot_goal: string;
+    minutes: number;
+    clean_sheets: number;
+    goals: number;
+    assists: number;
+    cards: string;
+    motm: number;
     rating: number;
   };
   seasons: PlayerCareerSeasonItem[];

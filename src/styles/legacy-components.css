@@ -2856,7 +2856,7 @@ body {
 
 .pm-career-totals-bar {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
   gap: 8px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
