@@ -54,6 +54,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
   initialTab,
   onClose,
   onSelectPlayer,
+  onPlayerUpdated,
   onOfferSuccess,
 }) => {
   const { t } = useTranslation();
@@ -99,6 +100,9 @@ export const PlayerDetailModal: React.FC<Props> = ({
     if (initialTab === 'offer') {
       return isEligibleForOffer ? 'offer' : 'skills';
     }
+    if (initialTab === 'contract') {
+      return isOwnClub ? 'contract' : 'skills';
+    }
     return initialTab || 'skills';
   });
 
@@ -118,7 +122,10 @@ export const PlayerDetailModal: React.FC<Props> = ({
     if (activeTab === 'offer' && !isEligibleForOffer) {
       setActiveTab('skills');
     }
-  }, [isEligibleForOffer, activeTab]);
+    if (activeTab === 'contract' && !isOwnClub) {
+      setActiveTab('skills');
+    }
+  }, [isEligibleForOffer, isOwnClub, activeTab]);
 
   // Offer State
   const [isLoan, setIsLoan] = useState<boolean>(false);
@@ -134,13 +141,22 @@ export const PlayerDetailModal: React.FC<Props> = ({
   const [confirmCancelModal, setConfirmCancelModal] = useState<boolean>(false);
 
   useEffect(() => {
+    const askPrice = Number(
+      detail?.status?.asking_price ??
+      player.player_status?.asking_price ??
+      (player as any).asking_price ??
+      0
+    );
     const marketVal = Number(
-      (player as any).asking_price ||
       player.market_value ||
       (player as any).player_financial_data?.market_value ||
+      (detail as any)?.market_value ||
+      (player as any).market_value ||
       2500000
     );
-    setOfferAmount(marketVal);
+    // Tự động điền asking_price nếu có, nếu không thì tự động điền market_value hiện tại
+    const initialOffer = askPrice > 0 ? askPrice : marketVal;
+    setOfferAmount(initialOffer);
     const defaultWage = Math.round(Math.max(1000, marketVal * 0.005));
     setProposedWage(defaultWage);
     setContractYears(3);
@@ -209,9 +225,44 @@ export const PlayerDetailModal: React.FC<Props> = ({
       setOfferError(t('player_modal.need_club_to_offer', 'Bạn cần quản lý một CLB để gửi đề nghị chuyển nhượng!'));
       return;
     }
-    if (!isLoan && cashBalance !== undefined && offerAmount > cashBalance) {
-      setOfferError(t('player_modal.insufficient_budget', 'Ngân sách CLB không đủ! Bạn hiện có €{cash}, trong khi phí chuyển nhượng đề xuất là €{offer}. Vui lòng giảm mức giá hoặc chọn mượn cầu thủ.').replace('{cash}', cashBalance.toLocaleString()).replace('{offer}', offerAmount.toLocaleString()));
-      return;
+    if (!isLoan) {
+      if (cashBalance !== undefined && offerAmount > cashBalance) {
+        setOfferError(t('player_modal.insufficient_budget', 'Ngân sách CLB không đủ! Bạn hiện có €{cash}, trong khi phí chuyển nhượng đề xuất là €{offer}. Vui lòng giảm mức giá hoặc chọn mượn cầu thủ.').replace('{cash}', cashBalance.toLocaleString()).replace('{offer}', offerAmount.toLocaleString()));
+        return;
+      }
+
+      const askPrice = Number(
+        detail?.status?.asking_price ??
+        player.player_status?.asking_price ??
+        (player as any).asking_price ??
+        0
+      );
+      const marketVal = Number(
+        player.market_value ||
+        (player as any).player_financial_data?.market_value ||
+        (detail as any)?.market_value ||
+        (player as any).market_value ||
+        2500000
+      );
+
+      // Ràng buộc nếu có asking_price: Không được đề nghị ít hơn asking_price
+      if (askPrice > 0 && offerAmount < askPrice) {
+        setOfferError(
+          t('player_offer.min_asking_price_error', 'Mức giá đề nghị không được thấp hơn mức phí tối thiểu do CLB chủ quản yêu cầu (€{minPrice}).')
+            .replace('{minPrice}', askPrice.toLocaleString())
+        );
+        return;
+      }
+
+      // Ràng buộc nếu không có asking_price: Không được đề nghị dưới 50% market_value
+      const minAllowed = Math.round(marketVal * 0.5);
+      if (askPrice <= 0 && offerAmount < minAllowed) {
+        setOfferError(
+          t('player_offer.min_market_value_error', 'Mức giá đề nghị không được thấp hơn 50% giá trị thị trường của cầu thủ (Tối thiểu €{minPrice}).')
+            .replace('{minPrice}', minAllowed.toLocaleString())
+        );
+        return;
+      }
     }
     const targetPlayerId = (player as any).playerId || player.id;
     const targetClubId = (player as any).currentClub?.id || player.club_id || (player as any).club?.id;
@@ -632,13 +683,15 @@ export const PlayerDetailModal: React.FC<Props> = ({
             <HeartPulse size={15} />
             <span>{t('player.tab_injuries')}</span>
           </button>
-          <button
-            className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
-            onClick={() => setActiveTab('contract')}
-          >
-            <FileText size={15} />
-            <span>{t('player.tab_contract', 'Hợp đồng')}</span>
-          </button>
+          {isOwnClub && (
+            <button
+              className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
+              onClick={() => setActiveTab('contract')}
+            >
+              <FileText size={15} />
+              <span>{t('player.tab_contract', 'Hợp đồng')}</span>
+            </button>
+          )}
           {isEligibleForOffer && (
             <button
               className={`pm-tab-btn ${activeTab === 'offer' ? 'active' : ''}`}
@@ -719,14 +772,15 @@ export const PlayerDetailModal: React.FC<Props> = ({
                   cancellingOffer={cancellingOffer}
                 />
               )}
-              {/* TAB 7: CONTRACT */}
-              {activeTab === 'contract' && (
+              {/* TAB 7: CONTRACT (CHỈ HIỂN THỊ VỚI CẦU THỦ THUỘC CLB CHỦ QUẢN) */}
+              {activeTab === 'contract' && isOwnClub && (
                 <PlayerContractTab
                   player={player}
                   detail={detail}
                   isOwnClub={isOwnClub}
                   onOpenRenewModal={() => setShowRenewModal(true)}
                   onOpenTerminateModal={() => setShowTerminateModal(true)}
+                  onPlayerUpdated={onPlayerUpdated}
                 />
               )}
             </>

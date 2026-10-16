@@ -60,6 +60,25 @@ export const PlayerOfferTab: React.FC<Props> = ({
   cancellingOffer,
 }) => {
   const { t } = useTranslation();
+
+  const askingPrice = Number(
+    detail?.status?.asking_price ??
+    player.player_status?.asking_price ??
+    (player as any).asking_price ??
+    0
+  );
+
+  const marketVal = Number(
+    player.market_value ||
+    (player as any).player_financial_data?.market_value ||
+    (detail as any)?.market_value ||
+    (player as any).market_value ||
+    2500000
+  );
+
+  const minAllowedOffer = askingPrice > 0 ? askingPrice : Math.round(marketVal * 0.5);
+  const isBelowMin = !isLoan && offerAmount > 0 && offerAmount < minAllowedOffer;
+
   return (
                 <div style={{ padding: '0.5rem 0.25rem' }}>
                   {/* Alert thông báo kết quả */}
@@ -252,19 +271,30 @@ export const PlayerOfferTab: React.FC<Props> = ({
                       {/* Nếu là MUA ĐỨT: Hiển thị ô nhập giá chuyển nhượng */}
                       {!isLoan ? (
                         <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '0.4rem' }}>
                             <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b' }}>
                               {t('player_offer.fee_label', 'Phí chuyển nhượng đề nghị (€):')}
                             </label>
-                            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                              {t('player_offer.valuation_label', 'Định giá:')} <strong>€{Number((player as any).asking_price || player.market_value || 2500000).toLocaleString()}</strong>
-                            </span>
+                            <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                              {askingPrice > 0 ? (
+                                <span style={{ color: '#15803d', fontWeight: 700 }}>
+                                  🏷️ {t('player_offer.asking_price_badge', 'Giá CLB yêu cầu:')} <strong>€{askingPrice.toLocaleString()}</strong>
+                                </span>
+                              ) : (
+                                <span>
+                                  {t('player_offer.valuation_label', 'Định giá:')} <strong>€{marketVal.toLocaleString()}</strong>
+                                  <span style={{ color: '#059669', marginLeft: '6px' }}>
+                                    (Min 50%: €{minAllowedOffer.toLocaleString()})
+                                  </span>
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           <div style={{ position: 'relative' }}>
                             <input
                               type="number"
-                              min={0}
+                              min={minAllowedOffer}
                               step={100000}
                               value={offerAmount || ''}
                               onChange={(e) => setOfferAmount(Math.max(0, Number(e.target.value)))}
@@ -274,7 +304,8 @@ export const PlayerOfferTab: React.FC<Props> = ({
                                 padding: '0.65rem 1rem',
                                 fontSize: '1.05rem',
                                 fontWeight: 800,
-                                color: '#15803d',
+                                color: isBelowMin ? '#dc2626' : '#15803d',
+                                borderColor: isBelowMin ? '#fca5a5' : undefined,
                               }}
                             />
                             <span style={{ position: 'absolute', right: 12, top: 10, fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700 }}>
@@ -282,21 +313,31 @@ export const PlayerOfferTab: React.FC<Props> = ({
                             </span>
                           </div>
 
+                          {/* Cảnh báo nếu nhập thấp hơn mức tối thiểu */}
+                          {isBelowMin && (
+                            <div style={{ fontSize: '0.78rem', color: '#dc2626', fontWeight: 600, marginTop: '4px' }}>
+                              {askingPrice > 0
+                                ? `⚠️ Không được đề nghị thấp hơn mức phí tối thiểu CLB chủ quản yêu cầu (€${askingPrice.toLocaleString()}).`
+                                : `⚠️ Không được đề nghị thấp hơn 50% giá trị thị trường (€${minAllowedOffer.toLocaleString()}).`}
+                            </div>
+                          )}
+
                           {/* Quick Adjust Buttons */}
                           <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.6rem', flexWrap: 'wrap' }}>
                             <button
                               type="button"
                               className="btn btn-xs btn-outline"
-                              onClick={() => setOfferAmount(Number((player as any).asking_price || player.market_value || 2500000))}
+                              onClick={() => setOfferAmount(minAllowedOffer)}
+                              style={{ color: '#059669', borderColor: '#a7f3d0' }}
                             >
-                              {t('player_offer.market_price_btn', 'Theo giá thị trường')}
+                              {askingPrice > 0 ? `Theo giá yêu cầu (€${(askingPrice / 1000000).toFixed(1)}M)` : `Tối thiểu 50% (€${(minAllowedOffer / 1000000).toFixed(1)}M)`}
                             </button>
                             <button
                               type="button"
                               className="btn btn-xs btn-outline"
-                              onClick={() => setOfferAmount(Math.max(0, offerAmount - 500000))}
+                              onClick={() => setOfferAmount(marketVal)}
                             >
-                              -€500K
+                              {t('player_offer.market_price_btn', 'Theo giá thị trường')} (€{(marketVal / 1000000).toFixed(1)}M)
                             </button>
                             <button
                               type="button"
