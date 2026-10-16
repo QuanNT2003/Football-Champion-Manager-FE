@@ -18,11 +18,14 @@ import {
   DollarSign,
   Coins,
   Check,
+  Loader2,
 } from 'lucide-react';
-import { User, Club, TimelineData } from '../types';
+import { User, Club, TimelineData, ClubNews } from '../types';
 import { competitionsApi, CompetitionsMenuResponse } from '../services/competitions.service';
+import { clubsApi } from '../services/clubs.service';
 import { Award, Zap, Sparkles, ChevronRight, Layers } from 'lucide-react';
 import { useTranslation } from '../i18n';
+import { ClubNewsModal } from './news/ClubNewsModal';
 
 interface NavbarProps {
   user: User | null;
@@ -51,10 +54,32 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const [currentTime, setCurrentTime] = useState<string>('');
   const [showWorldModal, setShowWorldModal] = useState(false);
-  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [showNewsModal, setShowNewsModal] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [federationMenu, setFederationMenu] = useState<CompetitionsMenuResponse | null>(null);
   const [showFederationMenu, setShowFederationMenu] = useState(false);
+
+  const [clubNews, setClubNews] = useState<ClubNews[]>([]);
+  const [newsLoading, setNewsLoading] = useState(false);
+
+  useEffect(() => {
+    if (club?.id) {
+      setNewsLoading(true);
+      clubsApi
+        .getNews(club.id, 1, 15)
+        .then((res) => {
+          if (res && res.items) {
+            setClubNews(res.items);
+          }
+        })
+        .catch((err) => {
+          console.warn('Failed to load club news for navbar:', err);
+        })
+        .finally(() => {
+          setNewsLoading(false);
+        });
+    }
+  }, [club?.id]);
 
   useEffect(() => {
     const cId = club?.country_id?.toString() || '1';
@@ -188,15 +213,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
 
-          {/* Notifications / Alerts Button */}
+          {/* Notifications / Alerts Button - Opens ClubNewsModal directly */}
           <button
             className="cockpit-icon-btn alert-btn"
-            onClick={() => setShowAlertModal(!showAlertModal)}
+            onClick={() => setShowNewsModal(true)}
             title={t('navbar.alerts_tooltip', 'Thông báo mới (Alerts)')}
           >
             <Bell size={15} />
             <span className="btn-label-text">{t('cockpit.alerts')}</span>
-            <span className="alert-count-badge">1</span>
+            {clubNews.length > 0 && (
+              <span className="alert-count-badge">{clubNews.length}</span>
+            )}
           </button>
 
           {/* Tasks Button */}
@@ -880,24 +907,12 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       )}
 
-      {/* Quick Alerts Notification Dropdown/Popup */}
-      {showAlertModal && (
-        <div className="alerts-dropdown-box">
-          <div className="alerts-dropdown-header">
-            <strong>{t('navbar.notif_title', 'Thông báo trận đấu & Chuyển nhượng')}</strong>
-            <button onClick={() => setShowAlertModal(false)}>✕</button>
-          </div>
-          <div className="alerts-dropdown-body">
-            <div className="alert-item unread">
-              <span className="alert-dot" />
-              <div>
-                <p className="font-semibold text-xs text-slate-800">{t('navbar.market_open_title', 'Thị trường chuyển nhượng Mùa {season} đang mở').replace('{season}', String(seasonNum))}</p>
-                <span className="text-[11px] text-slate-500">{t('navbar.market_open_desc', 'Hàng ngàn cầu thủ và ban huấn luyện đã sẵn sàng đàm phán hợp đồng.')}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Club News & Alerts Modal (Mở trực tiếp thay vì dropdown) */}
+      <ClubNewsModal
+        isOpen={showNewsModal}
+        newsList={clubNews}
+        onClose={() => setShowNewsModal(false)}
+      />
     </header>
   );
 };

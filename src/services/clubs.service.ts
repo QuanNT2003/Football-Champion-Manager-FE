@@ -1,5 +1,5 @@
 import { request } from './client';
-import { Club, StarterCountry, StarterTier, DashboardData, ClubTrophy } from '../types';
+import { Club, StarterCountry, StarterTier, DashboardData, ClubTrophy, ClubNews } from '../types';
 
 export const clubsApi = {
   getClubs: (page: number = 1, limit: number = 20, search?: string) => {
@@ -12,6 +12,12 @@ export const clubsApi = {
 
   getDashboard: (id: string) => request<DashboardData>(`/clubs/${id}/dashboard`),
   getTrophies: (id: string) => request<ClubTrophy[]>(`/clubs/${id}/trophies`),
+  getNews: (id: string, page: number = 1, limit: number = 20, newsType?: string, search?: string) => {
+    let url = `/clubs/${id}/news?page=${page}&limit=${limit}`;
+    if (newsType) url += `&newsType=${encodeURIComponent(newsType)}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    return request<{ total: number; page: number; limit: number; totalPages: number; items: ClubNews[] }>(url);
+  },
 
   getMyClub: () => request<Club | null>('/clubs/my-club'),
 

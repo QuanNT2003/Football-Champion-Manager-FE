@@ -679,6 +679,18 @@ export interface DashboardData {
     current_day: number;
     total_days: number;
   };
+  recent_news?: ClubNews[];
+}
+
+export interface ClubNews {
+  id: string;
+  club_id: string;
+  season_id?: string | null;
+  news_type: string;
+  title: string;
+  thumbnail_url?: string | null;
+  content?: string | null;
+  published_at?: string | null;
 }
 
 
