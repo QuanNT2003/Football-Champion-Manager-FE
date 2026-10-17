@@ -225,12 +225,14 @@ export const StaffDetailModal: React.FC<Props> = ({
   };
 
   const fullPhotoUrl = getFacepackUrl(staff.photoUrl);
+  const staffOvr = detail?.ovr || detail?.overall_rating || staff.ovr || staff.overall_rating || 60;
+  const ovrColor = staffOvr >= 65 ? '#10b981' : staffOvr >= 55 ? '#0284c7' : '#64748b';
+  const ovrBg = staffOvr >= 65 ? 'rgba(16, 185, 129, 0.15)' : staffOvr >= 55 ? 'rgba(2, 132, 199, 0.15)' : 'rgba(100, 116, 139, 0.15)';
 
   return (
     <div className="player-modal-overlay" onClick={onClose}>
       <div
         className="player-modal-dialog"
-        style={{ maxWidth: '1080px', width: '95%' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Control Bar */}
@@ -255,30 +257,22 @@ export const StaffDetailModal: React.FC<Props> = ({
               <ChevronRight size={20} />
             </button>
             <h2 className="pm-player-title">{staff.name}</h2>
-            {/* OVR Chip */}
-            {(() => {
-              const staffOvr = detail?.ovr || detail?.overall_rating || staff.ovr || staff.overall_rating || 60;
-              const ovrColor = staffOvr >= 65 ? '#10b981' : staffOvr >= 55 ? '#0284c7' : '#64748b';
-              const ovrBg = staffOvr >= 65 ? 'rgba(16, 185, 129, 0.15)' : staffOvr >= 55 ? 'rgba(2, 132, 199, 0.15)' : 'rgba(100, 116, 139, 0.15)';
-              return (
-                <span
-                  className="ovr-chip"
-                  title={t('staff.ovr', 'Chỉ số OVR')}
-                  style={{
-                    background: ovrBg,
-                    color: ovrColor,
-                    border: `1.5px solid ${ovrColor}`,
-                    fontWeight: 900,
-                    fontSize: '1.05rem',
-                    padding: '2px 10px',
-                    borderRadius: '8px',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  {staffOvr}
-                </span>
-              );
-            })()}
+            <span
+              className="ovr-chip"
+              title={t('staff.ovr', 'Chỉ số OVR')}
+              style={{
+                background: ovrBg,
+                color: ovrColor,
+                border: `1.5px solid ${ovrColor}`,
+                fontWeight: 900,
+                fontSize: '1.05rem',
+                padding: '2px 10px',
+                borderRadius: '8px',
+                letterSpacing: '0.5px',
+              }}
+            >
+              {staffOvr}
+            </span>
             <RoleBadge role={detail?.currentContract?.role || staff.role || staff.staffType} />
             <LicenseBadge license={staff.coachingLicense} size="sm" />
           </div>
@@ -293,155 +287,187 @@ export const StaffDetailModal: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Staff Profile Header Card */}
-        <div className="pm-header-card">
-          {/* Avatar with Badges */}
-          <div className="pm-avatar-container">
-            <StaffAvatar
-              name={staff.name}
-              role={detail?.currentContract?.role || staff.role || staff.staffType}
-              photoUrl={staff.photoUrl || detail?.photoUrl}
-              size={96}
-              style={{ borderRadius: '16px' }}
-            />
-          </div>
+        {/* Two Column Layout (Left: 30-40% Basic Info & Avatar, Right: Tabs) */}
+        <div className="pm-two-col-layout">
+          {/* LEFT COLUMN: 30-40% BASIC INFO & AVATAR */}
+          <div className="pm-left-col">
+            {/* Avatar & Badges */}
+            <div className="pm-left-card">
+              <div className="pm-avatar-container" style={{ width: 104, height: 104, margin: '0 auto' }}>
+                <StaffAvatar
+                  name={staff.name}
+                  role={detail?.currentContract?.role || staff.role || staff.staffType}
+                  photoUrl={staff.photoUrl || detail?.photoUrl}
+                  size={104}
+                  style={{ borderRadius: '16px' }}
+                />
+              </div>
 
-          {/* Column 1: Nationality, Age & Birthday, Tactical Style */}
-          <div className="pm-info-col">
-            <div className="pm-info-row">
-              <span className="pm-label">{t('staff.nationality_label', 'Quốc tịch:')}</span>
-              <span className="pm-value" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                {staff.countryFlag && (
-                  <img src={staff.countryFlag} alt="" style={{ width: 16, height: 11, borderRadius: 2 }} />
-                )}
-                <span>{staff.nationality || staff.countryCode || t('common.international', 'Quốc tế')}</span>
-              </span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('staff.age_label', 'Tuổi & Ngày sinh:')}</span>
-              <span className="pm-value pm-val-bold" style={{ color: '#0f172a' }}>
-                {t('staff.age_format', '{age} tuổi').replace('{age}', String(detail?.age || staff.age || 40))}
-                <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500, marginLeft: '6px' }}>
-                  ({t('common.date', 'Ngày')} {detail?.birth_season_day || staff.birth_season_day || 1})
-                </span>
-              </span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('staff.philosophy_label', 'Triết lý:')}</span>
-              <span className="pm-value pm-val-bold" style={{ color: '#16a34a' }}>
-                {staff.tacticalStyle ? t(`staff.style_${staff.tacticalStyle.toLowerCase()}`, staff.tacticalStyle) : t('staff.style_balanced', 'Cân bằng')}
-              </span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('staff.fav_formation_label', 'Sơ đồ ưa thích:')}</span>
-              <span className="pm-value pm-val-bold">
-                {staff.preferredFormation?.name || '4-3-3'}
-              </span>
-            </div>
-          </div>
-
-          {/* Column 2: Reputation, Current Club, Weekly Wages */}
-          <div className="pm-info-col">
-            <div className="pm-info-row">
-              <span className="pm-label">{t('staff.reputation_label', 'Danh tiếng:')}</span>
-              <div className="pm-stars-wrap">
-                {renderStars(staff.reputation)}
+              <div style={{ marginTop: '4px' }}>
+                <h3 style={{ margin: '0 0 6px 0', fontSize: '1.12rem', fontWeight: 800, color: '#0f172a' }}>
+                  {staff.name}
+                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <RoleBadge role={detail?.currentContract?.role || staff.role || staff.staffType} />
+                  <LicenseBadge license={staff.coachingLicense} size="sm" />
+                </div>
               </div>
             </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('staff.current_club_label', 'CLB hiện tại:')}</span>
-              <span className="pm-value">
-                {detail?.currentContract?.club?.name || t('staff.free_agent', 'Tự do (Free Agent)')}
-              </span>
+
+            {/* OVR & Reputation Card */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', background: '#ffffff', padding: '10px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)' }}>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>OVR</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: ovrColor, fontFamily: 'var(--font-game)' }}>{staffOvr}</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>{t('staff.reputation_label', 'Danh tiếng')}</span>
+                <div className="pm-stars-wrap" style={{ marginTop: '4px', justifyContent: 'center', display: 'flex' }}>
+                  {renderStars(staff.reputation)}
+                </div>
+              </div>
             </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('staff.current_wage_label', 'Lương hiện tại:')}</span>
-              <span className="pm-value pm-val-bold" style={{ color: '#047857' }}>
-                {formatMoney(staff.wage)} {t('staff.per_week', '/ tuần')}
+
+            {/* Section 1: Thông tin cá nhân & Triết lý */}
+            <div className="pm-left-section">
+              <span className="pm-left-section-title">
+                {t('staff.section_personal', 'Thông Tin & Triết Lý')}
               </span>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('staff.nationality_label', 'Quốc tịch:')}</span>
+                <span className="pm-value" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  {staff.countryFlag && (
+                    <img src={staff.countryFlag} alt="" style={{ width: 16, height: 11, borderRadius: 2 }} />
+                  )}
+                  <span>{staff.nationality || staff.countryCode || t('common.international', 'Quốc tế')}</span>
+                </span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('staff.age_label', 'Tuổi & Ngày sinh:')}</span>
+                <span className="pm-value pm-val-bold" style={{ color: '#0f172a' }}>
+                  {t('staff.age_format', '{age} tuổi').replace('{age}', String(detail?.age || staff.age || 40))}
+                  <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500, marginLeft: '6px' }}>
+                    ({t('common.date', 'Ngày')} {detail?.birth_season_day || staff.birth_season_day || 1})
+                  </span>
+                </span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('staff.philosophy_label', 'Triết lý:')}</span>
+                <span className="pm-value pm-val-bold" style={{ color: '#16a34a' }}>
+                  {staff.tacticalStyle ? t(`staff.style_${staff.tacticalStyle.toLowerCase()}`, staff.tacticalStyle) : t('staff.style_balanced', 'Cân bằng')}
+                </span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('staff.fav_formation_label', 'Sơ đồ ưa thích:')}</span>
+                <span className="pm-value pm-val-bold">
+                  {staff.preferredFormation?.name || '4-3-3'}
+                </span>
+              </div>
+            </div>
+
+            {/* Section 2: CLB & Hợp Đồng */}
+            <div className="pm-left-section">
+              <span className="pm-left-section-title">
+                {t('staff.section_contract', 'CLB & Hợp Đồng')}
+              </span>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('staff.current_club_label', 'CLB hiện tại:')}</span>
+                <span className="pm-value pm-val-bold pm-team-link">
+                  {detail?.currentContract?.club?.name || t('staff.free_agent', 'Tự do (Free Agent)')}
+                </span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('staff.current_wage_label', 'Lương hiện tại:')}</span>
+                <span className="pm-value pm-val-bold" style={{ color: '#047857' }}>
+                  {formatMoney(staff.wage)} {t('staff.per_week', '/ tuần')}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Navigation Tabs */}
-        <div className="pm-tabs-bar">
-          <button
-            type="button"
-            className={`pm-tab-btn ${activeTab === 'skills' ? 'active' : ''}`}
-            onClick={() => setActiveTab('skills')}
-          >
-            <Star size={15} />
-            <span>{t('staff.tab_skills')}</span>
-          </button>
-          <button
-            type="button"
-            className={`pm-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-            onClick={() => setActiveTab('history')}
-          >
-            <Briefcase size={15} />
-            <span>{t('staff.tab_history')}</span>
-          </button>
-          <button
-            type="button"
-            className={`pm-tab-btn ${activeTab === 'offer' ? 'active' : ''}`}
-            onClick={() => setActiveTab('offer')}
-          >
-            <Sparkles size={15} />
-            <span>{t('staff.tab_offer')}</span>
-          </button>
-          <button
-            type="button"
-            className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
-            onClick={() => setActiveTab('contract')}
-          >
-            <FileText size={15} />
-            <span>{t('staff.tab_contract', 'Hợp đồng')}</span>
-          </button>
-        </div>
-
-        {/* Modal Body Content */}
-        <div className="pm-body" style={{ maxHeight: 'calc(90vh - 240px)', overflowY: 'auto', overflowX: 'hidden', padding: '1.25rem' }}>
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '3.5rem', color: '#64748b' }}>
-              <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.75rem' }} />
-              <div>{t('staff.loading_profile', 'Đang tải hồ sơ nhân sự...')}</div>
+          {/* RIGHT COLUMN: TABS & CONTENT */}
+          <div className="pm-right-col">
+            {/* Navigation Tabs */}
+            <div className="pm-tabs-bar">
+              <button
+                type="button"
+                className={`pm-tab-btn ${activeTab === 'skills' ? 'active' : ''}`}
+                onClick={() => setActiveTab('skills')}
+              >
+                <Star size={15} />
+                <span>{t('staff.tab_skills')}</span>
+              </button>
+              <button
+                type="button"
+                className={`pm-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+                onClick={() => setActiveTab('history')}
+              >
+                <Briefcase size={15} />
+                <span>{t('staff.tab_history')}</span>
+              </button>
+              <button
+                type="button"
+                className={`pm-tab-btn ${activeTab === 'offer' ? 'active' : ''}`}
+                onClick={() => setActiveTab('offer')}
+              >
+                <Sparkles size={15} />
+                <span>{t('staff.tab_offer')}</span>
+              </button>
+              <button
+                type="button"
+                className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
+                onClick={() => setActiveTab('contract')}
+              >
+                <FileText size={15} />
+                <span>{t('staff.tab_contract', 'Hợp đồng')}</span>
+              </button>
             </div>
-          ) : (
-            <>
-              {activeTab === 'skills' && <StaffSkillsTab detail={detail} />}
-              {activeTab === 'history' && <StaffHistoryTab detail={detail} formatMoney={formatMoney} />}
-              {activeTab === 'offer' && (
-                <StaffOfferTab
-                  detail={detail}
-                  isCurrentOwnStaff={isCurrentOwnStaff}
-                  proposedWage={proposedWage}
-                  contractYears={contractYears}
-                  signingBonus={signingBonus}
-                  roleOffered={roleOffered}
-                  submittingOffer={submittingOffer}
-                  offerSuccess={offerSuccess}
-                  offerError={offerError}
-                  currentClubId={currentClubId}
-                  formatMoney={formatMoney}
-                  setProposedWage={setProposedWage}
-                  setContractYears={setContractYears}
-                  setSigningBonus={setSigningBonus}
-                  setRoleOffered={setRoleOffered}
-                  handleSubmitOffer={handleSubmitOffer}
-                  onOpenCancelConfirm={() => setShowCancelConfirm(true)}
-                />
+
+            {/* Modal Body Content */}
+            <div className="pm-body pm-tab-content">
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '3.5rem', color: '#64748b' }}>
+                  <div className="spinner" style={{ width: 28, height: 28, margin: '0 auto 0.75rem' }} />
+                  <div>{t('staff.loading_profile', 'Đang tải hồ sơ nhân sự...')}</div>
+                </div>
+              ) : (
+                <>
+                  {activeTab === 'skills' && <StaffSkillsTab detail={detail} />}
+                  {activeTab === 'history' && <StaffHistoryTab detail={detail} formatMoney={formatMoney} />}
+                  {activeTab === 'offer' && (
+                    <StaffOfferTab
+                      detail={detail}
+                      isCurrentOwnStaff={isCurrentOwnStaff}
+                      proposedWage={proposedWage}
+                      contractYears={contractYears}
+                      signingBonus={signingBonus}
+                      roleOffered={roleOffered}
+                      submittingOffer={submittingOffer}
+                      offerSuccess={offerSuccess}
+                      offerError={offerError}
+                      currentClubId={currentClubId}
+                      formatMoney={formatMoney}
+                      setProposedWage={setProposedWage}
+                      setContractYears={setContractYears}
+                      setSigningBonus={setSigningBonus}
+                      setRoleOffered={setRoleOffered}
+                      handleSubmitOffer={handleSubmitOffer}
+                      onOpenCancelConfirm={() => setShowCancelConfirm(true)}
+                    />
+                  )}
+                  {activeTab === 'contract' && (
+                    <StaffContractTab
+                      staff={staff}
+                      detail={detail}
+                      isCurrentOwnStaff={isCurrentOwnStaff}
+                      onOpenRenewModal={() => setShowRenewModal(true)}
+                      onOpenTerminateModal={() => setShowTerminateModal(true)}
+                    />
+                  )}
+                </>
               )}
-              {activeTab === 'contract' && (
-                <StaffContractTab
-                  staff={staff}
-                  detail={detail}
-                  isCurrentOwnStaff={isCurrentOwnStaff}
-                  onOpenRenewModal={() => setShowRenewModal(true)}
-                  onOpenTerminateModal={() => setShowTerminateModal(true)}
-                />
-              )}
-            </>
-          )}
+            </div>
+          </div>
         </div>
 
         {/* CANCEL CONFIRM MODAL */}

@@ -464,6 +464,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
 
   // Điểm OVR / Average Quality
   const pQuality = (detail?.average_quality ?? player.overall_rating ?? 50.0).toFixed(2);
+  const pOvr = detail?.ovr || detail?.overall_rating || player.overall_rating || player.ovr || Math.round(Number(pQuality));
   const pClubName = detail?.club?.name || player.club?.name || t('player_modal.free_agent', 'Tự do');
   const pCountry = typeof detail?.nationality === 'object'
     ? (detail?.nationality as any)?.name
@@ -590,269 +591,337 @@ export const PlayerDetailModal: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Player Profile Header Card */}
-        <div className="pm-header-card">
-          {/* Avatar with Shirt Badge */}
-          <div className="pm-avatar-container">
-            <div className="pm-avatar-box">
-              {detail?.photo_url || player.photo_url ? (
-                <img
-                  src={getFacepackUrl(detail?.photo_url || player.photo_url)}
-                  alt=""
-                  className="pm-avatar-img"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="pm-avatar-placeholder">
-                  <span className="pm-placeholder-icon">👤</span>
+        {/* Two Column Layout (Left: 30-40% Basic Info & Avatar, Right: Tabs) */}
+        <div className="pm-two-col-layout">
+          {/* LEFT COLUMN: 30-40% BASIC INFO & AVATAR */}
+          <div className="pm-left-col">
+            {/* Avatar & Jersey & Identity */}
+            <div className="pm-left-card">
+              <div className="pm-avatar-container" style={{ width: 104, height: 104, margin: '0 auto' }}>
+                <div className="pm-avatar-box">
+                  {detail?.photo_url || player.photo_url ? (
+                    <img
+                      src={getFacepackUrl(detail?.photo_url || player.photo_url)}
+                      alt=""
+                      className="pm-avatar-img"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="pm-avatar-placeholder">
+                      <span className="pm-placeholder-icon">👤</span>
+                    </div>
+                  )}
                 </div>
+                <div className="pm-jersey-badge" title={t('player_modal.shirt_no_tooltip', 'Số áo: {no}').replace('{no}', String(pShirtNo))}>
+                  <span className="pm-jersey-num">#{pShirtNo}</span>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '4px' }}>
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.12rem', fontWeight: 800, color: '#0f172a' }}>
+                  {pName}
+                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                  <span className="position-tag" style={{ fontSize: '0.75rem', padding: '2px 8px', fontWeight: 700 }}>
+                    {pPosCode} • {pPos}
+                  </span>
+                  {(detail?.is_on_loan || detail?.contract?.is_loan_contract || player.is_on_loan) && (
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 800,
+                        padding: '2px 7px',
+                        borderRadius: '4px',
+                        background: '#fef3c7',
+                        border: '1px solid #fde68a',
+                        color: '#b45309',
+                      }}
+                    >
+                      🤝 {t('player_modal.badge_loan', 'Mượn')}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {isOwnClub && (
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  disabled={isMovingSquad}
+                  style={{
+                    width: '100%',
+                    marginTop: '4px',
+                    padding: '6px 12px',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    borderRadius: '8px',
+                    cursor: isMovingSquad ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '5px',
+                    opacity: isMovingSquad ? 0.7 : 1,
+                    background: '#ecfdf5',
+                    color: '#047857',
+                    border: '1px solid #a7f3d0',
+                  }}
+                  onClick={handleDirectMoveSquad}
+                  title={
+                    (detail?.squad_type === 'YOUTH_U21' || player.squad_type === 'YOUTH_U21')
+                      ? t('squad.tooltip_promote', 'Đưa cầu thủ lên Đội Một')
+                      : t('squad.tooltip_demote', 'Chuyển cầu thủ xuống Đội Trẻ U21')
+                  }
+                >
+                  <span>
+                    {(detail?.squad_type === 'YOUTH_U21' || player.squad_type === 'YOUTH_U21')
+                      ? t('squad.btn_promote', 'Lên Đội 1')
+                      : t('squad.btn_demote', 'Xuống Đội Trẻ')}
+                  </span>
+                </button>
               )}
             </div>
-            {/* Jersey Badge */}
-            <div className="pm-jersey-badge" title={t('player_modal.shirt_no_tooltip', 'Số áo: {no}').replace('{no}', String(pShirtNo))}>
-              <span className="pm-jersey-num">{pShirtNo}</span>
-            </div>
-          </div>
 
-          {/* Column 1: Core Physical & Technical Info */}
-          <div className="pm-info-col">
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_position', 'Vị trí:')}</span>
-              <span className="pm-value pm-val-bold">
-                {pPos} / {pPosCode}
-              </span>
+            {/* OVR & Potential Ratings Card */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', background: '#ffffff', padding: '10px 12px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)' }}>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>OVR</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#d97706', fontFamily: 'var(--font-game)' }}>{pOvr}</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>{t('player_modal.col_potential', 'Tiềm năng')}</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#16a34a', fontFamily: 'var(--font-game)' }}>{pPotential}</div>
+                <div className="pm-stars-wrap" style={{ fontSize: '0.75rem', marginTop: '-2px' }}>{renderStars(pPotential)}</div>
+              </div>
             </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_age', 'Tuổi:')}</span>
-              <span className="pm-value pm-val-bold">{pAge}</span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_height', 'Chiều cao:')}</span>
-              <span className="pm-value">{pHeight}</span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_weight', 'Cân nặng:')}</span>
-              <span className="pm-value">{pWeight}</span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_foot', 'Chân thuận:')}</span>
-              <span className="pm-value">{pFoot}</span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_quality', 'Chất lượng TB:')}</span>
-              <span className="pm-value pm-val-bold pm-quality-val">{pQuality}</span>
-            </div>
-          </div>
 
-          {/* Column 2: Club, Reputation, Potential, Value & Wages */}
-          <div className="pm-info-col">
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_team', 'Đội bóng:')}</span>
-              <span className="pm-value pm-val-bold pm-team-link">
-                {pClubName} {(detail?.club as any)?.country_flag ? (
-                  <img src={(detail?.club as any).country_flag} alt="" className="pm-flag-img" />
-                ) : null}
+            {/* Section 1: Physical Info */}
+            <div className="pm-left-section">
+              <span className="pm-left-section-title">
+                {t('player_modal.section_physical', 'Thông Tin Thể Chất')}
               </span>
-            </div>
-            {(detail?.is_on_loan || detail?.contract?.is_loan_contract || player.is_on_loan) && (
               <div className="pm-info-row">
-                <span className="pm-label">{t('player_modal.parent_club_label', 'CLB Chủ Quản:')}</span>
-                <span className="pm-value pm-val-bold" style={{ color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  {(detail?.contract?.parent_club_logo || detail?.on_loan?.parent_club_logo || player.parent_club?.logo_url) && (
-                    <img
-                      src={detail?.contract?.parent_club_logo || detail?.on_loan?.parent_club_logo || player.parent_club?.logo_url}
-                      alt=""
-                      style={{ width: 16, height: 16, objectFit: 'contain' }}
-                    />
-                  )}
-                  {detail?.contract?.parent_club_name || detail?.on_loan?.parent_club_name || player.parent_club?.name || t('player_modal.owning_club', 'CLB Chủ Quản')}
+                <span className="pm-label">{t('player_modal.col_country', 'Quốc tịch:')}</span>
+                <span className="pm-value">
+                  {pCountry} {(detail?.nationality_detail?.flag_url || player.nationalityFlag) ? (
+                    <img src={detail?.nationality_detail?.flag_url || player.nationalityFlag} alt="" className="pm-flag-img" />
+                  ) : null}
                 </span>
               </div>
-            )}
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_country', 'Quốc tịch:')}</span>
-              <span className="pm-value">
-                {pCountry} {(detail?.nationality_detail?.flag_url || player.nationalityFlag) ? (
-                  <img src={detail?.nationality_detail?.flag_url || player.nationalityFlag} alt="" className="pm-flag-img" />
-                ) : null}
-              </span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_reputation', 'Danh tiếng:')}</span>
-              <span className="pm-value pm-reputation-val">
-                <Award size={14} className="pm-icon-badge" />
-                {formatNumber(pReputation)}
-              </span>
-            </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_potential', 'Tiềm năng:')}</span>
-              <div className="pm-potential-wrap">
-                <span className="pm-val-bold" style={{ color: 'var(--color-navy-blue)' }}>{pPotential}</span>
-                <span className="pm-muted-note" style={{ fontSize: '0.75rem', marginRight: '6px' }}>/100</span>
-                <div className="pm-stars-wrap">{renderStars(pPotential)}</div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.col_age', 'Tuổi:')}</span>
+                <span className="pm-value pm-val-bold">{pAge}</span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.col_height', 'Chiều cao:')}</span>
+                <span className="pm-value">{pHeight}</span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.col_weight', 'Cân nặng:')}</span>
+                <span className="pm-value">{pWeight}</span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.col_foot', 'Chân thuận:')}</span>
+                <span className="pm-value">{pFoot}</span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.col_quality', 'Chất lượng TB:')}</span>
+                <span className="pm-value pm-val-bold pm-quality-val">{pQuality}</span>
               </div>
             </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.experience', 'Kinh nghiệm:')}</span>
-              <span className="pm-value pm-val-bold" style={{ color: '#d97706', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <Zap size={14} fill="#f59e0b" color="#f59e0b" />
-                {formatNumber(pExperience)} EXP
+
+            {/* Section 2: Club & Finances */}
+            <div className="pm-left-section">
+              <span className="pm-left-section-title">
+                {t('player_modal.section_club', 'CLB & Thị Trường')}
               </span>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.col_team', 'Đội bóng:')}</span>
+                <span className="pm-value pm-val-bold pm-team-link">
+                  {pClubName} {(detail?.club as any)?.country_flag ? (
+                    <img src={(detail?.club as any).country_flag} alt="" className="pm-flag-img" />
+                  ) : null}
+                </span>
+              </div>
+              {(detail?.is_on_loan || detail?.contract?.is_loan_contract || player.is_on_loan) && (
+                <div className="pm-info-row">
+                  <span className="pm-label">{t('player_modal.parent_club_label', 'CLB Gốc:')}</span>
+                  <span className="pm-value pm-val-bold" style={{ color: '#0369a1', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    {detail?.contract?.parent_club_name || detail?.on_loan?.parent_club_name || player.parent_club?.name || t('player_modal.owning_club', 'CLB Chủ Quản')}
+                  </span>
+                </div>
+              )}
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.col_worth', 'Định giá:')}</span>
+                <span className="pm-value pm-worth-val">
+                  <Coins size={14} className="pm-coin-icon" /> {pWorth}
+                </span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.col_wage', 'Lương tuần:')}</span>
+                <span className="pm-value pm-val-bold" style={{ color: '#047857' }}>
+                  {pWages}
+                </span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.col_reputation', 'Danh tiếng:')}</span>
+                <span className="pm-value pm-reputation-val">
+                  <Award size={14} className="pm-icon-badge" />
+                  {formatNumber(pReputation)}
+                </span>
+              </div>
+              <div className="pm-info-row">
+                <span className="pm-label">{t('player_modal.experience', 'Kinh nghiệm:')}</span>
+                <span className="pm-value pm-val-bold" style={{ color: '#d97706', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <Zap size={14} fill="#f59e0b" color="#f59e0b" />
+                  {formatNumber(pExperience)} EXP
+                </span>
+              </div>
             </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_worth', 'Định giá:')}</span>
-              <span className="pm-value pm-worth-val">
-                <Coins size={14} className="pm-coin-icon" /> {pWorth}
-              </span>
+          </div>
+
+          {/* RIGHT COLUMN: TABS & CONTENT */}
+          <div className="pm-right-col">
+            {/* 5 Tabs Navigation Header */}
+            <div className="pm-tabs-bar">
+              <button
+                className={`pm-tab-btn ${activeTab === 'skills' ? 'active' : ''}`}
+                onClick={() => setActiveTab('skills')}
+              >
+                <Star size={15} />
+                <span>{t('player.tab_skills')}</span>
+              </button>
+              <button
+                className={`pm-tab-btn ${activeTab === 'matches' ? 'active' : ''}`}
+                onClick={() => setActiveTab('matches')}
+              >
+                <Activity size={15} />
+                <span>{t('player.tab_matches')}</span>
+              </button>
+              <button
+                className={`pm-tab-btn ${activeTab === 'statistics' ? 'active' : ''}`}
+                onClick={() => setActiveTab('statistics')}
+              >
+                <Award size={15} />
+                <span>{t('player_modal.career_history_tab', 'Lịch Sử Các Mùa')}</span>
+              </button>
+              <button
+                className={`pm-tab-btn ${activeTab === 'transfers' ? 'active' : ''}`}
+                onClick={() => setActiveTab('transfers')}
+              >
+                <Coins size={15} />
+                <span>{t('player.tab_transfers')}</span>
+              </button>
+              {isOwnClub && (
+                <button
+                  className={`pm-tab-btn ${activeTab === 'injuries' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('injuries')}
+                >
+                  <HeartPulse size={15} />
+                  <span>{t('player.tab_injuries')}</span>
+                </button>
+              )}
+              {isOwnClub && (
+                <button
+                  className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('contract')}
+                >
+                  <FileText size={15} />
+                  <span>{t('player.tab_contract', 'Hợp đồng')}</span>
+                </button>
+              )}
+              {isEligibleForOffer && (
+                <button
+                  className={`pm-tab-btn ${activeTab === 'offer' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('offer')}
+                  style={activeTab === 'offer' ? { color: '#16a34a', borderBottomColor: '#16a34a', fontWeight: 700 } : {}}
+                >
+                  <Coins size={15} />
+                  <span>{t('player.tab_offer')}</span>
+                </button>
+              )}
             </div>
-            <div className="pm-info-row">
-              <span className="pm-label">{t('player_modal.col_wage', 'Lương tuần:')}</span>
-              <span className="pm-value pm-val-bold" style={{ color: '#047857' }}>
-                {pWages}
-              </span>
+
+            {/* Tab Content Body */}
+            <div className="pm-tab-content">
+              {loading ? (
+                <div className="pm-loading-state">
+                  <div className="pm-spinner" />
+                  <span>{t('player_modal.loading_profile', 'Đang tải hồ sơ cầu thủ...')}</span>
+                </div>
+              ) : (
+                <>
+                  {/* TAB 1: SKILLS */}
+                  {activeTab === 'skills' && (
+                    <PlayerSkillsTab
+                      detail={detail}
+                      pPosCode={pPosCode}
+                    />
+                  )}
+
+                  {/* TAB 2: MATCHES THIS SEASON */}
+                  {activeTab === 'matches' && (
+                    <PlayerMatchesTab detail={detail} />
+                  )}
+
+                  {/* TAB 3: STATISTICS ACROSS SEASONS */}
+                  {activeTab === 'statistics' && (
+                    <PlayerStatsTab detail={detail} />
+                  )}
+
+                  {/* TAB 4: TRANSFERS */}
+                  {activeTab === 'transfers' && (
+                    <PlayerTransfersTab detail={detail} />
+                  )}
+
+                  {/* TAB 5: INJURIES (CHỈ HIỂN THỊ KHI LÀ CLB CHỦ QUẢN) */}
+                  {isOwnClub && activeTab === 'injuries' && (
+                    <PlayerInjuriesTab detail={detail} />
+                  )}
+
+                  {/* TAB 6: OFFER */}
+                  {isEligibleForOffer && activeTab === 'offer' && (
+                    <PlayerOfferTab
+                      player={player}
+                      detail={detail}
+                      currentClubId={currentClubId}
+                      cashBalance={cashBalance}
+                      offerSuccess={offerSuccess}
+                      offerError={offerError}
+                      loadingOffer={loadingOffer}
+                      existingOffer={existingOffer}
+                      isLoan={isLoan}
+                      setIsLoan={setIsLoan}
+                      offerAmount={offerAmount}
+                      setOfferAmount={setOfferAmount}
+                      proposedWage={proposedWage}
+                      setProposedWage={setProposedWage}
+                      contractYears={contractYears}
+                      setContractYears={setContractYears}
+                      offerSubmitting={offerSubmitting}
+                      handleSendOffer={handleSendOffer}
+                      handleOpenCancelConfirm={() => setConfirmCancelModal(true)}
+                      cancellingOffer={cancellingOffer}
+                    />
+                  )}
+                  {/* TAB 7: CONTRACT (CHỈ HIỂN THỊ VỚI CẦU THỦ THUỘC CLB CHỦ QUẢN) */}
+                  {activeTab === 'contract' && isOwnClub && (
+                    <PlayerContractTab
+                      player={player}
+                      detail={detail}
+                      isOwnClub={isOwnClub}
+                      onOpenRenewModal={() => setShowRenewModal(true)}
+                      onOpenTerminateModal={() => setShowTerminateModal(true)}
+                      onPlayerUpdated={onPlayerUpdated}
+                    />
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        {/* 5 Tabs Navigation Header */}
-        <div className="pm-tabs-bar">
-          <button
-            className={`pm-tab-btn ${activeTab === 'skills' ? 'active' : ''}`}
-            onClick={() => setActiveTab('skills')}
-          >
-            <Star size={15} />
-            <span>{t('player.tab_skills')}</span>
-          </button>
-          <button
-            className={`pm-tab-btn ${activeTab === 'matches' ? 'active' : ''}`}
-            onClick={() => setActiveTab('matches')}
-          >
-            <Activity size={15} />
-            <span>{t('player.tab_matches')}</span>
-          </button>
-          <button
-            className={`pm-tab-btn ${activeTab === 'statistics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('statistics')}
-          >
-            <Award size={15} />
-            <span>{t('player_modal.career_history_tab', 'Lịch Sử Các Mùa')}</span>
-          </button>
-          <button
-            className={`pm-tab-btn ${activeTab === 'transfers' ? 'active' : ''}`}
-            onClick={() => setActiveTab('transfers')}
-          >
-            <Coins size={15} />
-            <span>{t('player.tab_transfers')}</span>
-          </button>
-          {isOwnClub && (
-            <button
-              className={`pm-tab-btn ${activeTab === 'injuries' ? 'active' : ''}`}
-              onClick={() => setActiveTab('injuries')}
-            >
-              <HeartPulse size={15} />
-              <span>{t('player.tab_injuries')}</span>
-            </button>
-          )}
-          {isOwnClub && (
-            <button
-              className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
-              onClick={() => setActiveTab('contract')}
-            >
-              <FileText size={15} />
-              <span>{t('player.tab_contract', 'Hợp đồng')}</span>
-            </button>
-          )}
-          {isEligibleForOffer && (
-            <button
-              className={`pm-tab-btn ${activeTab === 'offer' ? 'active' : ''}`}
-              onClick={() => setActiveTab('offer')}
-              style={activeTab === 'offer' ? { color: '#16a34a', borderBottomColor: '#16a34a', fontWeight: 700 } : {}}
-            >
-              <Coins size={15} />
-              <span>{t('player.tab_offer')}</span>
-            </button>
-          )}
-        </div>
-
-        {/* Tab Content Body */}
-        <div className="pm-tab-content">
-          {loading ? (
-            <div className="pm-loading-state">
-              <div className="pm-spinner" />
-              <span>{t('player_modal.loading_profile', 'Đang tải hồ sơ cầu thủ...')}</span>
-            </div>
-          ) : (
-            <>
-              {/* TAB 1: SKILLS (100% PURE DB SCHEMA & POSITION ATTRIBUTES) */}
-              {/* TAB 1: SKILLS */}
-              {activeTab === 'skills' && (
-                <PlayerSkillsTab
-                  detail={detail}
-                  pPosCode={pPosCode}
-                />
-              )}
-
-              {/* TAB 2: MATCHES THIS SEASON */}
-              {activeTab === 'matches' && (
-                <PlayerMatchesTab detail={detail} />
-              )}
-
-              {/* TAB 3: STATISTICS ACROSS SEASONS */}
-              {activeTab === 'statistics' && (
-                <PlayerStatsTab detail={detail} />
-              )}
-
-              {/* TAB 4: TRANSFERS */}
-              {activeTab === 'transfers' && (
-                <PlayerTransfersTab detail={detail} />
-              )}
-
-              {/* TAB 5: INJURIES (CHỈ HIỂN THỊ KHI LÀ CLB CHỦ QUẢN) */}
-              {isOwnClub && activeTab === 'injuries' && (
-                <PlayerInjuriesTab detail={detail} />
-              )}
-
-              {/* TAB 6: OFFER */}
-              {isEligibleForOffer && activeTab === 'offer' && (
-                <PlayerOfferTab
-                  player={player}
-                  detail={detail}
-                  currentClubId={currentClubId}
-                  cashBalance={cashBalance}
-                  offerSuccess={offerSuccess}
-                  offerError={offerError}
-                  loadingOffer={loadingOffer}
-                  existingOffer={existingOffer}
-                  isLoan={isLoan}
-                  setIsLoan={setIsLoan}
-                  offerAmount={offerAmount}
-                  setOfferAmount={setOfferAmount}
-                  proposedWage={proposedWage}
-                  setProposedWage={setProposedWage}
-                  contractYears={contractYears}
-                  setContractYears={setContractYears}
-                  offerSubmitting={offerSubmitting}
-                  handleSendOffer={handleSendOffer}
-                  handleOpenCancelConfirm={() => setConfirmCancelModal(true)}
-                  cancellingOffer={cancellingOffer}
-                />
-              )}
-              {/* TAB 7: CONTRACT (CHỈ HIỂN THỊ VỚI CẦU THỦ THUỘC CLB CHỦ QUẢN) */}
-              {activeTab === 'contract' && isOwnClub && (
-                <PlayerContractTab
-                  player={player}
-                  detail={detail}
-                  isOwnClub={isOwnClub}
-                  onOpenRenewModal={() => setShowRenewModal(true)}
-                  onOpenTerminateModal={() => setShowTerminateModal(true)}
-                  onPlayerUpdated={onPlayerUpdated}
-                />
-              )}
-            </>
-          )}
-        </div>
 
         {/* Modal Footer */}
         <div className="pm-footer">
