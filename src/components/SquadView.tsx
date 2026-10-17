@@ -3,19 +3,50 @@ import { PlayerAvatar } from './common/PlayerAvatar';
 import React, { useState } from 'react';
 import { Player } from '../types';
 import { formatCurrency } from '../utils/formatters';
-import { Search, Users, Shield, Sparkles, Award, Zap, ChevronRight } from 'lucide-react';
+import { Search, Users, Shield, Sparkles, Award, Zap, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { playersApi } from '../services/players.service';
 
 interface Props {
   players: Player[];
   onSelectPlayer: (player: Player) => void;
   onUpdateTransferListing: (playerId: string, isTransfer: boolean, isLoan: boolean, price?: number) => void;
+  onRefreshSquad?: () => void;
 }
 
-export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
+export const SquadView: React.FC<Props> = ({ players, onSelectPlayer, onRefreshSquad }) => {
   const { t } = useTranslation();
   const [squadTab, setSquadTab] = useState<'FIRST_TEAM' | 'YOUTH_U21'>('FIRST_TEAM');
   const [filterType, setFilterType] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [movingPlayerId, setMovingPlayerId] = useState<string | null>(null);
+  const [successNotification, setSuccessNotification] = useState<string | null>(null);
+
+  const handleMoveSquad = async (player: Player) => {
+    const isCurrentFirstTeam = !player.squad_type || player.squad_type === 'FIRST_TEAM';
+    const targetSquad: 'FIRST_TEAM' | 'YOUTH_U21' = isCurrentFirstTeam ? 'YOUTH_U21' : 'FIRST_TEAM';
+
+    setMovingPlayerId(player.id);
+    try {
+      const res = await playersApi.moveSquad(player.id, targetSquad);
+      const assignedNum = res.player?.squad_number;
+      const playerName = player.name || `${player.first_name || ''} ${player.last_name || ''}`.trim() || player.common_name || t('common.player', 'Cầu thủ');
+      const msg = targetSquad === 'FIRST_TEAM'
+        ? t('squad.promote_success', 'Đã đưa {name} lên Đội Một thành công với số áo #{num}!')
+            .replace('{name}', playerName)
+            .replace('{num}', String(assignedNum))
+        : t('squad.demote_success', 'Đã chuyển {name} xuống Đội Trẻ U21 thành công với số áo #{num}!')
+            .replace('{name}', playerName)
+            .replace('{num}', String(assignedNum));
+      setSuccessNotification(msg);
+      setTimeout(() => setSuccessNotification(null), 4000);
+      onRefreshSquad?.();
+    } catch (err: any) {
+      console.error('Failed to move player squad:', err);
+      alert(err.response?.data?.message || err.message || t('squad.modal_move_failed', 'Không thể điều chuyển đội hình'));
+    } finally {
+      setMovingPlayerId(null);
+    }
+  };
 
   const firstTeamCount = players.filter((p) => !p.squad_type || p.squad_type === 'FIRST_TEAM').length;
   const youthCount = players.filter((p) => p.squad_type === 'YOUTH_U21' || p.squad_type === 'YOUTH_U19').length;
@@ -65,6 +96,29 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
 
   return (
     <div className="view-container squad-page-view">
+      {/* Toast Notification Banner */}
+      {successNotification && (
+        <div
+          style={{
+            padding: '12px 20px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+            border: '1.5px solid #6ee7b7',
+            color: '#065f46',
+            fontWeight: 700,
+            fontSize: '0.92rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)',
+            animation: 'fadeIn 0.2s ease-out',
+          }}
+        >
+          <CheckCircle2 size={18} style={{ color: '#059669', flexShrink: 0 }} />
+          <span>{successNotification}</span>
+        </div>
+      )}
+
       {/* Control Bar: Filters & Search */}
       <div className="glass-panel" style={{ padding: '18px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {/* SQUAD LEVEL TABS (Đội Một / Đội Trẻ U21 / Đội Dự Bị) */}
@@ -311,12 +365,79 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
                       </strong>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => onSelectPlayer(player)}
-                      >
-                        {t('common.details', 'Chi Tiết')}
-                      </button>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
+                        {(!player.squad_type || player.squad_type === 'FIRST_TEAM') ? (
+                          <button
+                            type="button"
+                            className="btn btn-sm"
+                            disabled={movingPlayerId === player.id}
+                            style={{
+                              padding: '5px 12px',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              background: '#ecfdf5',
+                              color: '#047857',
+                              border: '1px solid #a7f3d0',
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              cursor: movingPlayerId === player.id ? 'not-allowed' : 'pointer',
+                              whiteSpace: 'nowrap',
+                              transition: 'all 0.15s ease',
+                              opacity: movingPlayerId === player.id ? 0.7 : 1,
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMoveSquad(player);
+                            }}
+                            title={t('squad.tooltip_demote', 'Chuyển cầu thủ xuống Đội Trẻ U21')}
+                          >
+                            <span>{t('squad.btn_demote', 'Xuống Đội Trẻ')}</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn btn-sm"
+                            disabled={movingPlayerId === player.id}
+                            style={{
+                              padding: '5px 12px',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              background: '#ecfdf5',
+                              color: '#047857',
+                              border: '1px solid #a7f3d0',
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              cursor: movingPlayerId === player.id ? 'not-allowed' : 'pointer',
+                              whiteSpace: 'nowrap',
+                              transition: 'all 0.15s ease',
+                              opacity: movingPlayerId === player.id ? 0.7 : 1,
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMoveSquad(player);
+                            }}
+                            title={t('squad.tooltip_promote', 'Đưa cầu thủ lên Đội Một')}
+                          >
+                            <span>{t('squad.btn_promote', 'Lên Đội 1')}</span>
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          style={{ padding: '5px 12px', fontSize: '0.78rem' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectPlayer(player);
+                          }}
+                        >
+                          {t('common.details', 'Chi Tiết')}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -328,3 +449,5 @@ export const SquadView: React.FC<Props> = ({ players, onSelectPlayer }) => {
     </div>
   );
 };
+
+

@@ -263,6 +263,7 @@ export function App() {
               players={players}
               onSelectPlayer={setSelectedPlayer}
               onUpdateTransferListing={handleUpdateTransferListing}
+              onRefreshSquad={() => club && loadClubSquad(club.id)}
             />
           }
         />

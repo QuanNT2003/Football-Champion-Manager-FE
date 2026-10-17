@@ -31,7 +31,10 @@ import {
   HeartPulse,
   CheckCircle2,
   FileText,
+  Sparkles,
+  Loader2,
 } from 'lucide-react';
+
 
 export interface Props {
   player: Player;
@@ -61,6 +64,31 @@ export const PlayerDetailModal: React.FC<Props> = ({
   const [detail, setDetail] = useState<PlayerDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const [isMovingSquad, setIsMovingSquad] = useState<boolean>(false);
+
+  const handleDirectMoveSquad = async () => {
+    const currentSquadType = detail?.squad_type || player.squad_type;
+    const isCurrentFirstTeam = !currentSquadType || currentSquadType === 'FIRST_TEAM';
+    const targetSquad: 'FIRST_TEAM' | 'YOUTH_U21' = isCurrentFirstTeam ? 'YOUTH_U21' : 'FIRST_TEAM';
+
+    setIsMovingSquad(true);
+    try {
+      const res = await playersApi.moveSquad(player.id, targetSquad);
+      if (detail) {
+        setDetail({
+          ...detail,
+          squad_type: res.player?.squad_type || targetSquad,
+          squad_number: res.player?.squad_number || detail.squad_number,
+        });
+      }
+      onPlayerUpdated?.();
+    } catch (err: any) {
+      console.error('Failed to move player squad:', err);
+      alert(err.response?.data?.message || err.message || t('squad.modal_move_failed', 'Không thể điều chuyển đội hình'));
+    } finally {
+      setIsMovingSquad(false);
+    }
+  };
 
   // Kiểm tra cầu thủ có thuộc CLB của người dùng không (ưu tiên cờ is_own_club từ BE nếu đã fetch detail)
   const isOwnClub = detail?.is_own_club !== undefined
@@ -520,6 +548,41 @@ export const PlayerDetailModal: React.FC<Props> = ({
             >
               <Star size={17} fill={isFavorite ? '#eab308' : 'none'} color={isFavorite ? '#eab308' : '#64748b'} />
             </button>
+
+            {isOwnClub && (
+              <button
+                type="button"
+                className="btn btn-sm"
+                disabled={isMovingSquad}
+                style={{
+                  padding: '4px 10px',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  borderRadius: '6px',
+                  cursor: isMovingSquad ? 'not-allowed' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginLeft: '6px',
+                  opacity: isMovingSquad ? 0.7 : 1,
+                  background: '#ecfdf5',
+                  color: '#047857',
+                  border: '1px solid #a7f3d0',
+                }}
+                onClick={handleDirectMoveSquad}
+                title={
+                  (detail?.squad_type === 'YOUTH_U21' || player.squad_type === 'YOUTH_U21')
+                    ? t('squad.tooltip_promote', 'Đưa cầu thủ lên Đội Một')
+                    : t('squad.tooltip_demote', 'Chuyển cầu thủ xuống Đội Trẻ U21')
+                }
+              >
+                <span>
+                  {(detail?.squad_type === 'YOUTH_U21' || player.squad_type === 'YOUTH_U21')
+                    ? t('squad.btn_promote', 'Lên Đội 1')
+                    : t('squad.btn_demote', 'Xuống Đội Trẻ')}
+                </span>
+              </button>
+            )}
           </div>
 
           <button className="pm-close-btn" onClick={onClose} title={t('player_modal.close_tooltip', 'Đóng')}>

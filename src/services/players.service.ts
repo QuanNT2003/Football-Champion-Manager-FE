@@ -43,4 +43,18 @@ export const playersApi = {
         askingPrice: data.asking_price,
       }),
     }),
+
+  moveSquad: (
+    playerId: string,
+    squadType: 'FIRST_TEAM' | 'YOUTH_U21' | 'RESERVES' | 'YOUTH_U19',
+    squadNumber?: number
+  ) =>
+    request<{ success: boolean; message: string; player: { id: string; squad_type: string; squad_number: number } }>(
+      `/players/${playerId}/squad`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ squadType, squadNumber }),
+      }
+    ),
 };
+
