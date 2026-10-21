@@ -51,6 +51,24 @@ export interface MarketFilterParams {
 export interface FilterOptionsResponse {
   countries: { id: string; code: string; name: string; flag_url?: string | null }[];
   attributes: { id: string; code: string; name: string; category: string }[];
+  staffAttributes?: { id: string; code: string; name: string; category: string; description?: string }[];
+  formations?: { id: string; code: string; name: string }[];
+}
+
+export interface StaffMarketFilterParams {
+  page?: number;
+  limit?: number;
+  role?: string;
+  search?: string;
+  license?: string;
+  tacticalStyle?: string;
+  formationId?: string;
+  nationalityId?: string;
+  minAge?: number;
+  maxAge?: number;
+  minOvr?: number;
+  maxOvr?: number;
+  attributes?: Record<string, number>;
 }
 
 
@@ -252,18 +270,30 @@ export const transfersApi = {
   getClubStaff: (clubId: string) =>
     request<StaffMarketItem[]>(`/transfers/club/${clubId}/staff`),
 
-  getStaffMarket: (params?: {
-    page?: number;
-    limit?: number;
-    role?: string;
-    search?: string;
-  }) => {
+  getStaffMarket: (params?: StaffMarketFilterParams) => {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 20;
-    let url = `/transfers/staff-market?page=${page}&limit=${limit}`;
-    if (params?.role) url += `&role=${encodeURIComponent(params.role)}`;
-    if (params?.search) url += `&search=${encodeURIComponent(params.search)}`;
-    return request<{ total: number; page: number; limit: number; totalPages: number; items: StaffMarketItem[] }>(url);
+    const query = new URLSearchParams();
+    query.append('page', String(page));
+    query.append('limit', String(limit));
+
+    if (params?.role && params.role !== 'ALL') query.append('role', params.role);
+    if (params?.search) query.append('search', params.search);
+    if (params?.license && params.license !== 'ALL') query.append('license', params.license);
+    if (params?.tacticalStyle && params.tacticalStyle !== 'ALL') query.append('tacticalStyle', params.tacticalStyle);
+    if (params?.formationId) query.append('formationId', params.formationId);
+    if (params?.nationalityId) query.append('nationalityId', params.nationalityId);
+    if (params?.minAge !== undefined) query.append('minAge', String(params.minAge));
+    if (params?.maxAge !== undefined) query.append('maxAge', String(params.maxAge));
+    if (params?.minOvr !== undefined) query.append('minOvr', String(params.minOvr));
+    if (params?.maxOvr !== undefined) query.append('maxOvr', String(params.maxOvr));
+    if (params?.attributes && Object.keys(params.attributes).length > 0) {
+      query.append('attributes', JSON.stringify(params.attributes));
+    }
+
+    return request<{ total: number; page: number; limit: number; totalPages: number; items: StaffMarketItem[] }>(
+      `/transfers/staff-market?${query.toString()}`
+    );
   },
 
   hireStaff: (data: { clubId: string; staffId: string }) =>

@@ -11,6 +11,7 @@ import { TransferBidsView } from './transfers/TransferBidsView';
 import { PlayerDetailModal } from './player';
 import { StaffDetailModal } from './staff';
 import { PlayerSkillFilterModal, SkillFilterValues } from './transfers/PlayerSkillFilterModal';
+import { StaffFilterModal, StaffFilterValues } from './transfers/StaffFilterModal';
 
 interface TransfersViewProps {
   currentClubId: string;
@@ -54,10 +55,21 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   const [staffList, setStaffList] = useState<StaffMarketItem[]>([]);
   const [staffLoading, setStaffLoading] = useState(false);
   const [staffRoleFilter, setStaffRoleFilter] = useState('');
+  const [staffLicenseFilter, setStaffLicenseFilter] = useState('');
+  const [staffTacticalStyleFilter, setStaffTacticalStyleFilter] = useState('');
+  const [staffFormationFilter, setStaffFormationFilter] = useState('');
+  const [staffNationalityId, setStaffNationalityId] = useState('');
+  const [staffMinAge, setStaffMinAge] = useState<number | undefined>();
+  const [staffMaxAge, setStaffMaxAge] = useState<number | undefined>();
+  const [staffMinOvr, setStaffMinOvr] = useState<number | undefined>();
+  const [staffMaxOvr, setStaffMaxOvr] = useState<number | undefined>();
+  const [staffAttributeFilters, setStaffAttributeFilters] = useState<Record<string, number>>({});
+  const [isStaffFilterModalOpen, setIsStaffFilterModalOpen] = useState(false);
   const [staffSubTab, setStaffSubTab] = useState<'market' | 'my_club'>('market');
   const [staffSearch, setStaffSearch] = useState('');
   const [staffPage, setStaffPage] = useState(1);
   const [staffTotalPages, setStaffTotalPages] = useState(1);
+  const [staffTotalItems, setStaffTotalItems] = useState(0);
   const [selectedStaffForHire, setSelectedStaffForHire] = useState<StaffMarketItem | null>(null);
   const [staffDetailInitialTab, setStaffDetailInitialTab] = useState<'skills' | 'history' | 'offer'>('skills');
 
@@ -80,7 +92,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
       });
   }, []);
 
-  // Tính số lượng tiêu chí lọc nâng cao đang kích hoạt
+  // Tính số lượng tiêu chí lọc nâng cao đang kích hoạt (Player)
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (statusFilter && statusFilter !== 'ALL') count++;
@@ -95,6 +107,33 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
     return count;
   }, [statusFilter, positionFilter, minAge, maxAge, minPrice, maxPrice, nationalityId, minOvr, maxOvr, attributeFilters]);
 
+  // Tính số lượng tiêu chí lọc nâng cao đang kích hoạt (Staff)
+  const staffActiveFilterCount = useMemo(() => {
+    let count = 0;
+    if (staffRoleFilter) count++;
+    if (staffLicenseFilter) count++;
+    if (staffTacticalStyleFilter) count++;
+    if (staffFormationFilter) count++;
+    if (staffNationalityId) count++;
+    if (staffMinAge !== undefined || staffMaxAge !== undefined) count++;
+    if (staffMinOvr !== undefined || staffMaxOvr !== undefined) count++;
+    for (const val of Object.values(staffAttributeFilters)) {
+      if (val > 0) count++;
+    }
+    return count;
+  }, [
+    staffRoleFilter,
+    staffLicenseFilter,
+    staffTacticalStyleFilter,
+    staffFormationFilter,
+    staffNationalityId,
+    staffMinAge,
+    staffMaxAge,
+    staffMinOvr,
+    staffMaxOvr,
+    staffAttributeFilters,
+  ]);
+
   // Load Market data khi các filter chính thay đổi
   useEffect(() => {
     if (activeTab === 'market') {
@@ -104,7 +143,31 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
     } else {
       loadOffers();
     }
-  }, [activeTab, page, statusFilter, positionFilter, minAge, maxAge, minPrice, maxPrice, nationalityId, minOvr, maxOvr, attributeFilters, staffPage, staffRoleFilter]);
+  }, [
+    activeTab,
+    page,
+    statusFilter,
+    positionFilter,
+    minAge,
+    maxAge,
+    minPrice,
+    maxPrice,
+    nationalityId,
+    minOvr,
+    maxOvr,
+    attributeFilters,
+    staffPage,
+    staffRoleFilter,
+    staffLicenseFilter,
+    staffTacticalStyleFilter,
+    staffFormationFilter,
+    staffNationalityId,
+    staffMinAge,
+    staffMaxAge,
+    staffMinOvr,
+    staffMaxOvr,
+    staffAttributeFilters,
+  ]);
 
   const loadMarket = async () => {
     try {
@@ -142,12 +205,23 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
       const data: any = await transfersApi.getStaffMarket({
         search: staffSearch || undefined,
         role: staffRoleFilter || undefined,
+        license: staffLicenseFilter || undefined,
+        tacticalStyle: staffTacticalStyleFilter || undefined,
+        formationId: staffFormationFilter || undefined,
+        nationalityId: staffNationalityId || undefined,
+        minAge: staffMinAge,
+        maxAge: staffMaxAge,
+        minOvr: staffMinOvr,
+        maxOvr: staffMaxOvr,
+        attributes: Object.keys(staffAttributeFilters).length > 0 ? staffAttributeFilters : undefined,
         page: staffPage,
         limit: 15
       });
       const items = data?.items || [];
+      const total = Number(data?.total) || items.length;
       setStaffList(items);
-      setStaffTotalPages(data?.totalPages || 1);
+      setStaffTotalItems(total);
+      setStaffTotalPages(data?.totalPages || Math.ceil(total / 15) || 1);
     } catch (err) {
       console.error('Failed to load staff market:', err);
     } finally {
@@ -206,6 +280,34 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
     setMaxOvr(undefined);
     setAttributeFilters({});
     setPage(1);
+  };
+
+  const handleApplyStaffFilters = (values: StaffFilterValues) => {
+    if (values.role !== undefined) setStaffRoleFilter(values.role);
+    setStaffLicenseFilter(values.license || '');
+    setStaffTacticalStyleFilter(values.tacticalStyle || '');
+    setStaffFormationFilter(values.formationId || '');
+    setStaffNationalityId(values.nationalityId || '');
+    setStaffMinAge(values.minAge);
+    setStaffMaxAge(values.maxAge);
+    setStaffMinOvr(values.minOvr);
+    setStaffMaxOvr(values.maxOvr);
+    setStaffAttributeFilters(values.attributes);
+    setStaffPage(1);
+  };
+
+  const handleResetStaffFilters = () => {
+    setStaffRoleFilter('');
+    setStaffLicenseFilter('');
+    setStaffTacticalStyleFilter('');
+    setStaffFormationFilter('');
+    setStaffNationalityId('');
+    setStaffMinAge(undefined);
+    setStaffMaxAge(undefined);
+    setStaffMinOvr(undefined);
+    setStaffMaxOvr(undefined);
+    setStaffAttributeFilters({});
+    setStaffPage(1);
   };
 
   const handleOpenOfferTab = (player: Player) => {
@@ -283,7 +385,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
               onClick={() => setActiveTab('staff')}
             >
               <Users size={15} style={{ marginRight: '0.35rem' }} />
-              {t('transfers.tab_staff', 'Nhân Viên ({count})').replace('{count}', String(staffList.length > 0 ? staffTotalPages * 15 : 'Staff'))}
+              {t('transfers.tab_staff', 'Nhân Viên ({count})').replace('{count}', String(staffTotalItems > 0 ? staffTotalItems : (staffList.length > 0 ? staffList.length : 'Staff')))}
             </button>
             <button
               className={`btn btn-sm ${activeTab === 'offers' ? 'btn-primary' : 'btn-outline'}`}
@@ -369,14 +471,18 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
               currentClubId={currentClubId}
               search={staffSearch}
               roleFilter={staffRoleFilter}
+              activeFilterCount={staffActiveFilterCount}
               page={staffPage}
               totalPages={staffTotalPages}
+              totalItems={staffTotalItems}
               onSearchChange={setStaffSearch}
               onSearchSubmit={handleStaffSearchSubmit}
               onRoleFilterChange={(role) => {
                 setStaffRoleFilter(role);
                 setStaffPage(1);
               }}
+              onOpenFilterModal={() => setIsStaffFilterModalOpen(true)}
+              onResetFilters={handleResetStaffFilters}
               onPageChange={setStaffPage}
               onSelectStaff={handleOpenStaffDetail}
               onOpenOfferModal={handleOpenStaffOffer}
@@ -406,7 +512,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
         />
       )}
 
-      {/* MODAL 1: BỘ LỌC KỸ NĂNG & NÂNG CAO */}
+      {/* MODAL 1: BỘ LỌC KỸ NĂNG & NÂNG CAO CẦU THỦ */}
       <PlayerSkillFilterModal
         isOpen={isSkillModalOpen}
         onClose={() => setIsSkillModalOpen(false)}
@@ -425,6 +531,27 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
         }}
         onApply={handleApplySkillFilters}
         onReset={handleResetSkillFilters}
+      />
+
+      {/* MODAL 2: BỘ LỌC KỸ NĂNG & NÂNG CAO NHÂN VIÊN */}
+      <StaffFilterModal
+        isOpen={isStaffFilterModalOpen}
+        onClose={() => setIsStaffFilterModalOpen(false)}
+        filterOptions={filterOptions}
+        currentValues={{
+          role: staffRoleFilter,
+          license: staffLicenseFilter,
+          tacticalStyle: staffTacticalStyleFilter,
+          formationId: staffFormationFilter,
+          nationalityId: staffNationalityId,
+          minAge: staffMinAge,
+          maxAge: staffMaxAge,
+          minOvr: staffMinOvr,
+          maxOvr: staffMaxOvr,
+          attributes: staffAttributeFilters,
+        }}
+        onApply={handleApplyStaffFilters}
+        onReset={handleResetStaffFilters}
       />
 
       {/* MODAL 2: CHI TIẾT CẦU THỦ & ĐỀ NGHỊ CHUYỂN NHƯỢNG (TAB OFFER) */}
