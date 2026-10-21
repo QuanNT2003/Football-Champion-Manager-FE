@@ -82,6 +82,10 @@ export interface PlayerPosition {
     code: string;
     name: string;
   };
+  positions?: {
+    code: string;
+    name?: string;
+  };
 }
 
 export interface PlayerStatus {
@@ -107,6 +111,7 @@ export interface Player {
   nationalityFlag?: string;
   reputation?: number;
   overall_rating?: number;
+  ovr?: number;
   potential_rating?: number;
   potential?: number;
   experience?: any;

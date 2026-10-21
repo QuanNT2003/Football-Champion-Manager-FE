@@ -1,7 +1,15 @@
 import { useTranslation } from '../../i18n';
 import React from 'react';
 import { Player } from '../../types';
-import { Search, Filter, SlidersHorizontal } from 'lucide-react';
+import {
+  Search,
+  SlidersHorizontal,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-react';
 import { PositionBadge } from '../common/PositionBadge';
 import { PlayerAvatar } from '../common/PlayerAvatar';
 
@@ -15,11 +23,13 @@ interface PlayerMarketTableProps {
   activeFilterCount: number;
   page: number;
   totalPages: number;
+  totalItems?: number;
   onSearchChange: (value: string) => void;
   onSearchSubmit: (e: React.FormEvent) => void;
-  onStatusFilterChange: (status: 'ALL' | 'FREE' | 'LOAN' | 'TRANSFER') => void;
-  onPositionFilterChange: (value: string) => void;
+  onStatusFilterChange?: (status: 'ALL' | 'FREE' | 'LOAN' | 'TRANSFER') => void;
+  onPositionFilterChange?: (value: string) => void;
   onOpenSkillModal: () => void;
+  onResetFilters?: () => void;
   onPageChange: (page: number) => void;
   onSelectPlayer: (player: Player) => void;
   onOpenOfferModal: (player: Player) => void;
@@ -35,11 +45,11 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
   activeFilterCount,
   page,
   totalPages,
+  totalItems,
   onSearchChange,
   onSearchSubmit,
-  onStatusFilterChange,
-  onPositionFilterChange,
   onOpenSkillModal,
+  onResetFilters,
   onPageChange,
   onSelectPlayer,
   onOpenOfferModal,
@@ -51,85 +61,61 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
   };
 
   const { t } = useTranslation();
+
+  // Tính toán danh sách số trang hiển thị dạng [1, 2, 3, '...', 10]
+  const pageNumbers = React.useMemo(() => {
+    const list: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) list.push(i);
+    } else {
+      list.push(1);
+      if (page > 3) list.push('...');
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+      for (let i = start; i <= end; i++) list.push(i);
+      if (page < totalPages - 2) list.push('...');
+      list.push(totalPages);
+    }
+    return list;
+  }, [page, totalPages]);
+
   return (
     <>
       {/* Search & Filter Bar */}
-      <div className="card" style={{ padding: '1rem 1.5rem', marginBottom: '1.5rem' }}>
-        <form onSubmit={onSearchSubmit} className="flex-center" style={{ gap: '0.85rem', flexWrap: 'wrap' }}>
-          {/* 1. Ô tìm kiếm tên / quốc gia */}
-          <div className="search-bar" style={{ flex: 1, minWidth: 240 }}>
+      <div className="card" style={{ padding: '1rem 1.25rem', marginBottom: '1.25rem', borderRadius: '12px' }}>
+        <form onSubmit={onSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          {/* 1. Ô tìm kiếm tên cầu thủ */}
+          <div className="search-bar" style={{ flex: 1, minWidth: 260 }}>
             <Search size={18} className="search-icon" />
             <input
               type="text"
-              placeholder={t('transfers.search_placeholder_player')}
+              placeholder={t('transfers.search_placeholder_player', 'Tìm kiếm theo tên cầu thủ...')}
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               className="search-input"
             />
           </div>
 
-          {/* 2. Lọc theo tình trạng (Status) */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <select
-              className="input-select"
-              value={statusFilter}
-              onChange={(e) => onStatusFilterChange(e.target.value as any)}
-              style={{ minWidth: '160px', fontWeight: 600 }}
-              title={t('market.status_filter_tooltip', 'Tình trạng cầu thủ trên thị trường')}
-            >
-              <option value="ALL">{t('common.all_statuses')}</option>
-              <option value="FREE">🟢 {t('transfers.status_free')}</option>
-              <option value="LOAN">🟡 {t('transfers.status_loan')} (Loan)</option>
-              <option value="TRANSFER">{t('market.status_transfer', '🔵 Niêm yết bán (Transfer)')}</option>
-            </select>
-          </div>
+          {/* 2. Nút Submit Tìm kiếm */}
+          <button type="submit" className="btn btn-primary btn-sm flex-center" style={{ gap: '0.45rem', padding: '0.5rem 1rem' }}>
+            <Search size={15} />
+            <span>{t('common.search', 'Tìm kiếm')}</span>
+          </button>
 
-          {/* 3. Lọc theo Vị trí (Position) */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <select
-              className="input-select"
-              value={positionFilter}
-              onChange={(e) => onPositionFilterChange(e.target.value)}
-              style={{ minWidth: '150px' }}
-            >
-              <option value="">{t('common.all_positions')}</option>
-              <optgroup label={t('market.optgroup_lines', 'Tuyến thi đấu')}>
-                <option value="GK">{t('pos.gk')}</option>
-                <option value="DEF">{t('pos.def')}</option>
-                <option value="MID">{t('pos.mid')}</option>
-                <option value="ATT">{t('pos.fwd')}</option>
-              </optgroup>
-              <optgroup label={t('market.optgroup_positions', 'Vị trí cụ thể')}>
-                <option value="CB">{t('pos.cb')}</option>
-                <option value="LB">{t('pos.lb')}</option>
-                <option value="RB">{t('pos.rb')}</option>
-                <option value="CDM">{t('pos.cdm')}</option>
-                <option value="CM">{t('pos.cm')}</option>
-                <option value="CAM">{t('pos.cam')}</option>
-                <option value="LM">{t('pos.lm')}</option>
-                <option value="RM">{t('pos.rm')}</option>
-                <option value="LW">{t('pos.lw')}</option>
-                <option value="RW">{t('pos.rw')}</option>
-                <option value="ST">{t('pos.st')}</option>
-              </optgroup>
-            </select>
-          </div>
-
-          {/* 4. Nút mở Popup: Bộ Lọc Nâng Cao & Kỹ Năng */}
+          {/* 3. Nút Mở Modal Bộ Lọc Chi Tiết */}
           <button
             type="button"
             onClick={onOpenSkillModal}
             className={`btn btn-sm flex-center ${activeFilterCount > 0 ? 'btn-primary' : 'btn-outline'}`}
             style={{
-              gap: '0.45rem',
-              padding: '0.45rem 0.9rem',
-              position: 'relative',
+              gap: '0.5rem',
+              padding: '0.5rem 1.1rem',
               borderColor: activeFilterCount > 0 ? '#16a34a' : '#cbd5e1',
+              fontWeight: 700,
             }}
-            title={t('market.skill_filter_tooltip', 'Mở bộ lọc chi tiết theo 40 chỉ số FM, tuổi, giá, quốc tịch...')}
           >
-            <SlidersHorizontal size={15} />
-            <span>{t('market.skill_filter_btn', 'Kỹ Năng & Lọc Chi Tiết')}</span>
+            <SlidersHorizontal size={16} />
+            <span>{t('market.advanced_filters_btn', 'Bộ Lọc Thị Trường')}</span>
             {activeFilterCount > 0 && (
               <span
                 style={{
@@ -138,7 +124,7 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
                   fontSize: '0.72rem',
                   fontWeight: 800,
                   borderRadius: '10px',
-                  padding: '1px 6px',
+                  padding: '1px 7px',
                   lineHeight: '1.2',
                 }}
               >
@@ -147,11 +133,63 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
             )}
           </button>
 
-          {/* 5. Nút Lọc Submit */}
-          <button type="submit" className="btn btn-primary btn-sm flex-center" style={{ gap: '0.4rem' }}>
-            <Filter size={16} /> {t('common.filter', 'Lọc')}
-          </button>
+          {/* 4. Nút Đặt Lại Bộ Lọc Nhanh (nếu có filter active) */}
+          {activeFilterCount > 0 && onResetFilters && (
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="btn btn-sm btn-outline flex-center"
+              style={{
+                gap: '0.35rem',
+                padding: '0.5rem 0.85rem',
+                color: '#64748b',
+                borderColor: '#e2e8f0',
+              }}
+              title={t('common.reset_filters', 'Xóa tất cả bộ lọc về mặc định')}
+            >
+              <RotateCcw size={14} />
+              <span>{t('common.reset', 'Đặt lại')}</span>
+            </button>
+          )}
         </form>
+
+        {/* Active Filter Chips Preview */}
+        {activeFilterCount > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8' }}>
+              {t('common.filtering_by', 'Đang lọc:')}:
+            </span>
+
+            {statusFilter && statusFilter !== 'ALL' && (
+              <span style={{ fontSize: '0.75rem', background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                {statusFilter === 'FREE' ? '🟢 Tự do' : statusFilter === 'LOAN' ? '🟡 Cho mượn' : '🔵 Rao bán'}
+              </span>
+            )}
+
+            {positionFilter && (
+              <span style={{ fontSize: '0.75rem', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>
+                Vị trí: {positionFilter}
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={onOpenSkillModal}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#2563eb',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                padding: 0,
+              }}
+            >
+              {t('common.edit_filters', 'Chỉnh sửa bộ lọc')}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Table Container */}
@@ -189,7 +227,12 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
                   (p as any).name ||
                   p.common_name ||
                   ((p.first_name || p.last_name) ? `${p.first_name || ''} ${p.last_name || ''}`.trim() : 'Player');
-                const pos = (p as any).position || p.player_positions?.[0]?.position_code || 'FW';
+                const pos =
+                  (typeof (p as any).position === 'string' ? (p as any).position : (p as any).position?.code) ||
+                  p.player_positions?.[0]?.position?.code ||
+                  p.player_positions?.[0]?.positions?.code ||
+                  p.player_positions?.[0]?.position_code ||
+                  'FW';
                 const isOwnClub = p.club_id === currentClubId || (p as any).currentClub?.id === currentClubId;
                 const value = Number(
                   (p as any).asking_price ||
@@ -305,26 +348,175 @@ export const PlayerMarketTable: React.FC<PlayerMarketTableProps> = ({
           </tbody>
         </table>
 
-        {/* Pagination */}
-        <div className="flex-center" style={{ justifyContent: 'space-between', padding: '1rem 1.5rem', borderTop: '1px solid var(--border-color)' }}>
-          <span className="text-muted" style={{ fontSize: '0.85rem' }}>Trang {page} / {totalPages}</span>
-          <div className="btn-group">
-            <button
-              className="btn btn-xs btn-outline"
-              disabled={page <= 1}
-              onClick={() => onPageChange(Math.max(1, page - 1))}
-            >
-              {t('common.prev_page')}
-            </button>
-            <button
-              className="btn btn-xs btn-outline"
-              disabled={page >= totalPages}
-              onClick={() => onPageChange(page + 1)}
-            >
-              {t('common.next_page')}
-            </button>
+        {/* Pagination với các nút số trang 1, 2, 3... */}
+        {totalPages > 0 && (
+          <div
+            className="flex-center"
+            style={{
+              justifyContent: 'space-between',
+              padding: '0.85rem 1.5rem',
+              borderTop: '1px solid #e2e8f0',
+              background: '#ffffff',
+              flexWrap: 'wrap',
+              gap: '0.75rem',
+            }}
+          >
+            {/* Hiển thị số lượng cầu thủ và trang */}
+            <div style={{ fontSize: '0.82rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              <span>
+                {t('common.page_info', 'Trang {page} / {totalPages}')
+                  .replace('{page}', String(page))
+                  .replace('{totalPages}', String(totalPages))}
+              </span>
+              {totalItems !== undefined && totalItems > 0 && (
+                <span style={{ color: '#94a3b8' }}>
+                  ({t('common.total_players', 'Tổng cộng {total} cầu thủ').replace('{total}', Number(totalItems).toLocaleString())})
+                </span>
+              )}
+            </div>
+
+            {/* Danh sách các nút phân trang 1, 2, 3... */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              {/* Nút về trang đầu « */}
+              <button
+                type="button"
+                className="btn btn-xs btn-outline"
+                disabled={page <= 1}
+                onClick={() => onPageChange(1)}
+                title={t('common.first_page', 'Trang đầu')}
+                style={{
+                  minWidth: '30px',
+                  height: '30px',
+                  padding: '0 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '6px',
+                  borderColor: '#cbd5e1',
+                  color: page <= 1 ? '#cbd5e1' : '#475569',
+                }}
+              >
+                <ChevronsLeft size={15} />
+              </button>
+
+              {/* Nút Trang trước ‹ */}
+              <button
+                type="button"
+                className="btn btn-xs btn-outline"
+                disabled={page <= 1}
+                onClick={() => onPageChange(Math.max(1, page - 1))}
+                title={t('common.prev_page', 'Trang trước')}
+                style={{
+                  minWidth: '30px',
+                  height: '30px',
+                  padding: '0 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '6px',
+                  borderColor: '#cbd5e1',
+                  color: page <= 1 ? '#cbd5e1' : '#475569',
+                }}
+              >
+                <ChevronLeft size={15} />
+              </button>
+
+              {/* Các nút số trang 1, 2, 3... */}
+              {pageNumbers.map((p, idx) => {
+                if (p === '...') {
+                  return (
+                    <span
+                      key={`ellipsis-${idx}`}
+                      style={{
+                        padding: '0 6px',
+                        color: '#94a3b8',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        userSelect: 'none',
+                      }}
+                    >
+                      ...
+                    </span>
+                  );
+                }
+
+                const pageNum = Number(p);
+                const isActive = pageNum === page;
+
+                return (
+                  <button
+                    key={`page-${pageNum}`}
+                    type="button"
+                    onClick={() => onPageChange(pageNum)}
+                    style={{
+                      minWidth: '32px',
+                      height: '30px',
+                      padding: '0 6px',
+                      borderRadius: '6px',
+                      fontSize: '0.82rem',
+                      fontWeight: isActive ? 800 : 600,
+                      border: isActive ? '1px solid #16a34a' : '1px solid #cbd5e1',
+                      background: isActive ? '#16a34a' : '#ffffff',
+                      color: isActive ? '#ffffff' : '#334155',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: isActive ? '0 2px 4px rgba(22, 163, 74, 0.25)' : 'none',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              {/* Nút Trang sau › */}
+              <button
+                type="button"
+                className="btn btn-xs btn-outline"
+                disabled={page >= totalPages}
+                onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+                title={t('common.next_page', 'Trang sau')}
+                style={{
+                  minWidth: '30px',
+                  height: '30px',
+                  padding: '0 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '6px',
+                  borderColor: '#cbd5e1',
+                  color: page >= totalPages ? '#cbd5e1' : '#475569',
+                }}
+              >
+                <ChevronRight size={15} />
+              </button>
+
+              {/* Nút đến trang cuối » */}
+              <button
+                type="button"
+                className="btn btn-xs btn-outline"
+                disabled={page >= totalPages}
+                onClick={() => onPageChange(totalPages)}
+                title={t('common.last_page', 'Trang cuối')}
+                style={{
+                  minWidth: '30px',
+                  height: '30px',
+                  padding: '0 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '6px',
+                  borderColor: '#cbd5e1',
+                  color: page >= totalPages ? '#cbd5e1' : '#475569',
+                }}
+              >
+                <ChevronsRight size={15} />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

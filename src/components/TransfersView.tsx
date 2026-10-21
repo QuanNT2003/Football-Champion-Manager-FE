@@ -36,6 +36,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   const [positionFilter, setPositionFilter] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Advanced & Skill Filter States
   const [minAge, setMinAge] = useState<number | undefined>();
@@ -82,6 +83,8 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   // Tính số lượng tiêu chí lọc nâng cao đang kích hoạt
   const activeFilterCount = useMemo(() => {
     let count = 0;
+    if (statusFilter && statusFilter !== 'ALL') count++;
+    if (positionFilter) count++;
     if (minAge !== undefined || maxAge !== undefined) count++;
     if (minPrice !== undefined || maxPrice !== undefined) count++;
     if (nationalityId) count++;
@@ -90,7 +93,7 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
       if (val > 0) count++;
     }
     return count;
-  }, [minAge, maxAge, minPrice, maxPrice, nationalityId, minOvr, maxOvr, attributeFilters]);
+  }, [statusFilter, positionFilter, minAge, maxAge, minPrice, maxPrice, nationalityId, minOvr, maxOvr, attributeFilters]);
 
   // Load Market data khi các filter chính thay đổi
   useEffect(() => {
@@ -122,8 +125,10 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
         limit: 15
       });
       const items = data.items || (Array.isArray(data) ? data : []);
+      const total = Number(data.total) || items.length;
       setMarketPlayers(items);
-      setTotalPages(Math.ceil((data.total || items.length) / 15) || 1);
+      setTotalItems(total);
+      setTotalPages(data.totalPages || Math.ceil(total / 15) || 1);
     } catch (err) {
       console.error('Failed to load market:', err);
     } finally {
@@ -176,6 +181,8 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   };
 
   const handleApplySkillFilters = (values: SkillFilterValues) => {
+    if (values.status) setStatusFilter(values.status);
+    if (values.position !== undefined) setPositionFilter(values.position);
     setMinAge(values.minAge);
     setMaxAge(values.maxAge);
     setMinPrice(values.minPrice);
@@ -188,6 +195,8 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
   };
 
   const handleResetSkillFilters = () => {
+    setStatusFilter('ALL');
+    setPositionFilter('');
     setMinAge(undefined);
     setMaxAge(undefined);
     setMinPrice(undefined);
@@ -299,17 +308,11 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
           activeFilterCount={activeFilterCount}
           page={page}
           totalPages={totalPages}
+          totalItems={totalItems}
           onSearchChange={setSearch}
           onSearchSubmit={handleSearchSubmit}
-          onStatusFilterChange={(st) => {
-            setStatusFilter(st);
-            setPage(1);
-          }}
-          onPositionFilterChange={(pos) => {
-            setPositionFilter(pos);
-            setPage(1);
-          }}
           onOpenSkillModal={() => setIsSkillModalOpen(true)}
+          onResetFilters={handleResetSkillFilters}
           onPageChange={setPage}
           onSelectPlayer={handleOpenDetailModal}
           onOpenOfferModal={handleOpenOfferTab}
@@ -409,6 +412,8 @@ export const TransfersView: React.FC<TransfersViewProps> = ({
         onClose={() => setIsSkillModalOpen(false)}
         filterOptions={filterOptions}
         currentValues={{
+          status: statusFilter,
+          position: positionFilter,
           minAge,
           maxAge,
           minPrice,
