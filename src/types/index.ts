@@ -139,6 +139,7 @@ export interface Player {
   status?: PlayerStatus | null;
   player_status?: PlayerStatus | null;
   player_attributes?: Record<string, any> | null;
+  attributes?: Record<string, any> | null;
   player_financial_data?: {
     market_value?: number;
     wage?: number;

@@ -29,6 +29,8 @@ export interface StaffMarketItem {
   wage: number;
   signingFee: number;
   photoUrl?: string;
+  attributes?: Record<string, any> | null;
+  staff_attributes?: Record<string, any> | null;
 }
 
 export interface MarketFilterParams {
