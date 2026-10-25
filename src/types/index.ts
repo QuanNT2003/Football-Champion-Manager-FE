@@ -53,12 +53,27 @@ export interface Club {
   city?: string;
   reputation: number;
   ranking_points: number;
+  world_rank?: number;
   logo_url?: string;
-  stadium?: Stadium | null;
+  home_kit_url?: string | null;
+  away_kit_url?: string | null;
+  stadium?: (Stadium & { condition?: number; image_url?: string | null }) | null;
   stadiums?: Stadium[];
   manager?: {
     id: string;
     username: string;
+    email?: string;
+    avatar_url?: string | null;
+    created_at?: string;
+    status?: string;
+  } | null;
+  isAiManaged?: boolean;
+  current_competition?: {
+    id: string;
+    name: string;
+    code: string;
+    tier: number;
+    competition_type: string;
   } | null;
   finances?: {
     cash: number;
@@ -69,6 +84,8 @@ export interface Club {
     gold_balance: number;
   }>;
   squadCount?: number;
+  trophiesCount?: number;
+  avgOvr?: number;
   facilities?: Facility[];
   club_facilities?: Facility[];
 }
@@ -657,7 +674,9 @@ export interface DashboardData {
   last_match?: {
     id?: string;
     competition_name: string;
+    home_club_id?: string;
     home_club_name?: string;
+    away_club_id?: string;
     away_club_name?: string;
     home_score: number;
     away_score: number;
@@ -665,10 +684,14 @@ export interface DashboardData {
   competitions: Array<{
     id: string;
     name: string;
+    competition_type?: string;
+    tier?: number;
     type: string;
     color: string;
     icon: string;
     sub_title: string;
+    country_name?: string;
+    country_code?: string;
     rank?: number;
     points?: number;
     played?: number;
@@ -713,3 +736,144 @@ export interface ClubTrophy {
   rank_position: number;
   achieved_at: string;
 }
+
+export interface ClubSquadGroupsResponse {
+  firstTeam: Player[];
+  youthTeam: Player[];
+  totalPlayers: number;
+  firstTeamCount: number;
+  youthTeamCount: number;
+}
+
+export interface ClubMatchItem {
+  id: string;
+  season_day: number;
+  match_date: string;
+  kickoff_time: string;
+  status: string;
+  is_home: boolean;
+  home_team: {
+    id: string;
+    name: string;
+    short_name?: string;
+    logo_url?: string;
+  };
+  away_team: {
+    id: string;
+    name: string;
+    short_name?: string;
+    logo_url?: string;
+  };
+  opponent: {
+    id: string;
+    name: string;
+    short_name?: string;
+    logo_url?: string;
+  };
+  home_score?: number | null;
+  away_score?: number | null;
+  result?: 'W' | 'D' | 'L' | null;
+  competition_name: string;
+  competition_type?: string;
+  stadium_name: string;
+}
+
+export interface ClubTransferItem {
+  id: string;
+  transfer_type: string;
+  is_loan: boolean;
+  transfer_fee: number;
+  currency_type: string;
+  transfer_date: string;
+  season_number: number;
+  player: {
+    id: string;
+    name: string;
+    age: number;
+    ovr: number;
+    photo_url?: string | null;
+    position: string;
+    nationalityFlag?: string | null;
+  };
+  other_club: {
+    id: string;
+    name: string;
+    logo_url?: string | null;
+  };
+}
+
+export interface ClubTransfersResponse {
+  arrivals: ClubTransferItem[];
+  departures: ClubTransferItem[];
+  totalTransfers: number;
+  totalSpend: number;
+  totalIncome: number;
+}
+
+export interface ClubSeasonRecord {
+  id: string;
+  season_id: string;
+  season_number: number;
+  competition_id: string;
+  competition_name: string;
+  competition_type: string;
+  tier: number;
+  position: number;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+  points: number;
+  achievement: string;
+  achievement_label: string;
+}
+
+export interface ClubSeasonHistoryResponse {
+  trophies: ClubTrophy[];
+  seasons: ClubSeasonRecord[];
+  totalTrophies: number;
+  championshipsCount: number;
+}
+
+export interface ClubFacilityItem {
+  id: string;
+  type_id: string;
+  code: string;
+  name: string;
+  description: string;
+  level: number;
+  max_level: number;
+  level_name: string;
+  cost: number;
+  upgrade_days: number;
+  next_cost?: number | null;
+  next_upgrade_days?: number | null;
+  status: string;
+  icon?: string;
+  badgeColor?: string;
+  effect?: string;
+}
+
+export interface ClubStadiumResponse {
+  id: string;
+  club_id: string;
+  name: string;
+  capacity: number;
+  condition: number;
+  image_url?: string | null;
+  pitch_type: string;
+  lighting_system: string;
+  stands: Array<{
+    name: string;
+    capacity: number;
+    vipSeats: number;
+    covered: boolean;
+  }>;
+  avgAttendanceThisSeason: number;
+  totalMatchesHosted: number;
+  facilities?: ClubFacilityItem[];
+}
+

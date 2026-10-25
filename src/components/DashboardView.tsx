@@ -12,6 +12,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useTranslation } from '../i18n';
+import { useTournamentLocale } from '../utils/tournamentLocalization';
 
 interface Props {
   club: Club | null;
@@ -26,6 +27,7 @@ export const DashboardView: React.FC<Props> = ({
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { comp, round, status, subTitle } = useTournamentLocale();
 
   const [logoError, setLogoError] = useState(false);
   const [activeTabCompetitions, setActiveTabCompetitions] = useState<'comps' | 'friends'>('comps');
@@ -137,7 +139,11 @@ export const DashboardView: React.FC<Props> = ({
       <section className="cockpit-hero-card">
         {/* Left: Club Crest, Name, League Rank & Countdown */}
         <div className="hero-club-left">
-          <div className="hero-crest-box">
+          <div
+            className="hero-crest-box cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => navigate(`/clubs/${club.id}`)}
+            title={t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', club.name)}
+          >
             {hasValidLogo ? (
               <img
                 src={club.logo_url}
@@ -155,7 +161,13 @@ export const DashboardView: React.FC<Props> = ({
 
           <div className="hero-club-info">
             <div className="hero-name-row">
-              <h2 className="hero-club-title">{club.name}</h2>
+              <h2
+                className="hero-club-title cursor-pointer hover:text-emerald-700 transition-colors"
+                onClick={() => navigate(`/clubs/${club.id}`)}
+                title={t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', club.name)}
+              >
+                {club.name}
+              </h2>
               <button
                 className="btn-share-club"
                 onClick={() => alert(t('dashboard.share_club', 'Chia sẻ CLB {name}').replace('{name}', club.name))}
@@ -168,22 +180,22 @@ export const DashboardView: React.FC<Props> = ({
             <div className="hero-pills-row">
               <span className="pill-league-rank">
                 <span className="rank-badge-icon">🏆</span>
-                <span className="rank-text">Hạng {leagueRank}</span>
+                <span className="rank-text">{t('common.rank')} {leagueRank}</span>
                 <span className="rank-tier-divider">•</span>
-                <span className="tier-text">{tierLabel}</span>
+                <span className="tier-text">{comp(tierLabel)}</span>
               </span>
               <button
                 type="button"
                 className="pill-trophies-link"
                 onClick={() => navigate('/trophies')}
-                title="Mở phòng truyền thống & Tủ cúp CLB"
+                title={t('dashboard.hero.trophies_tooltip')}
               >
                 <span>🏆</span>
-                <span>Tủ cúp <strong>({dashboardData?.club.trophies_count ?? 0})</strong></span>
+                <span>{t('dashboard.hero.trophies')} <strong>({dashboardData?.club.trophies_count ?? 0})</strong></span>
               </button>
               <span className="pill-match-time">
                 <span className="pill-dot" />
-                <span>Trận tới: <strong>{formatKickoffTime(nextMatch?.kickoff_time)}</strong> (Ngày {nextMatch?.season_day || 3})</span>
+                <span>{t('dashboard.hero.next_match_short')}: <strong>{formatKickoffTime(nextMatch?.kickoff_time)}</strong> ({t('common.day')} {nextMatch?.season_day || 3})</span>
               </span>
             </div>
           </div>
@@ -192,19 +204,28 @@ export const DashboardView: React.FC<Props> = ({
         {/* Center: Matchday Status & Opponent Clash Box */}
         <div className="hero-clash-widget">
           <div className="clash-widget-header">
-            <span className="clash-season-tag">MÙA {seasonNum}</span>
+            <span className="clash-season-tag">{t('common.season').toUpperCase()} {seasonNum}</span>
             <span className="clash-dot">•</span>
-            <span className="clash-day-tag">NGÀY {currentDay} / {totalDays}</span>
+            <span className="clash-day-tag">{t('common.day').toUpperCase()} {currentDay} / {totalDays}</span>
           </div>
-          <div className="clash-widget-opponent">
-            <span className="clash-vs-badge">VS</span>
-            <span className="clash-opponent-name" title={nextMatch?.opponent?.name}>
-              {nextMatch?.opponent?.name || 'Chưa xếp lịch'}
-            </span>
-            <span className="clash-venue-badge">
-              {nextMatch?.is_home ? 'Sân nhà 🏠' : 'Sân khách ✈️'}
-            </span>
-          </div>
+          {(() => {
+            const opponentId = nextMatch?.opponent?.id || (nextMatch?.is_home ? nextMatch?.away_club?.id : nextMatch?.home_club?.id);
+            return (
+              <div
+                className={`clash-widget-opponent ${opponentId ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
+                onClick={() => opponentId && navigate(`/clubs/${opponentId}`)}
+                title={opponentId ? t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', nextMatch?.opponent?.name || '') : undefined}
+              >
+                <span className="clash-vs-badge">{t('common.vs', 'VS')}</span>
+                <span className="clash-opponent-name" title={nextMatch?.opponent?.name}>
+                  {nextMatch?.opponent?.name || t('dashboard.match.not_scheduled')}
+                </span>
+                <span className="clash-venue-badge">
+                  {nextMatch?.is_home ? `${t('common.home')} 🏠` : `${t('common.away')} ✈️`}
+                </span>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Right: Financial Status & Vital Club Meters */}
@@ -226,7 +247,7 @@ export const DashboardView: React.FC<Props> = ({
             {/* Meter 1: Popularity */}
             <div className="hero-meter-item">
               <div className="meter-header">
-                <span className="meter-name">Độ nổi tiếng CLB</span>
+                <span className="meter-name">{t('dashboard.hero.popularity')}</span>
                 <span className="meter-number">{popularity}%</span>
               </div>
               <div className="meter-track-bar">
@@ -240,7 +261,7 @@ export const DashboardView: React.FC<Props> = ({
             {/* Meter 2: Morale */}
             <div className="hero-meter-item">
               <div className="meter-header">
-                <span className="meter-name">Tinh thần đội bóng</span>
+                <span className="meter-name">{t('dashboard.hero.morale')}</span>
                 <span className="meter-number">{teamMorale}%</span>
               </div>
               <div className="meter-track-bar">
@@ -265,7 +286,9 @@ export const DashboardView: React.FC<Props> = ({
               <span className="text-emerald font-black">⏩</span>
               <h4 className="font-extrabold text-slate-800 text-sm uppercase tracking-wide">{t('dashboard.match.next_match')}</h4>
             </div>
-            <span className="stadium-comp-tag">{nextMatch?.competition_name || t('dashboard.match.league_match')}</span>
+            <span className="stadium-comp-tag">
+              {comp(nextMatch?.competition_name) || t('dashboard.match.league_match')}
+            </span>
           </div>
 
           {/* Stadium Pitch Canvas */}
@@ -276,37 +299,55 @@ export const DashboardView: React.FC<Props> = ({
 
             <div className="pitch-teams-stage">
               {/* Home Team */}
-              <div className="pitch-team-box home">
-                <div className="pitch-crest-badge home">
-                  {nextMatch?.home_club?.logo_url && !nextMatch.home_club.logo_url.includes('default_logo') ? (
-                    <img src={nextMatch.home_club.logo_url} alt="" className="pitch-away-img" />
-                  ) : (
-                    <span>⭐</span>
-                  )}
-                </div>
-                <strong className="pitch-team-name">{nextMatch?.home_club?.name || (nextMatch?.is_home ? club.name : 'Tuần Giáo')}</strong>
-                <span className="pitch-home-away-pill">{t('common.home')}</span>
-              </div>
+              {(() => {
+                const homeId = nextMatch?.home_club?.id || (nextMatch?.is_home ? club.id : undefined);
+                return (
+                  <div
+                    className="pitch-team-box home cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => homeId && navigate(`/clubs/${homeId}`)}
+                    title={t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', nextMatch?.home_club?.name || club.name)}
+                  >
+                    <div className="pitch-crest-badge home">
+                      {nextMatch?.home_club?.logo_url && !nextMatch.home_club.logo_url.includes('default_logo') ? (
+                        <img src={nextMatch.home_club.logo_url} alt="" className="pitch-away-img" />
+                      ) : (
+                        <span>⭐</span>
+                      )}
+                    </div>
+                    <strong className="pitch-team-name">{nextMatch?.home_club?.name || (nextMatch?.is_home ? club.name : 'Tuần Giáo')}</strong>
+                    <span className="pitch-home-away-pill">{t('common.home')}</span>
+                  </div>
+                );
+              })()}
 
               {/* Center Clash Time / Countdown */}
               <div className="pitch-clash-box">
                 <span className="clash-vs-text">{t('common.vs', 'VS')}</span>
                 <span className="clash-countdown">{formatKickoffTime(nextMatch?.kickoff_time)}</span>
-                <span className="clash-date-time">Ngày {nextMatch?.season_day || 3} • Sẵn sàng</span>
+                <span className="clash-date-time">{t('common.day')} {nextMatch?.season_day || 3} • {t('dashboard.hero.ready')}</span>
               </div>
 
               {/* Away Team */}
-              <div className="pitch-team-box away">
-                <div className="pitch-crest-badge away">
-                  {nextMatch?.away_club?.logo_url && !nextMatch.away_club.logo_url.includes('default_logo') ? (
-                    <img src={nextMatch.away_club.logo_url} alt="" className="pitch-away-img" />
-                  ) : (
-                    <span>⚽</span>
-                  )}
-                </div>
-                <strong className="pitch-team-name">{nextMatch?.away_club?.name || (!nextMatch?.is_home ? club.name : 'Đối thủ')}</strong>
-                <span className="pitch-home-away-pill away">{t('common.away')}</span>
-              </div>
+              {(() => {
+                const awayId = nextMatch?.away_club?.id || nextMatch?.opponent?.id || (!nextMatch?.is_home ? club.id : undefined);
+                return (
+                  <div
+                    className="pitch-team-box away cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => awayId && navigate(`/clubs/${awayId}`)}
+                    title={t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', nextMatch?.away_club?.name || t('dashboard.match.opponent'))}
+                  >
+                    <div className="pitch-crest-badge away">
+                      {nextMatch?.away_club?.logo_url && !nextMatch.away_club.logo_url.includes('default_logo') ? (
+                        <img src={nextMatch.away_club.logo_url} alt="" className="pitch-away-img" />
+                      ) : (
+                        <span>⚽</span>
+                      )}
+                    </div>
+                    <strong className="pitch-team-name">{nextMatch?.away_club?.name || (!nextMatch?.is_home ? club.name : t('dashboard.match.opponent'))}</strong>
+                    <span className="pitch-home-away-pill away">{t('common.away')}</span>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Stadium Action Buttons */}
@@ -327,15 +368,27 @@ export const DashboardView: React.FC<Props> = ({
             <div className="stadium-last-match-strip">
               <span className="text-xs text-slate-500 font-semibold">{t('dashboard.match.last_match')}:</span>
               <div className="flex items-center gap-2 text-xs">
-                <span className="font-bold text-slate-700">{lastMatch.home_club_name}</span>
+                <span
+                  className={`font-bold text-slate-700 ${lastMatch.home_club_id ? 'cursor-pointer hover:text-emerald-700 hover:underline' : ''}`}
+                  onClick={() => lastMatch.home_club_id && navigate(`/clubs/${lastMatch.home_club_id}`)}
+                  title={lastMatch.home_club_id ? t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', lastMatch.home_club_name || '') : undefined}
+                >
+                  {lastMatch.home_club_name}
+                </span>
                 <span className="last-score-pill">{lastMatch.home_score} - {lastMatch.away_score}</span>
-                <span className="font-bold text-slate-700">{lastMatch.away_club_name}</span>
+                <span
+                  className={`font-bold text-slate-700 ${lastMatch.away_club_id ? 'cursor-pointer hover:text-emerald-700 hover:underline' : ''}`}
+                  onClick={() => lastMatch.away_club_id && navigate(`/clubs/${lastMatch.away_club_id}`)}
+                  title={lastMatch.away_club_id ? t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', lastMatch.away_club_name || '') : undefined}
+                >
+                  {lastMatch.away_club_name}
+                </span>
               </div>
-              <span className="text-[11px] text-slate-400">{lastMatch.competition_name}</span>
+              <span className="text-[11px] text-slate-400">{comp(lastMatch.competition_name)}</span>
             </div>
           ) : (
             <div className="stadium-last-match-strip empty">
-              <span className="text-xs text-slate-400 italic">Mùa giải mới: Chưa có trận đấu nào diễn ra</span>
+              <span className="text-xs text-slate-400 italic">{t('dashboard.match.no_previous_match')}</span>
             </div>
           )}
         </div>
@@ -362,20 +415,26 @@ export const DashboardView: React.FC<Props> = ({
           {activeTabCompetitions === 'comps' ? (
             <div className="comp-list-content">
               {dashboardData?.competitions && dashboardData.competitions.length > 0 ? (
-                dashboardData.competitions.map((comp) => (
-                  <div key={comp.id} className="comp-list-item" onClick={() => navigate('/standings')}>
-                    <div className={`comp-trophy-icon ${comp.color || 'gold'}`}>{comp.icon || '🏆'}</div>
+                dashboardData.competitions.map((compItem) => (
+                  <div key={compItem.id} className="comp-list-item" onClick={() => navigate('/standings')}>
+                    <div className={`comp-trophy-icon ${compItem.color || 'gold'}`}>{compItem.icon || '🏆'}</div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <strong className="text-sm font-bold text-slate-800">{comp.name}</strong>
-                        <span className={`text-xs font-bold ${comp.color === 'blue' ? 'text-cyan' : comp.color === 'amber' ? 'text-amber' : 'text-emerald'}`}>
-                          {comp.round_label || (comp.rank ? `${t('common.rank')} ${comp.rank}` : comp.status_label)}
+                        <strong className="text-sm font-bold text-slate-800">
+                          {comp(compItem.name)}
+                        </strong>
+                        <span className={`text-xs font-bold ${compItem.color === 'blue' ? 'text-cyan' : compItem.color === 'amber' ? 'text-amber' : 'text-emerald'}`}>
+                          {compItem.round_label
+                            ? round(compItem.round_label)
+                            : (compItem.rank !== undefined ? `${t('common.rank')} ${compItem.rank}` : status(compItem.status_label))}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs text-slate-500 mt-0.5">
-                        <span>{comp.sub_title}</span>
+                        <span>{subTitle(compItem.sub_title)}</span>
                         <span className="font-semibold text-slate-700">
-                          {comp.points !== undefined ? `${comp.points} ${t('common.points')}` : comp.status_label}
+                          {compItem.points !== undefined
+                            ? `${compItem.points} ${t('common.points')}`
+                            : status(compItem.status_label)}
                         </span>
                       </div>
                     </div>
@@ -392,8 +451,8 @@ export const DashboardView: React.FC<Props> = ({
                         <span className="text-xs font-bold text-emerald">{t('common.rank')} {leagueRank}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs text-slate-500 mt-0.5">
-                        <span>{club.country || t('common.vietnam', 'Việt Nam')}</span>
-                        <span className="font-semibold text-slate-700">{dashboardData?.club.league_points || 17} {t('common.points')}</span>
+                        <span>{subTitle(club.country) || t('common.vietnam', 'Việt Nam')}</span>
+                        <span className="font-semibold text-slate-700">{dashboardData?.club.league_points || 0} {t('common.points')}</span>
                       </div>
                     </div>
                   </div>
@@ -407,7 +466,7 @@ export const DashboardView: React.FC<Props> = ({
                         <span className="text-xs font-bold text-amber">{t('dashboard.comp.round_32')}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs text-slate-500 mt-0.5">
-                        <span>Knockout</span>
+                        <span>{subTitle('Knockout')}</span>
                         <span className="font-semibold text-slate-700">LIVE</span>
                       </div>
                     </div>
@@ -418,7 +477,7 @@ export const DashboardView: React.FC<Props> = ({
                     <div className="comp-trophy-icon blue">🌍</div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <strong className="text-sm font-bold text-slate-800">{t('dashboard.comp.intl_cup')}</strong>
+                        <strong className="text-sm font-bold text-slate-800">{comp(t('dashboard.comp.intl_cup'))}</strong>
                         <span className="text-xs font-bold text-cyan">{t('dashboard.comp.qualifying')}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs text-slate-500 mt-0.5">
@@ -434,7 +493,7 @@ export const DashboardView: React.FC<Props> = ({
             <div className="comp-list-content">
               <div className="p-4 text-center text-xs text-slate-500">
                 <Users size={24} className="mx-auto mb-2 text-slate-400" />
-                <p>Connect with other managers to play friendlies!</p>
+                <p>{t('dashboard.friends.connect_prompt')}</p>
               </div>
             </div>
           )}

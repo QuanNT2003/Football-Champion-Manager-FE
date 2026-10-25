@@ -81,8 +81,31 @@ export function localizeRoundName(rawName: string | undefined | null, lang: Lang
   if (/^Round 4\s*\(\+\s*Tier 1\s*-\s*Round of 64\)$/i.test(trimmed) || /Vòng 4\s*\(Tier 1 Xuất Trận - Vòng 64\)/i.test(trimmed)) {
     return isEn ? 'Round 4 (+ Tier 1 - Round of 64)' : 'Vòng 4 (Tier 1 Xuất Trận - Vòng 64)';
   }
-  if (/^Round of 32$/i.test(trimmed) || /Vòng 5\s*\(Vòng 32 Đội\)/i.test(trimmed) || /Vòng 1\s*\(Vòng 32 Đội\)/i.test(trimmed)) {
-    return isEn ? 'Round of 32' : 'Vòng 32 Đội';
+  if (/^Round of 32$/i.test(trimmed) || /Vòng 5\s*\(Vòng 32 Đội\)/i.test(trimmed) || /Vòng 1\s*\(Vòng 32 Đội\)/i.test(trimmed) || /^Vòng 1\/32$/i.test(trimmed) || /^Vòng 1\/32 Đội$/i.test(trimmed)) {
+    return isEn ? 'Round of 32' : 'Vòng 1/32';
+  }
+  if (/^Round of 64$/i.test(trimmed) || /^Vòng 1\/64$/i.test(trimmed) || /^Vòng 1\/64 Đội$/i.test(trimmed)) {
+    return isEn ? 'Round of 64' : 'Vòng 1/64';
+  }
+
+  // Knockout status with round
+  if (/^(?:Round of 32|Vòng 1\/32)\s*(?:Knockout|Loại trực tiếp)$/i.test(trimmed)) {
+    return isEn ? 'Round of 32 Knockout' : 'Vòng 1/32 Knockout';
+  }
+  if (/^(?:Round of 64|Vòng 1\/64)\s*(?:Knockout|Loại trực tiếp)$/i.test(trimmed)) {
+    return isEn ? 'Round of 64 Knockout' : 'Vòng 1/64 Knockout';
+  }
+  if (/^(?:Round of 16|Vòng 1\/8|Vòng 1\/16)\s*(?:Knockout|Loại trực tiếp)$/i.test(trimmed)) {
+    return isEn ? 'Round of 16 Knockout' : 'Vòng 1/8 Knockout';
+  }
+  if (/^(?:Quarter-finals|Tứ Kết)\s*(?:Knockout|Loại trực tiếp)$/i.test(trimmed)) {
+    return isEn ? 'Quarter-finals Knockout' : 'Tứ Kết Knockout';
+  }
+  if (/^(?:Semi-finals|Bán Kết)\s*(?:Knockout|Loại trực tiếp)$/i.test(trimmed)) {
+    return isEn ? 'Semi-finals Knockout' : 'Bán Kết Knockout';
+  }
+  if (/^(?:Final|Chung Kết)\s*(?:Knockout|Loại trực tiếp)$/i.test(trimmed)) {
+    return isEn ? 'Final Knockout' : 'Chung Kết Knockout';
   }
 
   return trimmed;
@@ -183,7 +206,25 @@ export function localizeCompetitionName(rawName: string | undefined | null, lang
   const trimmed = rawName.trim();
   const isEn = lang === 'en';
 
-  // League 1..4 (ví dụ "England League 1", "Vietnam League 2")
+  // 1. Phân loại theo Hạng đấu Quốc nội (Domestic Tiers 1..5)
+  // Ví dụ: "Giải Hạng Nhì (Tier 3)", "National League (Tier 3)", "Vietnam League 3"
+  if (/(?:Giải Hạng Nhì|League.*Tier\s*3|National League.*3|Tier\s*3)/i.test(trimmed)) {
+    return isEn ? 'National League (Tier 3)' : 'Giải Hạng Nhì (Tier 3)';
+  }
+  if (/(?:Giải Hạng Nhất|League.*Tier\s*2|National League.*2|Tier\s*2)/i.test(trimmed)) {
+    return isEn ? 'National League (Tier 2)' : 'Giải Hạng Nhất (Tier 2)';
+  }
+  if (/(?:Giải Hạng Ba|League.*Tier\s*4|National League.*4|Tier\s*4)/i.test(trimmed)) {
+    return isEn ? 'National League (Tier 4)' : 'Giải Hạng Ba (Tier 4)';
+  }
+  if (/(?:Giải Hạng Tư|League.*Tier\s*5|National League.*5|Tier\s*5)/i.test(trimmed)) {
+    return isEn ? 'National League (Tier 5)' : 'Giải Hạng Tư (Tier 5)';
+  }
+  if (/(?:Giải VĐQG|National League.*Tier\s*1|Tier\s*1)/i.test(trimmed)) {
+    return isEn ? 'National League (Tier 1)' : 'Giải VĐQG (Tier 1)';
+  }
+
+  // 2. League 1..4 theo quốc gia (ví dụ "England League 1", "Vietnam League 2")
   const leagueMatch = trimmed.match(/^(.+?)\s+League\s+([1-4])$/i);
   if (leagueMatch) {
     const nation = leagueMatch[1];
@@ -191,32 +232,87 @@ export function localizeCompetitionName(rawName: string | undefined | null, lang
     return isEn ? `${nation} League ${tier}` : `Giải VĐQG ${nation} - Hạng ${tier}`;
   }
 
-  // Super Cup
+  // 3. Super Cup / Siêu Cúp
+  if (/^(?:Siêu Cúp Quốc Gia|National Super Cup|Super Cup)/i.test(trimmed)) {
+    return isEn ? 'National Super Cup' : 'Siêu Cúp Quốc Gia';
+  }
   const superCupMatch = trimmed.match(/^(.+?)\s+Super\s+Cup$/i);
   if (superCupMatch) {
     const nation = superCupMatch[1];
     return isEn ? `${nation} Super Cup` : `Siêu Cúp Quốc Gia ${nation}`;
   }
 
-  // U21 Cup
+  // 4. U21 Cup / Cúp Trẻ U21
+  if (/^(?:Cúp Trẻ U21|National U21 Cup|Youth Cup)/i.test(trimmed)) {
+    return isEn ? 'National U21 Youth Cup' : 'Cúp Trẻ U21 Quốc Gia';
+  }
   const u21Match = trimmed.match(/^(.+?)\s+U21\s+Cup$/i);
   if (u21Match) {
     const nation = u21Match[1];
     return isEn ? `${nation} U21 Cup` : `Cúp Trẻ U21 ${nation}`;
   }
 
-  // National Cup
+  // 5. Domestic Cup / Cúp Quốc Gia
+  if (/^(?:Cúp Quốc Gia(?:\s*\(National Cup\))?|National Cup(?:\s*\(Knockout\))?)$/i.test(trimmed)) {
+    return isEn ? 'National Cup' : 'Cúp Quốc Gia (National Cup)';
+  }
   const cupMatch = trimmed.match(/^(.+?)\s+Cup$/i);
   if (cupMatch && !trimmed.toLowerCase().includes('champions') && !trimmed.toLowerCase().includes('world')) {
     const nation = cupMatch[1];
     return isEn ? `${nation} Cup` : `Cúp Quốc Gia ${nation}`;
   }
 
-  // Champions League
+  // 6. Continental Cups / Cúp Châu Lục (C1, C2, C3)
+  if (/^(?:Cúp Châu Lục|Continental Cup)/i.test(trimmed)) {
+    return isEn ? 'Continental Cup (Champions League)' : 'Cúp Châu Lục (C1)';
+  }
   const clMatch = trimmed.match(/^(.+?)\s+Champions\s+League$/i);
   if (clMatch) {
     const confed = clMatch[1];
     return isEn ? `${confed} Champions League` : `Cúp C1 Châu Lục (${confed})`;
+  }
+
+  return trimmed;
+}
+
+/**
+ * Tự động chuẩn hóa và dịch chuỗi trạng thái bảng đấu / điểm / vòng đấu (Status Label).
+ * Ví dụ: "Hạng 1 • 0 Điểm" -> "Rank 1 • 0 Points"
+ *        "Vòng 1/32 Knockout" -> "Round of 32 Knockout"
+ */
+export function localizeStatusLabel(rawStatus: string | undefined | null, lang: Language): string {
+  if (!rawStatus) return '';
+  const trimmed = rawStatus.trim();
+  const isEn = lang === 'en';
+
+  // Hạng X • Y Điểm / Rank X • Y Points
+  const rankPointsMatch = trimmed.match(/^(?:Hạng|Rank)\s*(\d+)\s*•\s*(\d+)\s*(?:Điểm|Points|Pts)$/i);
+  if (rankPointsMatch) {
+    const r = rankPointsMatch[1];
+    const p = rankPointsMatch[2];
+    return isEn ? `Rank ${r} • ${p} Points` : `Hạng ${r} • ${p} Điểm`;
+  }
+
+  return localizeRoundName(trimmed, lang);
+}
+
+/**
+ * Tự động chuẩn hóa và dịch phụ đề giải đấu (Subtitle).
+ * Ví dụ: "Vietnam" -> "Việt Nam", "Knockout" -> "Knockout"
+ */
+export function localizeSubTitle(rawSub: string | undefined | null, lang: Language): string {
+  if (!rawSub) return '';
+  const trimmed = rawSub.trim();
+  const isEn = lang === 'en';
+
+  if (/^(?:Vietnam|Việt Nam)$/i.test(trimmed)) {
+    return isEn ? 'Vietnam' : 'Việt Nam';
+  }
+  if (/^(?:Knockout|Loại trực tiếp)$/i.test(trimmed)) {
+    return isEn ? 'Knockout' : 'Loại trực tiếp';
+  }
+  if (/^(?:Group Stage|Vòng bảng)$/i.test(trimmed)) {
+    return isEn ? 'Group Stage' : 'Vòng bảng';
   }
 
   return trimmed;
@@ -233,6 +329,8 @@ export function useTournamentLocale() {
     stage: (name: string | undefined | null) => localizeStageName(name, language),
     format: (label: string | undefined | null) => localizeFormatLabel(label, language),
     comp: (name: string | undefined | null) => localizeCompetitionName(name, language),
+    status: (label: string | undefined | null) => localizeStatusLabel(label, language),
+    subTitle: (sub: string | undefined | null) => localizeSubTitle(sub, language),
     language,
   };
 }

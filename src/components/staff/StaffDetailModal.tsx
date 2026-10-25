@@ -123,6 +123,12 @@ export const StaffDetailModal: React.FC<Props> = ({
     }
   };
 
+  const isCurrentOwnStaff = Boolean(
+    currentClubId &&
+    detail?.currentContract?.club?.id &&
+    String(detail.currentContract.club.id) === String(currentClubId)
+  );
+
   useEffect(() => {
     if (staff.id) {
       loadDetail(staff.id);
@@ -131,9 +137,19 @@ export const StaffDetailModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (initialTab) {
-      setActiveTab(initialTab);
+      if (initialTab === 'contract' && !isCurrentOwnStaff) {
+        setActiveTab('skills');
+      } else {
+        setActiveTab(initialTab);
+      }
     }
-  }, [initialTab, staff.id]);
+  }, [initialTab, staff.id, isCurrentOwnStaff]);
+
+  useEffect(() => {
+    if (activeTab === 'contract' && !isCurrentOwnStaff) {
+      setActiveTab('skills');
+    }
+  }, [activeTab, isCurrentOwnStaff]);
 
   const currentIndex = staffList.findIndex((s) => s.id === staff.id);
   const hasPrev = currentIndex > 0;
@@ -174,12 +190,6 @@ export const StaffDetailModal: React.FC<Props> = ({
       </div>
     );
   };
-
-  const isCurrentOwnStaff = Boolean(
-    currentClubId &&
-    detail?.currentContract?.club?.id &&
-    String(detail.currentContract.club.id) === String(currentClubId)
-  );
 
   const handleSubmitOffer = async () => {
     if (!currentClubId) {
@@ -413,14 +423,16 @@ export const StaffDetailModal: React.FC<Props> = ({
                 <Sparkles size={15} />
                 <span>{t('staff.tab_offer')}</span>
               </button>
-              <button
-                type="button"
-                className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
-                onClick={() => setActiveTab('contract')}
-              >
-                <FileText size={15} />
-                <span>{t('staff.tab_contract', 'Hợp đồng')}</span>
-              </button>
+              {isCurrentOwnStaff && (
+                <button
+                  type="button"
+                  className={`pm-tab-btn ${activeTab === 'contract' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('contract')}
+                >
+                  <FileText size={15} />
+                  <span>{t('staff.tab_contract', 'Hợp đồng')}</span>
+                </button>
+              )}
             </div>
 
             {/* Modal Body Content */}

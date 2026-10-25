@@ -1,6 +1,7 @@
 import { useTranslation } from '../i18n';
 import { useTournamentLocale } from '../utils/tournamentLocalization';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   CalendarDays,
   CheckCircle2,
@@ -93,6 +94,7 @@ export const MatchCenterView: React.FC<Props> = ({
   onMatchSimulated,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { comp, round } = useTournamentLocale();
   const [matchList, setMatchList] = useState<Match[]>(initialMatches || []);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -341,7 +343,16 @@ export const MatchCenterView: React.FC<Props> = ({
                       {/* Main matchup bar: Home vs Away */}
                       <div className="fixture-card-matchup">
                         {/* Đội nhà */}
-                        <div className={`fixture-team home ${match.homeClub?.id === club?.id ? 'my-club' : ''}`}>
+                        <div
+                          className={`fixture-team home ${match.homeClub?.id === club?.id ? 'my-club' : ''} cursor-pointer hover:opacity-80 transition-opacity`}
+                          onClick={(e) => {
+                            if (match.homeClub?.id) {
+                              e.stopPropagation();
+                              navigate(`/clubs/${match.homeClub.id}`);
+                            }
+                          }}
+                          title={t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', match.homeClub?.name || '')}
+                        >
                           <span className="club-name" title={match.homeClub?.name || t('matches.home_team', 'Đội nhà')}>
                             {match.homeClub?.name || t('matches.home_team', 'Đội nhà')}
                           </span>
@@ -367,7 +378,16 @@ export const MatchCenterView: React.FC<Props> = ({
                         </div>
 
                         {/* Đội khách */}
-                        <div className={`fixture-team away ${match.awayClub?.id === club?.id ? 'my-club' : ''}`}>
+                        <div
+                          className={`fixture-team away ${match.awayClub?.id === club?.id ? 'my-club' : ''} cursor-pointer hover:opacity-80 transition-opacity`}
+                          onClick={(e) => {
+                            if (match.awayClub?.id) {
+                              e.stopPropagation();
+                              navigate(`/clubs/${match.awayClub.id}`);
+                            }
+                          }}
+                          title={t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', match.awayClub?.name || '')}
+                        >
                           <ClubBadge
                             name={match.awayClub?.name}
                             logoUrl={match.awayClub?.logo_url}
@@ -425,7 +445,11 @@ export const MatchCenterView: React.FC<Props> = ({
 
             {/* Scoreboard thể thao cao cấp */}
             <div className="match-scoreboard">
-              <div className="match-scoreboard-team">
+              <div
+                className="match-scoreboard-team cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => selectedMatch.homeClub?.id && navigate(`/clubs/${selectedMatch.homeClub.id}`)}
+                title={t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', selectedMatch.homeClub?.name || '')}
+              >
                 <ClubBadge
                   name={selectedMatch.homeClub?.name}
                   logoUrl={selectedMatch.homeClub?.logo_url}
@@ -451,7 +475,11 @@ export const MatchCenterView: React.FC<Props> = ({
                 )}
               </div>
 
-              <div className="match-scoreboard-team">
+              <div
+                className="match-scoreboard-team cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => selectedMatch.awayClub?.id && navigate(`/clubs/${selectedMatch.awayClub.id}`)}
+                title={t('club_detail.view_profile', 'Xem hồ sơ chi tiết CLB {name}').replace('{name}', selectedMatch.awayClub?.name || '')}
+              >
                 <ClubBadge
                   name={selectedMatch.awayClub?.name}
                   logoUrl={selectedMatch.awayClub?.logo_url}

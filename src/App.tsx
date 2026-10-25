@@ -22,6 +22,7 @@ import { KnockoutCupView } from './components/standings/KnockoutCupView';
 import { GroupKnockoutView } from './components/standings/GroupKnockoutView';
 import { TrophiesView } from './components/trophies';
 import { ClubStaffView } from './components/ClubStaffView';
+import { ClubDetailView } from './components/ClubDetailView';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from './i18n/I18nContext';
 
@@ -348,6 +349,7 @@ export function App() {
             />
           }
         />
+        <Route path="/clubs/:id" element={<ClubDetailView />} />
       </Route>
 
       {/* Fallback Catch-all Route */}

@@ -539,9 +539,11 @@ export const PlayerDetailModal: React.FC<Props> = ({
                 🤝 {t('player_modal.badge_loan', 'Mượn')}
               </span>
             )}
-            <button className="pm-icon-btn" title={t('player_modal.edit_name_tooltip', 'Chỉnh sửa tên / biệt danh')}>
-              <Edit2 size={16} />
-            </button>
+            {isOwnClub && (
+              <button className="pm-icon-btn" title={t('player_modal.edit_name_tooltip', 'Chỉnh sửa tên / biệt danh')}>
+                <Edit2 size={16} />
+              </button>
+            )}
             <button
               className={`pm-icon-btn ${isFavorite ? 'fav-active' : ''}`}
               onClick={() => setIsFavorite(!isFavorite)}

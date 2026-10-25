@@ -15,19 +15,25 @@ import { transfersApi, StaffMarketItem } from '../services/transfers.service';
 import { StaffDetailModal } from './staff';
 import { StaffAvatar } from './common/StaffAvatar';
 import { RoleBadge } from './common/RoleBadge';
+import { authApi } from '../services/auth.service';
 
 interface Props {
   clubId: string;
+  userClubId?: string;
   cashBalance?: number;
   onNavigateToMarket?: () => void;
 }
 
 export const ClubStaffView: React.FC<Props> = ({
   clubId,
+  userClubId,
   cashBalance,
   onNavigateToMarket,
 }) => {
   const { t } = useTranslation();
+  const myUserClubId = userClubId || (authApi.getCurrentClub()?.id ? String(authApi.getCurrentClub()?.id) : undefined);
+  const isViewingOwnClub = Boolean(myUserClubId && String(clubId) === String(myUserClubId));
+
   const [staffList, setStaffList] = useState<StaffMarketItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -322,8 +328,8 @@ export const ClubStaffView: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Nút Tuyển thêm nhân sự */}
-        {onNavigateToMarket && (
+        {/* Nút Tuyển thêm nhân sự (chỉ khi là CLB của mình) */}
+        {isViewingOwnClub && onNavigateToMarket && (
           <button
             type="button"
             onClick={onNavigateToMarket}
@@ -525,7 +531,7 @@ export const ClubStaffView: React.FC<Props> = ({
         <StaffDetailModal
           staff={selectedStaff}
           staffList={staffList}
-          currentClubId={clubId}
+          currentClubId={myUserClubId}
           cashBalance={cashBalance}
           onClose={() => setSelectedStaff(null)}
           onSelectStaff={(st) => setSelectedStaff(st)}

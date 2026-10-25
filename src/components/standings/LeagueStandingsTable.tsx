@@ -1,5 +1,6 @@
 import { useTranslation } from '../../i18n';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
 import { StandingItem } from '../../types';
 
@@ -19,6 +20,7 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
   groupName,
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
       {groupName && (
@@ -131,6 +133,9 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
                 return (
                   <tr
                     key={row.id || idx}
+                    onClick={() => clubId && navigate(`/clubs/${clubId}`)}
+                    className="hover:bg-emerald-50/60 cursor-pointer group"
+                    title={t('standings.view_club_detail', 'Nhấp để xem chi tiết CLB {name}').replace('{name}', row.club?.name || '')}
                     style={{
                       borderBottom: '1px solid #f1f5f9',
                       backgroundColor: isCurrent ? 'rgba(34, 197, 94, 0.12)' : 'transparent',
@@ -138,6 +143,7 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
                       boxShadow: isCurrent ? 'inset 0 0 0 1px rgba(34, 197, 94, 0.25), 0 2px 8px rgba(34, 197, 94, 0.08)' : 'none',
                       fontWeight: isCurrent ? 800 : 400,
                       transition: 'all 0.2s ease',
+                      cursor: 'pointer',
                     }}
                   >
                     <td style={{ textAlign: 'center', padding: '10px 8px' }}>
