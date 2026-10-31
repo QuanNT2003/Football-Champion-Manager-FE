@@ -627,7 +627,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
                 </h3>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flexWrap: 'wrap' }}>
                   <span className="position-tag" style={{ fontSize: '0.75rem', padding: '2px 8px', fontWeight: 700 }}>
-                    {pPosCode} • {pPos}
+                    {pPosCode} • {t(`positions.${pPosCode}`, pPos)}
                   </span>
                   {(detail?.is_on_loan || detail?.contract?.is_loan_contract || player.is_on_loan) && (
                     <span
@@ -929,7 +929,7 @@ export const PlayerDetailModal: React.FC<Props> = ({
         <div className="pm-footer">
           <span className="pm-player-id">#{player.id}</span>
           <button className="pm-footer-close-btn" onClick={onClose}>
-            Close
+            {t('common.close', 'Đóng')}
           </button>
         </div>
         {/* MODAL XÁC NHẬN HỦY LỜI ĐỀ NGHỊ */}

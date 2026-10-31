@@ -51,9 +51,18 @@ export const PlayerSkillsTab: React.FC<Props> = ({
   // Helper to translate attribute name & description
   const renderAttributeList = (items: PlayerSkillItem[]) => {
     return items.map((sk) => {
-      const codeKey = (sk.code || '').toLowerCase();
-      const translatedName = t(`player.attr_${codeKey}`, sk.name);
-      const translatedDesc = t(`player.attr_desc_${codeKey}`, sk.description || '');
+      const rawCode = (sk.code || '').toLowerCase();
+      const strippedCode = rawCode.startsWith('gk_') ? rawCode.slice(3) : rawCode;
+      const prefixedCode = rawCode.startsWith('gk_') ? rawCode : `gk_${rawCode}`;
+
+      const translatedName = t(
+        `player.attr_${rawCode}`,
+        t(`player.attr_${prefixedCode}`, t(`player.attr_${strippedCode}`, sk.name))
+      );
+      const translatedDesc = t(
+        `player.attr_desc_${rawCode}`,
+        t(`player.attr_desc_${prefixedCode}`, t(`player.attr_desc_${strippedCode}`, sk.description || ''))
+      );
 
       return (
         <FmAttributeRow

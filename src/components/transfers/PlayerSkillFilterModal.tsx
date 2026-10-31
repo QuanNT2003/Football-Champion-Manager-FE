@@ -81,6 +81,11 @@ const ATTRIBUTE_EN_NAMES: Record<string, string> = {
   OTB: 'Off The Ball',
   // GOALKEEPING
   REF: 'Reflexes',
+  GK_REF: 'Reflexes',
+  GK_HAN: 'Handling',
+  GK_AER: 'Aerial Reach',
+  GK_OOO: 'One on Ones',
+  GK_KIC: 'Kicking',
   HAN: 'Handling',
   ONE: 'One on Ones',
   OOO: 'One on Ones',
@@ -224,7 +229,8 @@ export const PlayerSkillFilterModal: React.FC<PlayerSkillFilterModalProps> = ({
 
   // Get localized attribute name
   const getAttrName = (code: string): string => {
-    return t(`skill.${code}`, ATTRIBUTE_EN_NAMES[code] || code);
+    const norm = code.startsWith('GK_') ? code.substring(3) : code;
+    return t(`skill.${code}`, t(`skill.${norm}`, ATTRIBUTE_EN_NAMES[code] || code));
   };
 
   // Tính số lượng bộ lọc đang kích hoạt
